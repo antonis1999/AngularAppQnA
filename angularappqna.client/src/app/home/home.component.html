@@ -1,0 +1,150 @@
+<div class="home-page">
+  <div class="background-shape"></div>
+
+  <section class="hero">
+    <div class="brand">
+      <img src="/safety.png" class="brand-icon" alt="Safety">
+      <div>
+        <h3>Μασούτης</h3>
+        <span>SAFETY CAMPAIGN</span>
+      </div>
+    </div>
+
+    <div class="campaign-badge">Καμπάνια 2026</div>
+
+    <div class="company">ΔΙΑΜΑΝΤΗΣ ΜΑΣΟΥΤΗΣ Α.Ε.</div>
+
+    <h1>
+      Η ασφάλειά μας,<br>
+      <span>στο επίκεντρο.</span>
+    </h1>
+
+    <p>
+      Μάθε, παίξε, κέρδισε. Διαδραστική εκπαίδευση και μηνιαία
+      αναγνώριση για όσους <strong>ξεχωρίζουν στην ασφάλεια.</strong>
+    </p>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-dot navy"></div>
+        <strong>12</strong>
+        <span>ΔΙΑΔΡΑΣΤΙΚΑ QUIZ</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-dot red"></div>
+        <strong>04</strong>
+        <span>ΕΝΟΤΗΤΕΣ</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-dot gold"></div>
+        <strong>01</strong>
+        <span>ΝΙΚΗΤΗΣ/ΤΡΙΑ</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-area">
+    <div class="login-card">
+      <div class="login-chip">Είσοδος</div>
+
+      <div class="login-title-row">
+        <h2>Ξεκίνα την εκπαίδευση</h2>
+
+        <button type="button" class="help-btn" (click)="showHelpPopup = true">
+          <img src="/help.png" alt="Βοήθεια">
+        </button>
+      </div>
+
+      <form>
+        <label>EMAIL</label>
+        <input type="email" placeholder="π.χ. user@company.gr" />
+
+        <label>PIN</label>
+        <input type="password" placeholder="Πληκτρολόγησε το PIN σου" />
+
+        <label>ΨΕΥΔΩΝΥΜΟ</label>
+        <input type="text" placeholder="π.χ. Jhon" />
+
+        <label>ΧΩΡΟΣ ΕΡΓΑΣΙΑΣ</label>
+
+
+        <div class="work-grid">
+          <button type="button"
+                  class="work-card"
+                  [class.active]="selectedStore === 'store'"
+                  (click)="selectedStore = 'store'">
+            <img src="/stores.png" class="work-icon" alt="Store">
+            <strong>Κατάστημα</strong>
+            <span>Πώληση & ταμείο</span>
+          </button>
+
+          <button type="button"
+                  class="work-card"
+                  [class.active]="selectedStore === 'office'"
+                  (click)="selectedStore = 'office'">
+            <img src="/offices.png" class="work-icon" alt="Office">
+            <strong>Κεντρικά Γραφεία</strong>
+            <span>Διοίκηση</span>
+          </button>
+
+          <button type="button"
+                  class="work-card"
+                  [class.active]="selectedStore === 'logistics'"
+                  (click)="selectedStore = 'logistics'">
+            <img src="/logistics.png" class="work-icon" alt="Logistics">
+            <strong>Logistics</strong>
+            <span>Αποθήκη</span>
+          </button>
+        </div>
+
+        <div class="alert-box">
+          Διάλεξε τον χώρο εργασίας σου.
+        </div>
+
+        <button type="button" class="login-btn">
+          <span>Είσοδος στην Εκπαίδευση</span>
+          <span class="arrow">→</span>
+        </button>
+
+        <p class="terms">
+          Με τη συμμετοχή σου συμφωνείς ότι τα στοιχεία της απόδοσής σου
+          καταγράφονται για τον σκοπό της εταιρικής εκπαίδευσης.
+        </p>
+      </form>
+    </div>
+  </section>
+  <div class="modal-backdrop"
+       *ngIf="showHelpPopup"
+       (click)="showHelpPopup = false">
+    <div class="help-modal" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" (click)="showHelpPopup = false">×</button>
+
+      <h3>Βοήθεια σύνδεσης</h3>
+      <p class="modal-subtitle">Συμπλήρωσε τα παρακάτω στοιχεία για να συνεχίσεις.</p>
+
+      <div class="help-list">
+        <div class="help-item">
+          <strong>Email</strong>
+          <span>Συμπλήρωσε το email που χρησιμοποιείς στην εταιρεία.</span>
+        </div>
+
+        <div class="help-item">
+          <strong>PIN</strong>
+          <span>Βάλε το PIN σου. Αν συνδέεσαι πρώτη φορά, βάλε ένα καινούριο PIN.</span>
+        </div>
+
+        <div class="help-item">
+          <strong>Ψευδώνυμο</strong>
+          <span>Βάλε το αγαπημένο σου ψευδώνυμο.</span>
+        </div>
+      </div>
+
+      <button type="button" class="modal-ok" (click)="showHelpPopup = false">
+        Το κατάλαβα
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="angularappqna.client/angularappqna.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="AngularAppQnA.Server/AngularAppQnA.Server.csproj" />
+</Solution>
