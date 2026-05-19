@@ -227,6 +227,10 @@
   font-size: 30px;
   cursor: pointer;
 }
+  .close-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 26px 55px rgba(11, 19, 40, 0.42), inset 0 0 0 1px rgba(214, 170, 75, 1);
+  }
 
 .modal-tabs {
   padding: 18px 32px;
@@ -244,12 +248,18 @@
     cursor: pointer;
   }
 
+    .modal-tabs button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 26px 55px rgba(11, 19, 40, 0.42), inset 0 0 0 1px rgba(214, 170, 75, 1);
+    }
+
     .modal-tabs button.active {
       background: linear-gradient(135deg, #0f172a, #1e293b);
       color: white;
       border-color: #0f172a;
       box-shadow: 0 12px 24px rgba(15, 23, 42, 0.25);
     }
+      
 
 .modal-body {
   padding: 30px 32px;
@@ -326,7 +336,13 @@
   font-weight: 900;
   cursor: pointer;
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+
 }
+
+  .save-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 26px 55px rgba(11, 19, 40, 0.42), inset 0 0 0 1px rgba(214, 170, 75, 1);
+  }
 
 .empty-state {
   min-height: 300px;
@@ -373,6 +389,11 @@ textarea {
   cursor: pointer;
 }
 
+  .add-topic-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 26px 55px rgba(11, 19, 40, 0.42), inset 0 0 0 1px rgba(214, 170, 75, 1);
+  }
+
 .topic-card {
   border: 1px solid #e2e8f0;
   border-radius: 24px;
@@ -404,3 +425,8 @@ textarea {
   font-size: 24px;
   cursor: pointer;
 }
+
+  .delete-topic-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 26px 55px rgba(11, 19, 40, 0.42), inset 0 0 0 1px rgba(214, 170, 75, 1);
+  }
