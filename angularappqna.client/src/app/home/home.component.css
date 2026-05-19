@@ -209,8 +209,8 @@ h1 {
 
 .login-chip {
   position: absolute;
-  top: 22px;
-  right: 22px;
+  top: 8px;
+  right: 10px;
   padding: 14px 26px;
   border-radius: 14px;
   background: linear-gradient(135deg, #0b1328, #172746);
@@ -446,7 +446,7 @@ input {
   background: linear-gradient(180deg, #ffffff, #fffaf2);
   border: 1px solid rgba(214, 170, 75, 0.65);
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.35);
-  animation: popupIn 0.22s ease;
+  animation: popupIn 0.52s ease;
 }
 
 .modal-close {

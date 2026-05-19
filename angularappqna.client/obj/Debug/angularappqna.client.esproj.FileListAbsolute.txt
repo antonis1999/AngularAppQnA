@@ -1,1 +1,2 @@
 C:\Users\alomtzianidis\source\repos\AngularAppQnA\angularappqna.client\obj\Debug\angularappqna.client.esproj.CoreCompileInputs.cache
+C:\Users\alomtzianidis\source\repos\GitHub\AngularAppQnA\angularappqna.client\obj\Debug\angularappqna.client.esproj.CoreCompileInputs.cache

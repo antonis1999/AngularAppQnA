@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+  </Folder>
   <Project Path="angularappqna.client/angularappqna.client.esproj">
     <Build />
     <Deploy />

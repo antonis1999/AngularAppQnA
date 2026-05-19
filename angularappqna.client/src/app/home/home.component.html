@@ -15,7 +15,7 @@
     <div class="company">ΔΙΑΜΑΝΤΗΣ ΜΑΣΟΥΤΗΣ Α.Ε.</div>
 
     <h1>
-      Η ασφάλειά μας,<br>
+      Η ασφάλεια μας,<br>
       <span>στο επίκεντρο.</span>
     </h1>
 
@@ -58,14 +58,11 @@
       </div>
 
       <form>
-        <label>EMAIL</label>
-        <input type="email" placeholder="π.χ. user@company.gr" />
+        <input type="email" placeholder="π.χ. user@company.gr" [(ngModel)]="email" name="email" />
 
-        <label>PIN</label>
-        <input type="password" placeholder="Πληκτρολόγησε το PIN σου" />
+        <input type="password" placeholder="Πληκτρολόγησε το PIN σου" [(ngModel)]="pin" name="pin" />
 
-        <label>ΨΕΥΔΩΝΥΜΟ</label>
-        <input type="text" placeholder="π.χ. Jhon" />
+        <input type="text" placeholder="π.χ. Jhon" [(ngModel)]="nickname" name="nickname" />
 
         <label>ΧΩΡΟΣ ΕΡΓΑΣΙΑΣ</label>
 
@@ -103,7 +100,7 @@
           Διάλεξε τον χώρο εργασίας σου.
         </div>
 
-        <button type="button" class="login-btn">
+        <button type="button" class="login-btn" (click)="login()">
           <span>Είσοδος στην Εκπαίδευση</span>
           <span class="arrow">→</span>
         </button>
