@@ -1,7 +1,10 @@
-﻿namespace AngularAppQnA.Server.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AngularAppQnA.Server.Models
 {
     public class Thematologia
     {
+        [Key]
         public int Id { get; set; }
         public string Title { get; set; }
         public string Username { get; set; }

@@ -10,6 +10,8 @@ namespace AngularAppQnA.Server.Data
         {
         }
 
+
+        public DbSet<Thematologia> Thematologia { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<TrainingStore> Stores { get; set; }
@@ -26,6 +28,9 @@ namespace AngularAppQnA.Server.Data
 
             modelBuilder.Entity<TrainingStore>()
                 .ToTable("storess")
+                .HasKey(x => x.Id);
+
+            modelBuilder.Entity<Thematologia>()
                 .HasKey(x => x.Id);
         }
     }

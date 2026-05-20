@@ -7,7 +7,7 @@ public class User
     public string Email { get; set; } = "";
 
     [Column("password_sha256")]
-    public string PasswordSha256 { get; set; } = "";
+    public string? PasswordSha256 { get; set; } = "";
 
     public string Nickname { get; set; } = "";
 

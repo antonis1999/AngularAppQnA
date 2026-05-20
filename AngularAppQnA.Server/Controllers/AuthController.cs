@@ -1,6 +1,8 @@
 ﻿using AngularAppQnA.Server.Data;
+using AngularAppQnA.Server.DataContracts;
 using AngularAppQnA.Server.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -18,9 +20,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult Login(LoginRequest request)
+    public async Task<LoginResponse> Login(LoginRequest request)
     {
-
+        LoginResponse ret = new LoginResponse();
         if (
             string.IsNullOrWhiteSpace(request.Email) ||
             string.IsNullOrWhiteSpace(request.Pin) ||
@@ -28,42 +30,68 @@ public class AuthController : ControllerBase
             request.StoreId <= 0
         )
         {
-            return BadRequest(new
-            {
-                success = false,
-                message = "Συμπλήρωσε όλα τα πεδία."
-            });
+            ret.IsSuccess = false;
+            ret.Message = "Invalid input data";
+            return ret;
         }
 
+        request.Email = request.Email.Trim().ToLower();
 
-        string email =
-            request.Email.Trim().ToLower();
+        User userFound = await _context.Users.Where(x => x.Email == request.Email).FirstOrDefaultAsync();
 
-        string passwordHash =
-            CreateSha256(email + request.Pin);
+        if (userFound != null)
+        {
+            string passwordHash = CreateSha256(request.Email + request.Pin);
+            if (string.IsNullOrWhiteSpace(userFound.PasswordSha256))
+            {
+                userFound.PasswordSha256 = passwordHash;
+                userFound.Nickname = request.Nickname.Trim();
+                _context.Users.Update(userFound);
+                _context.SaveChangesAsync();
 
-        var user = _context.Users
-     .FirstOrDefault(x =>
-         x.PasswordSha256 == passwordHash
-     );
+                ret.IsSuccess = true;
+                ret.Message = "OK login";
+                ret.User = userFound;
+                return ret;
+            }
+            else
+            {
+                if (userFound.PasswordSha256 == passwordHash)
+                {
+                    ret.IsSuccess = true;
+                    ret.Message = "OK login";
+                    ret.User = userFound;
+                    return ret;
+                }
+                else
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Invalid password";
+                    return ret;
+                }
+            }
+        }
+        else
+        {
+            ret.IsSuccess = false;
+            ret.Message = "User not found";
+            return ret;
+        }
+
+        /*
+        string email = request.Email.Trim().ToLower();
+
+        string passwordHash = CreateSha256(email + request.Pin);
+
+        var user = _context.Users.FirstOrDefault(x =>
+         x.PasswordSha256 == passwordHash);
 
         if (user != null)
         {
-            return Ok(new
-            {
-                success = true,
-                isNewUser = false,
-                message = "OK login",
-
-                user = new
-                {
-                    user.Id,
-                    user.Email,
-                    user.Nickname,
-                    user.StoreId,
-                    user.RoleId
-                }
-            });
+            returnContract.IsSuccess = true;
+            returnContract.IsNewUser = false;
+            returnContract.Message = "OK login";
+            return returnContract;
         }
 
         string[] adminEmails =
@@ -90,22 +118,15 @@ public class AuthController : ControllerBase
         _context.Users.Add(newUser);
 
         _context.SaveChanges();
-
-        return Ok(new
+        */
+        return new LoginResponse
         {
-            success = true,
-            isNewUser = true,
-            message = "OK register",
+            IsSuccess = true,
+            Message = "OK register",
+            IsNewUser = true,
+            User = new User()
+        };
 
-            user = new
-            {
-                newUser.Id,
-                newUser.Email,
-                newUser.Nickname,
-                newUser.StoreId,
-                newUser.RoleId
-            }
-        });
     }
 
     private static string CreateSha256(string value)

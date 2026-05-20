@@ -20,19 +20,19 @@ export class AppComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.getForecasts();
+    // this.getForecasts();
   }
 
-  getForecasts() {
-    this.http.get<WeatherForecast[]>('/weatherforecast').subscribe(
-      (result) => {
-        this.forecasts = result;
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
-  }
+  // getForecasts() {
+  //   this.http.get<WeatherForecast[]>('/weatherforecast').subscribe(
+  //     (result) => {
+  //       this.forecasts = result;
+  //     },
+  //     (error) => {
+  //       console.error(error);
+  //     }
+  //   );
+  // }
 
   title = 'angularappqna.client';
 }

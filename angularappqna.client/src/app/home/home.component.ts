@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LoginRequest, LoginResponse } from '../interfaces/models';
 
 @Component({
   selector: 'app-home',
@@ -26,26 +27,26 @@ export class HomeComponent {
   login() {
     const storeId = this.getStoreId();
 
-    const body = {
-      email: this.email,
-      pin: this.pin,
-      nickname: this.nickname,
-      storeId: storeId
+    const body: LoginRequest = {
+      Email: this.email,
+      Pin: this.pin,
+      Nickname: this.nickname,
+      StoreId: storeId
     };
 
-    this.http.post<any>('api/Auth/login', body).subscribe({
+    this.http.post<LoginResponse>('api/Auth/login', body).subscribe({
       next: (res) => {
         console.log(res);
 
-        if (res.success) {
-          localStorage.setItem('currentUser', JSON.stringify(res.user));
+        if (res.IsSuccess) {
+          localStorage.setItem('currentUser', JSON.stringify(res.User));
           this.router.navigate(['/mainpage']);
         } else {
-          alert(res.message);
+          alert(res.Message);
         }
       },
       error: (err) => {
-        alert(err.error?.message || 'Κάτι πήγε στραβά.');
+        alert(err.error?.Message || 'Κάτι πήγε στραβά.');
       }
     });
   }

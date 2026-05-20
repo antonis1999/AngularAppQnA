@@ -1,5 +1,4 @@
 using AngularAppQnA.Server.Data;
-using AngularAppQnA.Server.DBContext;
 using Microsoft.EntityFrameworkCore;
 
 internal class Program
@@ -9,6 +8,15 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers();
+
+        builder.Services.AddControllersWithViews().
+        AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            options.JsonSerializerOptions.PropertyNamingPolicy = null;
+        });
+
+
 
         builder.Services.AddCors(options =>
         {
