@@ -61,26 +61,28 @@ export class HomeComponent {
   }
 
   adminLogin() {
-    const body = {
+
+    if (this.adminPin !== '1234') {
+      alert('Λάθος PIN διαχειριστή.');
+      return;
+    }
+
+    const adminUser = {
+      id: 999,
       email: 'admin@masoutis.gr',
-      pin: this.adminPin,
       nickname: 'Admin',
-      storeId: 2
+      storeId: 2,
+      roleId: 99
     };
 
-    this.http.post<any>('https://localhost:7125/api/Auth/login', body).subscribe({
-      next: (res) => {
-        if (res.success) {
-          localStorage.setItem('currentUser', JSON.stringify(res.user));
-          this.router.navigate(['/mainpage']);
-        } else {
-          alert(res.message);
-        }
-      },
-      error: (err) => {
-        alert(err.error?.message || 'Λάθος PIN διαχειριστή.');
-      }
-    });
+    localStorage.setItem(
+      'currentUser',
+      JSON.stringify(adminUser)
+    );
+
+    this.closeAdminPopup();
+
+    this.router.navigate(['/mainpage']);
   }
 
   getStoreId(): number {

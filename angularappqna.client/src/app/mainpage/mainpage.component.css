@@ -6,8 +6,7 @@
   background: radial-gradient(circle at 20% 20%, rgba(218, 179, 83, 0.16), transparent 28%), linear-gradient(135deg, #fbf7ef 0%, #f7f1e7 52%, #09142a 52%, #111d35 100%);
 }
 .user-panel,
-.main-panel,
-.admin-form {
+.main-panel{
   max-width: 1000px;
   margin: 0 auto 22px auto;
   background: rgba(255, 255, 255, 0.96);
@@ -189,7 +188,7 @@
 .edit-modal {
   width: min(1050px, 96vw);
   max-height: 90vh;
-  overflow: hidden;
+  overflow: visible;
   background: rgba(255, 255, 255, 0.98);
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.8);
@@ -289,42 +288,37 @@
       border-color: #0f172a;
       box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
     }
-
-.editor-toolbar {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+.edit-modal,
+.modal-body,
+.form-section,
+.topic-card {
+  overflow: visible;
 }
 
-  .editor-toolbar button {
-    border: 1px solid #dbe1ea;
-    background: #ffffff;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-weight: 800;
-    cursor: pointer;
-  }
-
-    .editor-toolbar button:hover {
-      background: #f8fafc;
-      border-color: #0f172a;
-    }
-
-.rich-editor {
-  min-height: 260px;
-  border: 1px solid #dbe1ea;
+quill-editor {
+  display: block;
+  background: white;
   border-radius: 18px;
-  padding: 18px;
-  background: #fbfdff;
-  outline: none;
+  overflow: hidden;
+}
+
+.ql-toolbar {
+  border-radius: 18px 18px 0 0;
+  border-color: #dbe1ea;
+  background: #f8fafc;
+}
+
+ .ql-container {
+  min-height: 220px;
+  border-radius: 0 0 18px 18px;
+  border-color: #dbe1ea;
   font-size: 15px;
+}
+
+.ql-editor {
+  min-height: 220px;
   line-height: 1.7;
 }
-
-  .rich-editor:focus {
-    border-color: #0f172a;
-    box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
-  }
 
 .save-btn {
   align-self: flex-end;
@@ -430,3 +424,94 @@ textarea {
     transform: translateY(-3px);
     box-shadow: 0 26px 55px rgba(11, 19, 40, 0.42), inset 0 0 0 1px rgba(214, 170, 75, 1);
   }
+.preview-btn {
+  margin-left: auto;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #d6aa4b, #f6d37a);
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(214, 170, 75, 0.35);
+  transition: 0.25s ease;
+}
+
+  .preview-btn:hover {
+    transform: translateY(-3px);
+  }
+
+.section-title {
+  margin-bottom: 26px;
+}
+
+  .section-title h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+    color: #0f172a;
+  }
+
+  .section-title p {
+    margin: 0;
+    color: #64748b;
+  }
+
+.theory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.theory-card {
+  display: flex;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.theory-number {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #f6d37a;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.theory-content h2 {
+  margin: 0 0 12px;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.theory-content p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.empty-theory {
+  padding: 42px;
+  border-radius: 22px;
+  border: 1px dashed #cbd5e1;
+  background: #ffffff;
+  color: #64748b;
+  text-align: center;
+  font-weight: 800;
+}
+.ql-picker-options {
+  z-index: 99999 !important;
+  max-height: 220px !important;
+  overflow-y: auto !important;
+}
