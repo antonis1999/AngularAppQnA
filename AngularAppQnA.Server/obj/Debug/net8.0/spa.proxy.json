@@ -3,7 +3,7 @@
 "ServerUrl": "https://localhost:51418",
 "RedirectUrl": "",
 "LaunchCommand": "npm start",
-"WorkingDirectory": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\AngularAppQnA.Server\\..\\angularappqna.client",
+"WorkingDirectory": "C:\\Users\\kpatakis\\source\\repos\\AngularAppQnA\\AngularAppQnA.Server\\..\\angularappqna.client",
 "MaxTimeoutInSeconds": "120",
 "KeepRunning": "false"
 }

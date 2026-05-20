@@ -1,4 +1,5 @@
 using AngularAppQnA.Server.Data;
+using AngularAppQnA.Server.DBContext;
 using Microsoft.EntityFrameworkCore;
 
 internal class Program
@@ -22,11 +23,12 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddDbContext<AppDbContext>(options =>
+        builder.Services.AddDbContext<MasoutisDbContext>(options =>
         {
             options.UseSqlServer(
                 builder.Configuration.GetConnectionString("DefaultConnection")
             );
+            //options.UseSqlServer(builder.Configuration.GetConnectionString("MasoutisConnection"));
         });
 
         var app = builder.Build();
