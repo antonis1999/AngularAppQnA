@@ -23,7 +23,7 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddDbContext<MasoutisDbContext>(options =>
+        builder.Services.AddDbContext<AppDbContext>(options =>
         {
             options.UseSqlServer(
                 builder.Configuration.GetConnectionString("DefaultConnection")

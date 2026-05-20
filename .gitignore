@@ -1,6 +1,29 @@
+# Visual Studio / .NET
 .vs/
 bin/
 obj/
+*.user
+*.suo
+*.pdb
+*.dll
+*.exe
+*.cache
+*.dbmdl
+*.nuget.props
+*.nuget.targets
+*.deps.json
+*.runtimeconfig.json
+*.FileListAbsolute.txt
+
+# Angular / Node
 node_modules/
 dist/
 .angular/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.*

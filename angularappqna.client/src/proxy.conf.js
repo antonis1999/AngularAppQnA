@@ -13,4 +13,17 @@ const PROXY_CONFIG = [
   }
 ]
 
-module.exports = PROXY_CONFIG;
+module.exports = {
+  "/api": {
+    "target": "https://localhost:7125",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/weatherforecast": {
+    "target": "https://localhost:7125",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug" 
+  }
+};

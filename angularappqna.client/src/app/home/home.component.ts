@@ -33,7 +33,7 @@ export class HomeComponent {
       storeId: storeId
     };
 
-    this.http.post<any>('https://localhost:7125/api/Auth/login', body).subscribe({
+    this.http.post<any>('api/Auth/login', body).subscribe({
       next: (res) => {
         console.log(res);
 
