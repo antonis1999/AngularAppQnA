@@ -550,3 +550,111 @@ input {
     transform: translateY(0) scale(1);
   }
 }
+.title-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.icon-btn {
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(214, 170, 75, 0.55);
+  border-radius: 16px;
+  background: #fff7ea;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14px 28px rgba(11, 19, 40, 0.12);
+  transition: 0.2s ease;
+}
+
+  .icon-btn img {
+    width: 25px;
+    height: 25px;
+    object-fit: contain;
+  }
+
+  .icon-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 35px rgba(11, 19, 40, 0.18);
+  }
+
+.admin-icon-btn {
+  background: linear-gradient(135deg, #0b1328, #172746);
+  border-color: rgba(214, 170, 75, 0.75);
+}
+
+  .admin-icon-btn img {
+    filter: brightness(0) invert(1);
+  }
+
+.admin-login-modal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  padding: 42px;
+  border-radius: 30px;
+  background: linear-gradient(180deg, #ffffff, #fffaf2);
+  border: 1px solid rgba(214, 170, 75, 0.65);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.35);
+  animation: popupIn 0.52s ease;
+}
+
+  .admin-login-modal h3 {
+    margin: 0;
+    color: #0b1328;
+    font-size: 34px;
+    letter-spacing: -1px;
+  }
+
+  .admin-login-modal label {
+    margin-top: 18px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .admin-login-modal input {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+    .admin-login-modal input:disabled {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+.admin-login-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.cancel-admin-btn,
+.submit-admin-btn {
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.cancel-admin-btn {
+  background: #eef2f7;
+  color: #0b1328;
+}
+
+.submit-admin-btn {
+  background: linear-gradient(135deg, #0b1328, #172746);
+  color: #f6d37a;
+  box-shadow: inset 0 0 0 1px rgba(214, 170, 75, 0.75);
+}
+
+  .cancel-admin-btn:hover,
+  .submit-admin-btn:hover {
+    transform: translateY(-3px);
+  }

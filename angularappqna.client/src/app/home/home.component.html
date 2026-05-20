@@ -52,9 +52,15 @@
       <div class="login-title-row">
         <h2>Ξεκίνα την εκπαίδευση</h2>
 
-        <button type="button" class="help-btn" (click)="showHelpPopup = true">
-          <img src="/help.png" alt="Βοήθεια">
-        </button>
+        <div class="title-actions">
+          <button type="button" class="icon-btn admin-icon-btn" (click)="openAdminPopup()">
+            <img src="/admin.png" alt="Admin">
+          </button>
+
+          <button type="button" class="icon-btn help-btn" (click)="showHelpPopup = true">
+            <img src="/help.png" alt="Βοήθεια">
+          </button>
+        </div>
       </div>
 
       <form>
@@ -143,5 +149,38 @@
       </button>
     </div>
   </div>
+  <div class="modal-backdrop"
+       *ngIf="showAdminPopup"
+       (click)="closeAdminPopup()">
+
+    <div class="admin-login-modal" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" (click)="closeAdminPopup()">×</button>
+
+      <h3>Admin είσοδος</h3>
+      <p class="modal-subtitle">Συμπλήρωσε μόνο το PIN διαχειριστή.</p>
+
+      <label>Email διαχειριστή</label>
+      <input type="email"
+             value="admin@masoutis.gr"
+             disabled>
+
+      <label>PIN</label>
+      <input type="password"
+             placeholder="Πληκτρολόγησε admin PIN"
+             [(ngModel)]="adminPin"
+             name="adminPin">
+
+      <div class="admin-login-actions">
+        <button type="button" class="cancel-admin-btn" (click)="closeAdminPopup()">
+          Ακύρωση
+        </button>
+
+        <button type="button" class="submit-admin-btn" (click)="adminLogin()">
+          Είσοδος
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>
 

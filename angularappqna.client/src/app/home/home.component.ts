@@ -18,6 +18,8 @@ export class HomeComponent {
 
   selectedStore: string = '';
   showHelpPopup = false;
+  showAdminPopup = false;
+  adminPin = '';
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -44,6 +46,39 @@ export class HomeComponent {
       },
       error: (err) => {
         alert(err.error?.message || 'Κάτι πήγε στραβά.');
+      }
+    });
+  }
+
+  openAdminPopup() {
+    this.adminPin = '';
+    this.showAdminPopup = true;
+  }
+
+  closeAdminPopup() {
+    this.showAdminPopup = false;
+    this.adminPin = '';
+  }
+
+  adminLogin() {
+    const body = {
+      email: 'admin@masoutis.gr',
+      pin: this.adminPin,
+      nickname: 'Admin',
+      storeId: 2
+    };
+
+    this.http.post<any>('https://localhost:7125/api/Auth/login', body).subscribe({
+      next: (res) => {
+        if (res.success) {
+          localStorage.setItem('currentUser', JSON.stringify(res.user));
+          this.router.navigate(['/mainpage']);
+        } else {
+          alert(res.message);
+        }
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Λάθος PIN διαχειριστή.');
       }
     });
   }
