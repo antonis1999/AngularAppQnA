@@ -105,5 +105,41 @@ namespace AngularAppQnA.Server.Controllers
             }
             return ret;
         }
+        [HttpDelete("DeleteThematologia/{id}")]
+        public async Task<BasicResponse> DeleteThematologia(int id)
+        {
+            BasicResponse ret = new BasicResponse();
+
+            try
+            {
+                var row = await _context.Thematologia.FindAsync(id);
+
+                if (row == null)
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Thematologia not found.";
+                    return ret;
+                }
+
+                var theories = await _context.Thematologia_Theoria
+                    .Where(x => x.DetId == id)
+                    .ToListAsync();
+
+                _context.Thematologia_Theoria.RemoveRange(theories);
+                _context.Thematologia.Remove(row);
+
+                await _context.SaveChangesAsync();
+
+                ret.IsSuccess = true;
+                ret.Message = "Thematologia deleted.";
+            }
+            catch (Exception ex)
+            {
+                ret.IsSuccess = false;
+                ret.Message = ex.Message;
+            }
+
+            return ret;
+        }
     }
 }

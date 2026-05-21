@@ -79,6 +79,8 @@
           "options": {
             "proxyConfig": "src/proxy.conf.js",
             "port": 51418
+           // "ssl": false
+
           }
         },
         "extract-i18n": {

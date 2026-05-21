@@ -1,0 +1,113 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B02B20F2-0AC2-9F64-72B6-D05CF0D01A04}|angularappqna.client\\angularappqna.client.esproj|c:\\users\\alomtzianidis\\source\\repos\\github\\angularappqna\\angularappqna.client\\src\\app\\mainpage\\mainpage.component.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{B02B20F2-0AC2-9F64-72B6-D05CF0D01A04}|angularappqna.client\\angularappqna.client.esproj|solutionrelative:angularappqna.client\\src\\app\\mainpage\\mainpage.component.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D87DA9CE-0E21-84F9-ED31-2D0C3449B6D9}|AngularAppQnA.Server\\AngularAppQnA.Server.csproj|c:\\users\\alomtzianidis\\source\\repos\\github\\angularappqna\\angularappqna.server\\controllers\\servicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D87DA9CE-0E21-84F9-ED31-2D0C3449B6D9}|AngularAppQnA.Server\\AngularAppQnA.Server.csproj|solutionrelative:angularappqna.server\\controllers\\servicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B02B20F2-0AC2-9F64-72B6-D05CF0D01A04}|angularappqna.client\\angularappqna.client.esproj|c:\\users\\alomtzianidis\\source\\repos\\github\\angularappqna\\angularappqna.client\\src\\app\\mainpage\\mainpage.component.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B02B20F2-0AC2-9F64-72B6-D05CF0D01A04}|angularappqna.client\\angularappqna.client.esproj|solutionrelative:angularappqna.client\\src\\app\\mainpage\\mainpage.component.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B02B20F2-0AC2-9F64-72B6-D05CF0D01A04}|angularappqna.client\\angularappqna.client.esproj|c:\\users\\alomtzianidis\\source\\repos\\github\\angularappqna\\angularappqna.client\\src\\app\\mainpage\\mainpage.component.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{B02B20F2-0AC2-9F64-72B6-D05CF0D01A04}|angularappqna.client\\angularappqna.client.esproj|solutionrelative:angularappqna.client\\src\\app\\mainpage\\mainpage.component.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D87DA9CE-0E21-84F9-ED31-2D0C3449B6D9}|AngularAppQnA.Server\\AngularAppQnA.Server.csproj|c:\\users\\alomtzianidis\\source\\repos\\github\\angularappqna\\angularappqna.server\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D87DA9CE-0E21-84F9-ED31-2D0C3449B6D9}|AngularAppQnA.Server\\AngularAppQnA.Server.csproj|solutionrelative:angularappqna.server\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "mainpage.component.css",
+              "DocumentMoniker": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\angularappqna.client\\src\\app\\mainpage\\mainpage.component.css",
+              "RelativeDocumentMoniker": "angularappqna.client\\src\\app\\mainpage\\mainpage.component.css",
+              "ToolTip": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\angularappqna.client\\src\\app\\mainpage\\mainpage.component.css",
+              "RelativeToolTip": "angularappqna.client\\src\\app\\mainpage\\mainpage.component.css",
+              "ViewState": "AgIAACMCAAAAAAAAAAAQwEYCAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-05-21T07:06:13.084Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "mainpage.component.html",
+              "DocumentMoniker": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\angularappqna.client\\src\\app\\mainpage\\mainpage.component.html",
+              "RelativeDocumentMoniker": "angularappqna.client\\src\\app\\mainpage\\mainpage.component.html",
+              "ToolTip": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\angularappqna.client\\src\\app\\mainpage\\mainpage.component.html",
+              "RelativeToolTip": "angularappqna.client\\src\\app\\mainpage\\mainpage.component.html",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAlwDYAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-05-21T07:05:12.493Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "mainpage.component.ts",
+              "DocumentMoniker": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\angularappqna.client\\src\\app\\mainpage\\mainpage.component.ts",
+              "RelativeDocumentMoniker": "angularappqna.client\\src\\app\\mainpage\\mainpage.component.ts",
+              "ToolTip": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\angularappqna.client\\src\\app\\mainpage\\mainpage.component.ts",
+              "RelativeToolTip": "angularappqna.client\\src\\app\\mainpage\\mainpage.component.ts",
+              "ViewState": "AgIAAGoAAAAAAAAAAAAAwH4AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-21T06:52:08.337Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ServiceController.cs",
+              "DocumentMoniker": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\AngularAppQnA.Server\\Controllers\\ServiceController.cs",
+              "RelativeDocumentMoniker": "AngularAppQnA.Server\\Controllers\\ServiceController.cs",
+              "ToolTip": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\AngularAppQnA.Server\\Controllers\\ServiceController.cs",
+              "RelativeToolTip": "AngularAppQnA.Server\\Controllers\\ServiceController.cs",
+              "ViewState": "AgIAADUAAAAAAAAAAAAwwEsAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-21T05:33:22.157Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\AngularAppQnA.Server\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "AngularAppQnA.Server\\Data\\AppDbContext.cs",
+              "ToolTip": "C:\\Users\\alomtzianidis\\source\\repos\\GitHub\\AngularAppQnA\\AngularAppQnA.Server\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "AngularAppQnA.Server\\Data\\AppDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-20T11:57:15.135Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
