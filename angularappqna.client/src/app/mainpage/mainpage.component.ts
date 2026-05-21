@@ -22,13 +22,14 @@ export class MainpageComponent {
   showEditModal = false;
   adminEditTab: string = 'theory';
   adminPreviewMode = false;
-
   thematologiaTitle = '';
   thematologies: any[] = [];
-
   selectedThematologia: any = null;
   selectedTheories: any[] = [];
-
+  editingThematologiaId: number | null = null;
+  editingThematologiaTitle = '';
+  editingFromDate = '';
+  editingToDate = '';
   newTheoryHeader = '';
   newTheoryDetails = '';
 
@@ -81,26 +82,21 @@ export class MainpageComponent {
       return;
     }
 
-    if (this.selectedThematologia) {
-      this.updateThematologia();
-      return;
-    }
+    const fromDate = new Date();
+
+    const toDate = new Date();
+    toDate.setMonth(toDate.getMonth() + 1);
 
     const body = {
       Title: this.thematologiaTitle,
-      FromDate: new Date(),
-      ToDate: new Date(2099, 11, 31)
+      FromDate: fromDate,
+      ToDate: toDate
     };
-
     this.http.post<any>('api/Service/AddThematologia', body)
       .subscribe({
         next: (res) => {
           if (res.isSuccess || res.IsSuccess) {
-            this.selectedThematologia = null;
-            this.selectedTheories = [];
             this.thematologiaTitle = '';
-            this.newTheoryHeader = '';
-            this.newTheoryDetails = '';
             this.loadThematologies();
           } else {
             alert(res.message || res.Message);
@@ -114,45 +110,62 @@ export class MainpageComponent {
   }
 
   startEditThematologia(item: any) {
-    const currentId = this.selectedThematologia?.id ?? this.selectedThematologia?.Id;
     const itemId = item.id ?? item.Id;
 
-    if (currentId === itemId) {
+    if (this.editingThematologiaId === itemId) {
+      this.editingThematologiaId = null;
+      this.editingThematologiaTitle = '';
+      this.editingFromDate = '';
+      this.editingToDate = '';
       this.selectedThematologia = null;
       this.selectedTheories = [];
-      this.thematologiaTitle = '';
       this.newTheoryHeader = '';
       this.newTheoryDetails = '';
       return;
     }
 
+    this.editingThematologiaId = itemId;
+    this.editingThematologiaTitle = item.title ?? item.Title;
+
+    const from = item.fromDate ?? item.FromDate;
+    const to = item.toDate ?? item.ToDate;
+
+    this.editingFromDate = from ? from.substring(0, 10) : '';
+    this.editingToDate = to ? to.substring(0, 10) : '';
+
     this.selectedThematologia = item;
-    this.thematologiaTitle = item.title ?? item.Title;
     this.selectThematologia(item);
   }
 
-  updateThematologia() {
-    const body = { 
-      Id: this.selectedThematologia.id ?? this.selectedThematologia.Id,
-      Title: this.thematologiaTitle,
-      FromDate: this.selectedThematologia.fromDate ?? this.selectedThematologia.FromDate ?? new Date(),
-      ToDate: this.selectedThematologia.toDate ?? this.selectedThematologia.ToDate ?? new Date(2099, 11, 31)
+  updateThematologia(item: any) {
+    if (!this.editingThematologiaTitle.trim()) {
+      alert('Συμπλήρωσε Header Θεματολογίας');
+      return;
+    }
+
+    const body = {
+      Id: item.id ?? item.Id,
+      Title: this.editingThematologiaTitle,
+      FromDate: this.editingFromDate ? new Date(this.editingFromDate) : new Date(),
+      ToDate: this.editingToDate ? new Date(this.editingToDate) : new Date(2099, 11, 31)
     };
 
     this.http.post<any>('api/Service/UpdateThematologia', body)
       .subscribe({
         next: (res) => {
           if (res.isSuccess || res.IsSuccess) {
-            this.thematologiaTitle = '';
+            this.editingThematologiaId = null;
+            this.editingThematologiaTitle = '';
+            this.editingFromDate = '';
+            this.editingToDate = '';
             this.selectedThematologia = null;
+            this.selectedTheories = [];
+            this.newTheoryHeader = '';
+            this.newTheoryDetails = '';
             this.loadThematologies();
           } else {
             alert(res.message || res.Message);
           }
-        },
-        error: (err) => {
-          console.error('Update thematologia error:', err);
-          alert('Σφάλμα ενημέρωσης θεματολογίας');
         }
       });
   }

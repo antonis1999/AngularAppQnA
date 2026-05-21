@@ -156,7 +156,7 @@
 
             <button class="save-header-btn"
                     (click)="saveThematologia()">
-              {{ selectedThematologia ? 'Ενημέρωση Θεματολογίας' : 'Αποθήκευση Θεματολογίας' }}
+              Αποθήκευση Θεματολογίας
             </button>
 
           </div>
@@ -175,10 +175,19 @@
 
             <div class="topic-top">
 
-              <button class="select-topic-btn"
-                      (click)="selectThematologia(item)">
-                {{ item.title || item.Title }}
-              </button>
+              <div class="select-topic-btn topic-title-display">
+
+                <span>
+                  {{ item.title || item.Title }}
+                </span>
+
+                <small>
+                  {{ (item.fromDate || item.FromDate) | date:'dd/MM/yyyy' }}
+                  -
+                  {{ (item.toDate || item.ToDate) | date:'dd/MM/yyyy' }}
+                </small>
+
+              </div>
 
               <div class="topic-actions">
 
@@ -196,7 +205,27 @@
 
             </div>
 
-            <div *ngIf="(selectedThematologia?.id ?? selectedThematologia?.Id) === (item.id ?? item.Id)"
+            <div class="edit-thematologia-row"
+                 *ngIf="editingThematologiaId === (item.id ?? item.Id)">
+
+              <input type="text"
+                     [(ngModel)]="editingThematologiaTitle"
+                     placeholder="Επεξεργασία header θεματολογίας">
+
+              <input type="date"
+                     [(ngModel)]="editingFromDate">
+
+              <input type="date"
+                     [(ngModel)]="editingToDate">
+
+              <button class="update-topic-btn"
+                      (click)="updateThematologia(item)">
+                Ενημέρωση Θεματολογίας
+              </button>
+
+            </div>
+
+            <div *ngIf="editingThematologiaId === (item.id ?? item.Id)"
                  class="selected-topic-area">
 
               <h4>
@@ -226,7 +255,9 @@
 
                   <div class="topic-top">
 
-                    <h4>{{ theory.header || theory.Header }}</h4>
+                    <h4>
+                      {{ theory.header || theory.Header }}
+                    </h4>
 
                     <button class="delete-topic-btn"
                             (click)="deleteTheory(theory)">
@@ -245,7 +276,7 @@
 
           </div>
 
-        </div>
+          </div>
 
         <div *ngIf="adminEditTab === 'quiz'"
              class="form-section empty-state">
