@@ -16,6 +16,7 @@ namespace AngularAppQnA.Server.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<TrainingStore> Stores { get; set; }
+        public DbSet<Thematologia_Theoria> Thematologia_Theoria { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

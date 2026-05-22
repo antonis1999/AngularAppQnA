@@ -22,7 +22,7 @@ internal class Program
         {
             options.AddPolicy("AllowAngularClient", policy =>
             {
-                policy.WithOrigins("https://localhost:51418")
+                policy.WithOrigins("http://localhost:51418")
                       .AllowAnyHeader()
                       .AllowAnyMethod();
             });

@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoginRequest, LoginResponse } from '../interfaces/models';
+import { NotificationService } from '../services/notification.service';
 
 @Component({
   selector: 'app-home',
@@ -22,7 +23,7 @@ export class HomeComponent {
   showAdminPopup = false;
   adminPin = '';
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router, private notificationService: NotificationService) { }
 
   login() {
     const storeId = this.getStoreId();
@@ -41,12 +42,13 @@ export class HomeComponent {
         if (res.IsSuccess) {
           localStorage.setItem('currentUser', JSON.stringify(res.User));
           this.router.navigate(['/mainpage']);
+          this.notificationService.success('Επιτυχία Σύνδεσης');
         } else {
-          alert(res.Message);
+          this.notificationService.error(res.Message);
         }
       },
       error: (err) => {
-        alert(err.error?.Message || 'Κάτι πήγε στραβά.');
+        this.notificationService.warning(err.error?.Message || 'Κάτι πήγε στραβά.');
       }
     });
   }
@@ -64,7 +66,7 @@ export class HomeComponent {
   adminLogin() {
 
     if (this.adminPin !== '1234') {
-      alert('Λάθος PIN διαχειριστή.');
+      this.notificationService.error('Λάθος PIN διαχειριστή.');
       return;
     }
 
@@ -82,7 +84,7 @@ export class HomeComponent {
     );
 
     this.closeAdminPopup();
-
+    this.notificationService.success('Επιτυχία Σύνδεσης');
     this.router.navigate(['/mainpage']);
   }
 

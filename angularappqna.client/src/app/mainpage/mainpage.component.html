@@ -1,4 +1,5 @@
 <div class="page">
+
   <div class="user-panel">
 
     <img src="admin.png"
@@ -13,154 +14,78 @@
     <button *ngIf="isAdmin"
             class="preview-btn"
             (click)="toggleAdminPreview()">
-
-      {{ adminPreviewMode ? 'Admin View' : 'User Preview' }}
-
+      {{ adminPreviewMode ? 'User Preview' : 'Admin View' }}
     </button>
-    <button *ngIf="isAdmin"
+
+    <button *ngIf="isAdmin && adminPreviewMode"
             class="edit-btn"
             (click)="openEditModal()">
       Edit
     </button>
+
   </div>
+
   <div class="main-panel">
-    <!-- ADMIN BOARD -->
-    <div *ngIf="isAdmin && adminPreviewMode">
 
-      <div class="tab-menu">
+    <div class="tab-menu"
+         [class.admin-tabs]="isAdmin && adminPreviewMode">
 
-        <button class="active">
-          Θεωρία
-        </button>
+      <button [class.active]="activeSection === 'theory'"
+              (click)="setSection('theory')">
+        Θεωρία
+      </button>
 
-      </div>
+      <button [class.active]="activeSection === 'quiz'"
+              (click)="setSection('quiz')">
+        Quiz
+      </button>
 
-      <div class="section-card">
+      <button *ngIf="!isAdmin || !adminPreviewMode"
+              [class.active]="activeSection === 'ranking'"
+              (click)="setSection('ranking')">
+        Κατάταξη
+      </button>
 
-        <div class="section-title">
+      <button *ngIf="!isAdmin || !adminPreviewMode"
+              [class.active]="activeSection === 'settings'"
+              (click)="setSection('settings')">
+        Ρυθμίσεις
+      </button>
 
-          <h1>Θεωρίες Εκπαίδευσης</h1>
+    </div>
 
-          <p>
-            Εδώ θα εμφανίζονται όλες οι θεματολογίες
-            που έχουν δημιουργηθεί από το admin panel.
-          </p>
+    <div class="section-card">
 
-        </div>
+      <div *ngIf="activeSection === 'theory'">
 
         <div class="empty-theory"
              *ngIf="topics.length === 0">
-
           Δεν υπάρχουν ακόμη διαθέσιμες θεματολογίες.
-
         </div>
 
         <div class="theory-list"
              *ngIf="topics.length > 0">
 
-          <div class="theory-card"
-               *ngFor="let topic of topics; let i = index">
+          <div class="theory-card clickable-theory-card"
+               *ngFor="let topic of topics; let i = index"
+               (click)="togglePreviewThematologia(topic)">
 
             <div class="theory-number">
               {{ i + 1 }}
             </div>
 
             <div class="theory-content">
+              <h2>{{ topic.title || 'Χωρίς τίτλο' }}</h2>
 
-              <h2>
-                {{ topic.title || 'Χωρίς τίτλο' }}
-              </h2>
+              <small>
+                Πατήστε για προβολή θεωριών
+              </small>
 
-              <p [innerHTML]="topic.content">
-              </p>
+              <div class="preview-theory-details"
+                   *ngIf="openedPreviewThematologiaId === topic.id">
 
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-    <!-- USER PREVIEW -->
-    <div *ngIf="!isAdmin || !adminPreviewMode">
-
-      <div class="tab-menu">
-
-        <button [class.active]="activeSection === 'theory'"
-                (click)="setSection('theory')">
-
-          Θεωρία
-
-        </button>
-
-        <button [class.active]="activeSection === 'quiz'"
-                (click)="setSection('quiz')">
-
-          Quiz
-
-        </button>
-
-        <button [class.active]="activeSection === 'ranking'"
-                (click)="setSection('ranking')">
-
-          Κατάταξη
-
-        </button>
-
-        <button [class.active]="activeSection === 'settings'"
-                (click)="setSection('settings')">
-
-          Ρυθμίσεις
-
-        </button>
-
-      </div>
-
-      <div class="section-card">
-
-
-        <div *ngIf="activeSection === 'theory'">
-
-          <div class="section-title">
-
-            <h1>
-              {{ theoryTitle || 'Θεωρία Εκπαίδευσης' }}
-            </h1>
-
-            <p>
-              Οι θεματολογίες εκπαίδευσης εμφανίζονται παρακάτω.
-            </p>
-
-          </div>
-
-          <div class="empty-theory"
-               *ngIf="topics.length === 0">
-
-            Δεν υπάρχουν ακόμη διαθέσιμες θεωρίες.
-
-          </div>
-
-          <div class="theory-list"
-               *ngIf="topics.length > 0">
-
-            <div class="theory-card"
-                 *ngFor="let topic of topics; let i = index">
-
-              <div class="theory-number">
-
-                {{ i + 1 }}
-
-              </div>
-
-              <div class="theory-content">
-
-                <h2>
-                  {{ topic.title }}
-                </h2>
-
-                <p [innerHTML]="topic.content">
+                <p>
+                  Δεν υπάρχουν ακόμη διαθέσιμες θεωρίες για αυτή τη θεματολογία.
                 </p>
 
               </div>
@@ -171,39 +96,21 @@
 
         </div>
 
-        <!-- QUIZ -->
-        <div *ngIf="activeSection === 'quiz'">
+      </div>
 
-          <h1>Quiz</h1>
+      <div *ngIf="activeSection === 'quiz'">
+        <h1>Quiz</h1>
+        <p>Εδώ θα ξεκινάει το quiz του εργαζομένου.</p>
+      </div>
 
-          <p>
-            Εδώ θα ξεκινάει το quiz του εργαζομένου.
-          </p>
+      <div *ngIf="!isAdmin && activeSection === 'ranking'">
+        <h1>Κατάταξη</h1>
+        <p>Εδώ θα εμφανίζεται η κατάταξη των χρηστών.</p>
+      </div>
 
-        </div>
-
-        <!-- RANKING -->
-        <div *ngIf="activeSection === 'ranking'">
-
-          <h1>Κατάταξη</h1>
-
-          <p>
-            Εδώ θα εμφανίζεται η κατάταξη των χρηστών.
-          </p>
-
-        </div>
-
-        <!-- SETTINGS -->
-        <div *ngIf="activeSection === 'settings'">
-
-          <h1>Ρυθμίσεις</h1>
-
-          <p>
-            Εδώ θα μπουν οι ρυθμίσεις λογαριασμού.
-          </p>
-
-        </div>
-
+      <div *ngIf="!isAdmin && activeSection === 'settings'">
+        <h1>Ρυθμίσεις</h1>
+        <p>Εδώ θα μπουν οι ρυθμίσεις λογαριασμού.</p>
       </div>
 
     </div>
@@ -219,18 +126,12 @@
       <div class="modal-header">
 
         <div>
-
-          <h2>
-            Διαχείριση Περιεχομένου
-          </h2>
-
+          <h2>Διαχείριση Περιεχομένου</h2>
         </div>
 
         <button class="close-btn"
                 (click)="closeEditModal()">
-
           ×
-
         </button>
 
       </div>
@@ -239,78 +140,153 @@
 
         <button [class.active]="adminEditTab === 'theory'"
                 (click)="setAdminEditTab('theory')">
-
-          Θεωρία
-
+          Θεματολογία
         </button>
 
         <button [class.active]="adminEditTab === 'quiz'"
                 (click)="setAdminEditTab('quiz')">
-
           Quiz
-
         </button>
 
       </div>
 
       <div class="modal-body">
 
-        <!-- THEORY EDITOR -->
         <div *ngIf="adminEditTab === 'theory'"
              class="form-section">
 
-          <label>
-            Header Θεματολογίας
-          </label>
+          <label>Header Θεματολογίας</label>
 
           <input type="text"
-                 [(ngModel)]="theoryTitle"
+                 [(ngModel)]="thematologiaTitle"
                  placeholder="π.χ. Εκπαίδευση Ασφαλείας">
 
-          <div class="topics-header">
+          <div class="header-actions">
 
-            <h3>Θεωρίες</h3>
-
-            <button class="add-topic-btn"
-                    (click)="addTopic()">
-
-              + Προσθήκη
-
+            <button class="save-header-btn"
+                    (click)="saveThematologia()">
+              Αποθήκευση Θεματολογίας
             </button>
 
           </div>
 
+          <div class="topics-header">
+            <h3>Θεματολογίες</h3>
+          </div>
+
+          <div class="empty-theory"
+               *ngIf="thematologies.length === 0">
+            Δεν υπάρχουν ακόμη θεματολογίες.
+          </div>
+
           <div class="topic-card"
-               *ngFor="let topic of topics; let i = index">
+               *ngFor="let item of thematologies">
 
             <div class="topic-top">
 
-              <input type="text"
-                     [(ngModel)]="topic.title"
-                     placeholder="Τίτλος θεματολογίας">
+              <div class="select-topic-btn topic-title-display">
 
-              <button class="delete-topic-btn"
-                      (click)="removeTopic(i)">
+                <span>
+                  {{ item.title || item.Title }}
+                </span>
 
-                ×
-              </button>
+                <small>
+                  {{ (item.fromDate || item.FromDate) | date:'dd/MM/yyyy' }}
+                  -
+                  {{ (item.toDate || item.ToDate) | date:'dd/MM/yyyy' }}
+                </small>
+
+              </div>
+
+              <div class="topic-actions">
+
+                <button class="edit-topic-btn"
+                        (click)="startEditThematologia(item)">
+                  Edit
+                </button>
+
+                <button class="delete-topic-btn"
+                        (click)="deleteThematologia(item)">
+                  ×
+                </button>
+
+              </div>
+
             </div>
-            <quill-editor [(ngModel)]="topic.content"
-                          [modules]="quillModules"
-                          placeholder="Γράψε τις λεπτομέρειες της θεματολογίας...">
-            </quill-editor>
+
+            <div class="edit-thematologia-row"
+                 *ngIf="editingThematologiaId === (item.id ?? item.Id)">
+
+              <input type="text"
+                     [(ngModel)]="editingThematologiaTitle"
+                     placeholder="Επεξεργασία header θεματολογίας">
+
+              <input type="date"
+                     [(ngModel)]="editingFromDate">
+
+              <input type="date"
+                     [(ngModel)]="editingToDate">
+
+              <button class="update-topic-btn"
+                      (click)="updateThematologia(item)">
+                Ενημέρωση Θεματολογίας
+              </button>
+
+            </div>
+
+            <div *ngIf="editingThematologiaId === (item.id ?? item.Id)"
+                 class="selected-topic-area">
+
+              <h4>
+                Θεωρίες για:
+                {{ item.title || item.Title }}
+              </h4>
+
+              <input type="text"
+                     [(ngModel)]="newTheoryHeader"
+                     placeholder="Τίτλος θεωρίας">
+
+              <quill-editor [(ngModel)]="newTheoryDetails"
+                            [modules]="quillModules"
+                            placeholder="Γράψε τις λεπτομέρειες της θεωρίας...">
+              </quill-editor>
+
+              <button class="save-btn"
+                      (click)="addTheoryToSelected()">
+                Αποθήκευση Θεωρίας
+              </button>
+
+              <div class="theory-list-inside"
+                   *ngIf="selectedTheories.length > 0">
+
+                <div class="inner-theory-card"
+                     *ngFor="let theory of selectedTheories">
+
+                  <div class="topic-top">
+
+                    <h4>
+                      {{ theory.header || theory.Header }}
+                    </h4>
+
+                    <button class="delete-topic-btn"
+                            (click)="deleteTheory(theory)">
+                      ×
+                    </button>
+
+                  </div>
+
+                  <div [innerHTML]="theory.details || theory.Details"></div>
+
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
 
-          <button class="save-btn"
-                  (click)="saveTheory()">
+          </div>
 
-            Αποθήκευση Θεωρίας
-
-          </button>
-
-        </div>
-
-        <!-- QUIZ -->
         <div *ngIf="adminEditTab === 'quiz'"
              class="form-section empty-state">
 
