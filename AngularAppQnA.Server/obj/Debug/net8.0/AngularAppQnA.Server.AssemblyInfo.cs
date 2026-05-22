@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AngularAppQnA.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4519f4e1144377e5714c8a9f186870859c699e89")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c73737fa30db26b2709429466b45862e269df8df")]
 [assembly: System.Reflection.AssemblyProductAttribute("AngularAppQnA.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AngularAppQnA.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { HttpClient } from '@angular/common/http';
+import { NotificationService } from '../services/notification.service';
 
 @Component({
   selector: 'app-mainpage',
@@ -13,7 +14,8 @@ import { HttpClient } from '@angular/common/http';
 })
 export class MainpageComponent {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,
+    private notificationService: NotificationService) { }
 
   user: any;
   isAdmin = false;
@@ -32,6 +34,7 @@ export class MainpageComponent {
   editingToDate = '';
   newTheoryHeader = '';
   newTheoryDetails = '';
+  openedPreviewThematologiaId: number | null = null;
 
   topics: any[] = [];
 
@@ -78,7 +81,7 @@ export class MainpageComponent {
 
   saveThematologia() {
     if (!this.thematologiaTitle.trim()) {
-      alert('Συμπλήρωσε Header Θεματολογίας');
+      this.notificationService.warning('Συμπλήρωσε Header Θεματολογίας');
       return;
     }
 
@@ -98,13 +101,15 @@ export class MainpageComponent {
           if (res.isSuccess || res.IsSuccess) {
             this.thematologiaTitle = '';
             this.loadThematologies();
+            this.notificationService.success('Η θεματολογία αποθηκεύτηκε επιτυχώς');
+
           } else {
-            alert(res.message || res.Message);
+            this.notificationService.warning('Κατι πήγε λάθος');
           }
         },
         error: (err) => {
           console.error('Save thematologia error:', err);
-          alert('Σφάλμα αποθήκευσης θεματολογίας');
+          this.notificationService.error('Σφάλμα αποθήκευσης θεματολογίας');
         }
       });
   }
@@ -139,7 +144,7 @@ export class MainpageComponent {
 
   updateThematologia(item: any) {
     if (!this.editingThematologiaTitle.trim()) {
-      alert('Συμπλήρωσε Header Θεματολογίας');
+      this.notificationService.warning('Συμπλήρωσε Header Θεματολογίας');
       return;
     }
 
@@ -163,8 +168,10 @@ export class MainpageComponent {
             this.newTheoryHeader = '';
             this.newTheoryDetails = '';
             this.loadThematologies();
+
+            this.notificationService.success(res.message || res.Message);
           } else {
-            alert(res.message || res.Message);
+            this.notificationService.error(res.message || res.Message);
           }
         }
       });
@@ -184,10 +191,12 @@ export class MainpageComponent {
           this.selectedTheories = [];
           this.thematologiaTitle = '';
           this.loadThematologies();
+
+          this.notificationService.success('Διαγράφηκε Επιτυχώς');
         },
         error: (err) => {
           console.error('Delete thematologia error:', err);
-          alert('Σφάλμα διαγραφής θεματολογίας');
+          this.notificationService.error('Σφάλμα διαγραφής θεματολογίας');
         }
       });
   }
@@ -210,12 +219,12 @@ export class MainpageComponent {
 
   addTheoryToSelected() {
     if (!this.selectedThematologia) {
-      alert('Διάλεξε πρώτα θεματολογία');
+      this.notificationService.warning('Διάλεξε πρώτα θεματολογία');
       return;
     }
 
     if (!this.newTheoryHeader.trim()) {
-      alert('Συμπλήρωσε τίτλο θεωρίας');
+      this.notificationService.warning('Συμπλήρωσε τίτλο θεωρίας');
       return;
     }
 
@@ -233,12 +242,12 @@ export class MainpageComponent {
             this.newTheoryDetails = '';
             this.selectThematologia(this.selectedThematologia);
           } else {
-            alert(res.message || res.Message);
+            this.notificationService.success(res.message || res.Message);
           }
         },
         error: (err) => {
           console.error('Add theory error:', err);
-          alert('Σφάλμα αποθήκευσης θεωρίας');
+          this.notificationService.error('Σφάλμα αποθήκευσης θεωρίας');
         }
       });
   }
@@ -257,7 +266,7 @@ export class MainpageComponent {
         },
         error: (err) => {
           console.error('Delete theory error:', err);
-          alert('Σφάλμα διαγραφής θεωρίας');
+          this.notificationService.error('Σφάλμα διαγραφής θεωρίας');
         }
       });
   }
@@ -268,6 +277,17 @@ export class MainpageComponent {
     if (this.adminPreviewMode && this.activeSection !== 'theory' && this.activeSection !== 'quiz') {
       this.activeSection = 'theory';
     }
+  }
+
+  togglePreviewThematologia(topic: any) {
+    const id = topic.id ?? topic.Id;
+
+    if (this.openedPreviewThematologiaId === id) {
+      this.openedPreviewThematologiaId = null;
+      return;
+    }
+
+    this.openedPreviewThematologiaId = id;
   }
 
   setSection(section: string) {

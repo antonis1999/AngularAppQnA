@@ -1,0 +1,150 @@
+.notification {
+  position: fixed;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 340px;
+  max-width: 430px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  color: #ffffff;
+  background: rgba(18, 18, 24, 0.74);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+  animation: neoIn 0.55s cubic-bezier(0.16, 1, 0.3, 1), neoOut 0.45s cubic-bezier(0.7, 0, 0.84, 0) 2.8s forwards;
+}
+
+.top-right {
+  top: 24px;
+  right: 24px;
+}
+
+.side-right {
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+}
+
+.notification-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  font-size: 24px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+  .notification-content strong {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+  }
+
+  .notification-content p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+.success {
+  border-left: 5px solid #22c55e;
+}
+
+  .success .notification-icon {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.14);
+  }
+
+.warning {
+  border-left: 5px solid #f59e0b;
+}
+
+  .warning .notification-icon {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.16);
+  }
+
+.error {
+  border-left: 5px solid #ef4444;
+}
+
+  .error .notification-icon {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.16);
+  }
+
+.notification::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient( circle at top left, rgba(255, 255, 255, 0.18), transparent 35% );
+  pointer-events: none;
+}
+
+.notification::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient( 90deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15) );
+  animation: progressLine 3s linear forwards;
+}
+
+@keyframes neoIn {
+  from {
+    opacity: 0;
+    transform: translateX(140%) scale(0.92);
+    filter: blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes neoOut {
+  to {
+    opacity: 0;
+    transform: translateX(140%) scale(0.92);
+    filter: blur(8px);
+  }
+}
+
+@keyframes progressLine {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification {
+    left: 16px;
+    right: 16px;
+    min-width: auto;
+    max-width: none;
+  }
+}

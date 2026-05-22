@@ -1,0 +1,23 @@
+<div *ngIf="notificationService.notification() as notification"
+     class="notification"
+     [ngClass]="[notification.type, notification.position]">
+  <div class="notification-icon">
+    <span *ngIf="notification.type === 'success'">✓</span>
+    <span *ngIf="notification.type === 'warning'">!</span>
+    <span *ngIf="notification.type === 'error'">×</span>
+  </div>
+
+  <div class="notification-content">
+    <strong>
+      {{
+        notification.type === 'success'
+          ? 'Success'
+          : notification.type === 'warning'
+          ? 'Warning'
+          : 'Error'
+      }}
+    </strong>
+
+    <p>{{ notification.message }}</p>
+  </div>
+</div>

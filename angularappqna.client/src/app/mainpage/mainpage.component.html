@@ -66,8 +66,9 @@
         <div class="theory-list"
              *ngIf="topics.length > 0">
 
-          <div class="theory-card"
-               *ngFor="let topic of topics; let i = index">
+          <div class="theory-card clickable-theory-card"
+               *ngFor="let topic of topics; let i = index"
+               (click)="togglePreviewThematologia(topic)">
 
             <div class="theory-number">
               {{ i + 1 }}
@@ -75,7 +76,20 @@
 
             <div class="theory-content">
               <h2>{{ topic.title || 'Χωρίς τίτλο' }}</h2>
-              <p [innerHTML]="topic.content"></p>
+
+              <small>
+                Πατήστε για προβολή θεωριών
+              </small>
+
+              <div class="preview-theory-details"
+                   *ngIf="openedPreviewThematologiaId === topic.id">
+
+                <p>
+                  Δεν υπάρχουν ακόμη διαθέσιμες θεωρίες για αυτή τη θεματολογία.
+                </p>
+
+              </div>
+
             </div>
 
           </div>
