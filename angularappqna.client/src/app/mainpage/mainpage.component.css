@@ -16,7 +16,7 @@
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 24px;
-  padding: 22px;
+  padding: 24px;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.13);
   backdrop-filter: blur(14px);
 }
@@ -47,9 +47,13 @@
 
 .user-info p {
   margin: 4px 0 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
   color: #64748b;
+}
+
+button {
+  font-family: inherit;
 }
 
 .preview-btn,
@@ -60,6 +64,8 @@
 .delete-topic-btn,
 .select-topic-btn,
 .close-btn,
+.update-topic-btn,
+.theory-icon-btn,
 .tab-menu button,
 .modal-tabs button {
   transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
@@ -92,6 +98,8 @@
   .edit-btn:hover {
     transform: translateY(-2px);
   }
+
+/* NAVIGATION */
 
 .tab-menu {
   display: grid;
@@ -130,22 +138,24 @@
       transform: translateY(-2px);
     }
 
+/* MAIN CONTENT */
+
 .section-card {
   min-height: 220px;
-  padding: 30px;
+  padding: 36px;
   border-radius: 22px;
   background: rgba(248, 250, 252, 0.92);
   border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
 .section-title {
-  margin-bottom: 24px;
+  margin-bottom: 26px;
   text-align: center;
 }
 
   .section-title h1 {
     margin: 0 0 8px;
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 900;
     color: #0f172a;
     letter-spacing: -0.035em;
@@ -154,7 +164,7 @@
   .section-title p {
     margin: 0;
     color: #64748b;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
   }
 
@@ -167,7 +177,7 @@
 .theory-card {
   display: flex;
   gap: 16px;
-  padding: 20px;
+  padding: 22px;
   border-radius: 22px;
   background: white;
   border: 1px solid #e5e7eb;
@@ -191,7 +201,7 @@
 .theory-content h2 {
   margin: 0 0 8px;
   color: #0f172a;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 900;
   letter-spacing: -0.02em;
   text-transform: uppercase;
@@ -200,8 +210,16 @@
 .theory-content p {
   margin: 0;
   color: #475569;
-  font-size: 14px;
-  line-height: 1.65;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.theory-content small {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .empty-theory {
@@ -211,7 +229,7 @@
   background: white;
   color: #64748b;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
 }
 
@@ -251,7 +269,7 @@
 
   .modal-header h2 {
     margin: 0;
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 900;
     color: #0f172a;
     letter-spacing: -0.035em;
@@ -305,19 +323,19 @@
     }
 
 .modal-body {
-  padding: 28px 30px;
+  padding: 34px;
   overflow-y: auto;
 }
 
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 14px;
 }
 
   .form-section label {
     color: #0f172a;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 850;
     text-align: center;
   }
@@ -326,8 +344,8 @@
     width: 100%;
     border: 1px solid #dbe1ea;
     border-radius: 16px;
-    padding: 14px 16px;
-    font-size: 13px;
+    padding: 15px 18px;
+    font-size: 14px;
     font-weight: 600;
     color: #0f172a;
     outline: none;
@@ -348,10 +366,11 @@
 .save-header-btn,
 .save-btn {
   align-self: flex-end;
+  min-height: 44px;
   border: none;
   border-radius: 15px;
   padding: 13px 22px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 900;
   cursor: pointer;
 }
@@ -388,23 +407,28 @@
   .topics-header h3 {
     margin: 0;
     color: #0f172a;
-    font-size: 19px;
+    font-size: 22px;
     font-weight: 900;
     letter-spacing: -0.025em;
   }
-
 /* THEMATologia CARDS */
 
 .topic-card {
-  padding: 18px;
+  padding: 22px;
   border-radius: 22px;
   background: white;
   border: 1px solid #e2e8f0;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 16px;
 }
+
+  .topic-card:hover,
+  .inner-theory-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+  }
 
 .topic-top {
   display: flex;
@@ -417,10 +441,10 @@
   flex: 1;
   border: none;
   border-radius: 16px;
-  padding: 14px 16px;
+  padding: 16px 18px;
   background: linear-gradient(135deg, #0f172a, #1e293b);
   color: white;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 900;
   text-align: left;
   cursor: pointer;
@@ -435,6 +459,26 @@
     transform: translateY(-2px);
   }
 
+.topic-title-display {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  cursor: default;
+}
+
+  .topic-title-display:hover,
+  .select-topic-btn:hover.topic-title-display {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    transform: none;
+  }
+
+  .topic-title-display small {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
 .topic-actions {
   display: flex;
   align-items: center;
@@ -444,7 +488,6 @@
 .edit-topic-btn {
   border: none;
   border-radius: 14px;
-  padding: 12px 16px;
   background: linear-gradient(135deg, #d6aa4b, #f6d37a);
   color: #0f172a;
   font-size: 12px;
@@ -457,6 +500,24 @@
     background: linear-gradient(135deg, #0f172a, #1e293b);
     color: white;
     transform: translateY(-2px);
+  }
+
+.thematologia-edit-btn {
+  width: auto !important;
+  height: 42px !important;
+  padding: 0 16px !important;
+  border: none !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #f4d06f 0%, #d9ad4b 100%) !important;
+  color: #0d1b3d !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  cursor: pointer;
+}
+
+  .thematologia-edit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(217, 173, 75, 0.35);
   }
 
 .delete-topic-btn {
@@ -479,21 +540,53 @@
 
 .selected-topic-area {
   margin-top: 4px;
-  padding: 20px;
+  padding: 26px;
   border-radius: 22px;
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 0.92));
   border: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 16px;
 }
 
   .selected-topic-area h4 {
     margin: 0;
     color: #0f172a;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 900;
     letter-spacing: -0.02em;
+  }
+
+/* EDIT ROWS */
+
+.edit-thematologia-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.7fr 0.7fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.update-topic-btn {
+  min-height: 44px;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 18px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.22);
+}
+
+  .update-topic-btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #d6aa4b, #f6d37a);
+    color: #0f172a;
   }
 
 /* INNER THEORIES */
@@ -501,12 +594,12 @@
 .theory-list-inside {
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 14px;
   margin-top: 10px;
 }
 
 .inner-theory-card {
-  padding: 16px;
+  padding: 22px;
   border-radius: 18px;
   background: white;
   border: 1px solid #e5e7eb;
@@ -516,14 +609,61 @@
   .inner-theory-card h4 {
     margin: 0;
     color: #0f172a;
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 900;
   }
 
   .inner-theory-card div {
     color: #475569;
-    font-size: 13px;
-    line-height: 1.65;
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+.edit-theory-row {
+  margin-top: 14px;
+  padding: 20px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* THEORY ICON BUTTONS */
+
+.theory-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theory-icon-btn {
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 9px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+  .theory-icon-btn img {
+    width: 14px !important;
+    height: 14px !important;
+    object-fit: contain;
+  }
+
+.delete-theory-btn {
+  background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+  box-shadow: 0 8px 16px rgba(220, 38, 38, 0.16);
+}
+
+  .delete-theory-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(220, 38, 38, 0.25);
   }
 
 /* QUILL */
@@ -536,29 +676,116 @@ quill-editor {
   border: 1px solid #dbe1ea;
 }
 
-
 .ql-toolbar {
+  padding: 10px !important;
   border: none !important;
   border-bottom: 1px solid #dbe1ea !important;
   background: #f8fafc;
 }
 
 .ql-container {
-  min-height: 210px;
+  min-height: 260px;
   border: none !important;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .ql-editor {
-  font-size: 24px;
-  min-height: 260px;
-  line-height: 1.7;
+  min-height: 300px;
+  padding: 18px;
+  font-size: 16px !important;
+  line-height: 1.9;
 }
 
 .ql-picker-options {
   z-index: 99999 !important;
   max-height: 220px !important;
   overflow-y: auto !important;
+}
+
+/* PREVIEW ACCORDION */
+
+.clickable-theory-card {
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+  .clickable-theory-card:hover {
+    transform: translateY(-3px);
+    border-color: #d6aa4b;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
+  }
+
+.preview-theory-details {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border-left: 4px solid #d6aa4b;
+}
+
+  .preview-theory-details p {
+    margin: 0;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+.preview-theory-item {
+  margin-top: 14px;
+  padding: 20px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border-left: 4px solid #d6aa4b;
+}
+
+  .preview-theory-item h3 {
+    margin: 0 0 12px;
+    color: #dc143c;
+    font-size: 17px;
+    font-weight: 900;
+  }
+
+.preview-theory-text {
+  color: #0f172a;
+  font-size: 16px;
+  line-height: 1.85;
+}
+.theory-card {
+  align-items: flex-start;
+}
+
+.theory-content {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+.preview-theory-details {
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border-left: 4px solid #d6aa4b;
+  overflow: hidden;
+}
+
+.preview-theory-item {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 14px;
+  padding: 20px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border-left: 4px solid #d6aa4b;
+}
+
+.preview-theory-text {
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .empty-state {
@@ -568,6 +795,8 @@ quill-editor {
   text-align: center;
   color: #64748b;
 }
+
+/* RESPONSIVE */
 
 @media (max-width: 760px) {
   .page {
@@ -587,7 +816,9 @@ quill-editor {
     grid-template-columns: 1fr;
   }
 
-  .topic-top {
+  .topic-top,
+  .edit-thematologia-row {
+    grid-template-columns: 1fr;
     flex-direction: column;
     align-items: stretch;
   }
@@ -596,92 +827,3 @@ quill-editor {
     justify-content: flex-end;
   }
 }
-.edit-thematologia-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: center;
-  padding: 14px;
-  border-radius: 18px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-}
-
-.update-topic-btn {
-  border: none;
-  border-radius: 14px;
-  padding: 13px 18px;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: white;
-  font-size: 12px;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.22);
-  transition: 0.22s ease;
-}
-
-  .update-topic-btn:hover {
-    transform: translateY(-2px);
-    background: linear-gradient(135deg, #d6aa4b, #f6d37a);
-    color: #0f172a;
-  }
-.topic-title-display {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  cursor: default;
-}
-
-  .topic-title-display:hover {
-    transform: none;
-  }
-
-  .topic-title-display small {
-    font-size: 11px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.72);
-  }
-
-.select-topic-btn:hover.topic-title-display {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: white;
-}
-
-.edit-thematologia-row {
-  display: grid;
-  grid-template-columns: 1.4fr 0.7fr 0.7fr auto;
-  gap: 10px;
-  align-items: center;
-}
-.clickable-theory-card {
-  cursor: pointer;
-  transition: 0.25s ease;
-}
-
-  .clickable-theory-card:hover {
-    transform: translateY(-3px);
-    border-color: #d6aa4b;
-    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
-  }
-
-.theory-content small {
-  display: block;
-  margin-top: 6px;
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.preview-theory-details {
-  margin-top: 18px;
-  padding: 18px;
-  border-radius: 18px;
-  background: #f8fafc;
-  border-left: 4px solid #d6aa4b;
-}
-
-  .preview-theory-details p {
-    margin: 0;
-    color: #64748b;
-    font-weight: 700;
-  }

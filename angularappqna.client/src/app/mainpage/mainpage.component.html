@@ -84,9 +84,23 @@
               <div class="preview-theory-details"
                    *ngIf="openedPreviewThematologiaId === topic.id">
 
-                <p>
+                <div class="empty-theory"
+                     *ngIf="previewTheories.length === 0">
                   Δεν υπάρχουν ακόμη διαθέσιμες θεωρίες για αυτή τη θεματολογία.
-                </p>
+                </div>
+
+                <div class="preview-theory-item"
+                     *ngFor="let theory of previewTheories; let j = index">
+
+                  <h3>
+                    {{ j + 1 }}. {{ theory.header || theory.Header }}
+                  </h3>
+
+                  <div class="preview-theory-text"
+                       [innerHTML]="theory.details || theory.Details">
+                  </div>
+
+                </div>
 
               </div>
 
@@ -200,7 +214,7 @@
 
               <div class="topic-actions">
 
-                <button class="edit-topic-btn"
+                <button class="edit-topic-btn thematologia-edit-btn"
                         (click)="startEditThematologia(item)">
                   Edit
                 </button>
@@ -264,22 +278,48 @@
 
                   <div class="topic-top">
 
-                    <h4>
-                      {{ theory.header || theory.Header }}
-                    </h4>
+                    <h4>{{ theory.header || theory.Header }}</h4>
 
-                    <button class="delete-topic-btn"
-                            (click)="deleteTheory(theory)">
-                      ×
-                    </button>
+                    <div class="theory-actions">
+
+                      <button class="edit-topic-btn theory-icon-btn"
+                              (click)="startEditTheory(theory)">
+                        <img src="edit.png" alt="Edit">
+                      </button>
+
+                      <button class="delete-theory-btn theory-icon-btn"
+                              (click)="deleteTheoria(theory)">
+                        <img src="delete.png" alt="Delete">
+                      </button>
+
+                    </div>
 
                   </div>
 
                   <div [innerHTML]="theory.details || theory.Details"></div>
 
-                </div>
+                  <div class="edit-theory-row"
+                       *ngIf="editingTheoryId === (theory.id ?? theory.Id) && editingTheoryDetId === (theory.detId ?? theory.DetId)">
 
-              </div>
+                    <input type="text"
+                           [(ngModel)]="editingTheoryHeader"
+                           placeholder="Επεξεργασία τίτλου θεωρίας">
+
+                    <quill-editor [(ngModel)]="editingTheoryDetails"
+                                  [modules]="quillModules"
+                                  placeholder="Επεξεργασία λεπτομερειών θεωρίας...">
+                    </quill-editor>
+
+                    <button class="update-topic-btn"
+                            (click)="updateTheoria()">
+                      Ενημέρωση Θεωρίας
+                    </button>
+
+                  </div>
+
+                  </div>
+
+                </div>
 
             </div>
 

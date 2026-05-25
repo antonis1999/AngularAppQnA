@@ -34,8 +34,12 @@ export class MainpageComponent {
   editingToDate = '';
   newTheoryHeader = '';
   newTheoryDetails = '';
+  editingTheoryId: number | null = null;
+  editingTheoryDetId: number | null = null;
+  editingTheoryHeader = '';
+  editingTheoryDetails = '';
   openedPreviewThematologiaId: number | null = null;
-
+  previewTheories: any[] = [];
   topics: any[] = [];
 
   quillModules = {
@@ -206,7 +210,7 @@ export class MainpageComponent {
 
     const id = item.id ?? item.Id;
 
-    this.http.get<any[]>(`api/Service/GetTheoriesByThematologia/${id}`)
+    this.http.get<any[]>(`api/Service/GetTheoriaByThematologia?thematologiaId=${id}`)
       .subscribe({
         next: (res) => {
           this.selectedTheories = res;
@@ -215,6 +219,17 @@ export class MainpageComponent {
           console.error('Load theories error:', err);
         }
       });
+  }
+
+  getNextDetId(): number {
+
+    if (!this.selectedTheories || this.selectedTheories.length === 0) {
+      return 1;
+    }
+
+    return Math.max(
+      ...this.selectedTheories.map((x: any) => x.detId ?? x.DetId)
+    ) + 1;
   }
 
   addTheoryToSelected() {
@@ -228,21 +243,33 @@ export class MainpageComponent {
       return;
     }
 
+    const thematologiaId =
+      this.selectedThematologia.id ??
+      this.selectedThematologia.Id;
+
     const body = {
-      DetId: this.selectedThematologia.id ?? this.selectedThematologia.Id,
+      Id: thematologiaId,
+      DetId: this.getNextDetId(),
       Header: this.newTheoryHeader,
       Details: this.newTheoryDetails
     };
 
-    this.http.post<any>('api/Service/AddTheory', body)
+    console.log('Selected theories:', this.selectedTheories);
+
+    console.log('Next DetId:', this.getNextDetId());
+
+    this.http.post<any>('api/Service/AddTheoria', body)
       .subscribe({
         next: (res) => {
           if (res.isSuccess || res.IsSuccess) {
             this.newTheoryHeader = '';
             this.newTheoryDetails = '';
+
             this.selectThematologia(this.selectedThematologia);
+
+            this.notificationService.success('Η θεωρία αποθηκεύτηκε επιτυχώς');
           } else {
-            this.notificationService.success(res.message || res.Message);
+            this.notificationService.error(res.message || res.Message);
           }
         },
         error: (err) => {
@@ -252,17 +279,80 @@ export class MainpageComponent {
       });
   }
 
-  deleteTheory(theory: any) {
+  startEditTheory(theory: any) {
     const id = theory.id ?? theory.Id;
+    const detId = theory.detId ?? theory.DetId;
+
+    if (this.editingTheoryId === id && this.editingTheoryDetId === detId) {
+      this.editingTheoryId = null;
+      this.editingTheoryDetId = null;
+      this.editingTheoryHeader = '';
+      this.editingTheoryDetails = '';
+      return;
+    }
+
+    this.editingTheoryId = id;
+    this.editingTheoryDetId = detId;
+    this.editingTheoryHeader = theory.header ?? theory.Header;
+    this.editingTheoryDetails = theory.details ?? theory.Details;
+  }
+
+  updateTheoria() {
+    if (!this.editingTheoryHeader.trim()) {
+      this.notificationService.warning('Συμπλήρωσε τίτλο θεωρίας');
+      return;
+    }
+
+    const body = {
+      Id: this.editingTheoryId,
+      DetId: this.editingTheoryDetId,
+      Header: this.editingTheoryHeader,
+      Details: this.editingTheoryDetails
+    };
+
+    this.http.post<any>('api/Service/UpdateTheoria', body)
+      .subscribe({
+        next: (res) => {
+          if (res.isSuccess || res.IsSuccess) {
+            this.notificationService.success('Η θεωρία ενημερώθηκε επιτυχώς');
+
+            this.editingTheoryId = null;
+            this.editingTheoryDetId = null;
+            this.editingTheoryHeader = '';
+            this.editingTheoryDetails = '';
+
+            this.selectThematologia(this.selectedThematologia);
+          } else {
+            this.notificationService.error(res.message || res.Message);
+          }
+        },
+        error: (err) => {
+          console.error('Update theory error:', err);
+          this.notificationService.error('Σφάλμα ενημέρωσης θεωρίας');
+        }
+      });
+  }
+
+  deleteTheoria(theory: any) {
+    const id = theory.id ?? theory.Id;
+    const detId = theory.detId ?? theory.DetId;
 
     if (!confirm('Να διαγραφεί αυτή η θεωρία;')) {
       return;
     }
 
-    this.http.delete<any>(`api/Service/DeleteTheory/${id}`)
+    this.http.delete<any>(`api/Service/DeleteTheoria/${id}/${detId}`)
       .subscribe({
-        next: () => {
-          this.selectThematologia(this.selectedThematologia);
+        next: (res) => {
+          if (res.isSuccess || res.IsSuccess) {
+            this.notificationService.success('Η θεωρία διαγράφηκε επιτυχώς');
+
+            if (this.selectedThematologia) {
+              this.selectThematologia(this.selectedThematologia);
+            }
+          } else {
+            this.notificationService.error(res.message || res.Message);
+          }
         },
         error: (err) => {
           console.error('Delete theory error:', err);
@@ -284,10 +374,22 @@ export class MainpageComponent {
 
     if (this.openedPreviewThematologiaId === id) {
       this.openedPreviewThematologiaId = null;
+      this.previewTheories = [];
       return;
     }
 
     this.openedPreviewThematologiaId = id;
+
+    this.http.get<any[]>(`api/Service/GetTheoriaByThematologia?thematologiaId=${id}`)
+      .subscribe({
+        next: (res) => {
+          this.previewTheories = res;
+        },
+        error: (err) => {
+          console.error('Load preview theories error:', err);
+          this.notificationService.error('Σφάλμα φόρτωσης θεωριών');
+        }
+      });
   }
 
   setSection(section: string) {
