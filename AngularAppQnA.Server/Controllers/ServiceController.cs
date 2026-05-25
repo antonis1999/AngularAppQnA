@@ -103,6 +103,7 @@ namespace AngularAppQnA.Server.Controllers
             }
             return ret;
         }
+
         [HttpDelete("DeleteThematologia/{id}")]
         public async Task<BasicResponse> DeleteThematologia(int id)
         {
@@ -139,6 +140,8 @@ namespace AngularAppQnA.Server.Controllers
 
             return ret;
         }
+
+
         [HttpGet("GetTheoriaByThematologia")]
         public async Task<List<Thematologia_Theoria>> GetTheoriaByThematologia(int thematologiaId)
         {
@@ -243,6 +246,38 @@ namespace AngularAppQnA.Server.Controllers
                 ret.IsSuccess = false;
                 ret.Message += ex.Message;
             }
+            return ret;
+        }
+
+        [HttpDelete("DeleteTheoria/{id}/{detId}")]
+        public async Task<BasicResponse> DeleteTheoria(int id, int detId)
+        {
+            BasicResponse ret = new BasicResponse();
+
+            try
+            {
+                var theory = await _context.Thematologia_Theoria
+                  .FirstOrDefaultAsync(x => x.Id == id && x.DetId == detId);
+
+                if (theory == null)
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Thematologia not found.";
+                    return ret;
+                }
+
+                _context.Thematologia_Theoria.Remove(theory);
+                await _context.SaveChangesAsync();
+
+                ret.IsSuccess = true;
+                ret.Message = $"Theory with ID: {id} and DetId: {detId} deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                ret.IsSuccess = false;
+                ret.Message = ex.Message;
+            }
+
             return ret;
         }
     }
