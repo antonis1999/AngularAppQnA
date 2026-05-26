@@ -36,15 +36,20 @@ export class HomeComponent {
     };
 
     this.http.post<LoginResponse>('api/Auth/login', body).subscribe({
-      next: (res) => {
-        console.log(res);
+      next: (res: any) => {
+        console.log('LOGIN RESPONSE:', res);
 
-        if (res.IsSuccess) {
-          localStorage.setItem('currentUser', JSON.stringify(res.User));
+        const isSuccess = res.isSuccess ?? res.IsSuccess;
+        const message = res.message ?? res.Message;
+        const user = res.user ?? res.User;
+
+        if (isSuccess && user) {
+          localStorage.setItem('currentUser', JSON.stringify(user));
+
           this.router.navigate(['/mainpage']);
           this.notificationService.success('Επιτυχία Σύνδεσης');
         } else {
-          this.notificationService.error(res.Message);
+          this.notificationService.error(message || 'Αποτυχία σύνδεσης');
         }
       },
       error: (err) => {

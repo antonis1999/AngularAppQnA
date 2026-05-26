@@ -1,0 +1,292 @@
+<div class="page">
+
+  <div class="main-panel">
+
+    <div class="modal-header">
+      <h2>Διαχείριση Περιεχομένου</h2>
+
+      <button class="close-btn"
+              (click)="goBack()">
+        ×
+      </button>
+    </div>
+
+    <div class="modal-tabs">
+
+      <button [class.active]="adminEditTab === 'theory'"
+              (click)="setAdminEditTab('theory')">
+        Θεματολογία
+      </button>
+
+      <button [class.active]="adminEditTab === 'quiz'"
+              (click)="setAdminEditTab('quiz')">
+        Quiz
+      </button>
+
+    </div>
+
+    <div class="section-card">
+      <div *ngIf="adminEditTab === 'theory'"
+           class="form-section">
+
+        <div class="topics-header">
+          <h3>Επεξεργασία Θεματολογίας</h3>
+        </div>
+
+        <div class="empty-theory"
+             *ngIf="thematologies.length === 0">
+          Δεν υπάρχουν ακόμη θεματολογίες.
+        </div>
+
+          <div class="topic-card"
+               *ngIf="selectedThematologia as item">
+
+            <div class="topic-top">
+
+              <div class="select-topic-btn topic-title-display">
+
+                <span>
+                  {{ item.title || item.Title }}
+                </span>
+
+                <small>
+                  {{ (item.fromDate || item.FromDate) | date:'dd/MM/yyyy' }}
+                  -
+                  {{ (item.toDate || item.ToDate) | date:'dd/MM/yyyy' }}
+                </small>
+
+              </div>
+
+              <div class="topic-actions">
+
+                <button class="edit-topic-btn thematologia-edit-btn"
+                        (click)="startEditThematologia(item)">
+                  Edit
+                </button>
+
+                <button class="delete-topic-btn"
+                        (click)="deleteThematologia(item)">
+                  ×
+                </button>
+
+              </div>
+
+            </div>
+
+            <div class="edit-thematologia-row"
+                 *ngIf="editingThematologiaId === (item.id ?? item.Id)">
+
+              <input type="text"
+                     [(ngModel)]="editingThematologiaTitle"
+                     placeholder="Επεξεργασία header θεματολογίας">
+
+              <input type="date"
+                     [(ngModel)]="editingFromDate">
+
+              <input type="date"
+                     [(ngModel)]="editingToDate">
+
+              <button class="update-topic-btn"
+                      (click)="updateThematologia(item)">
+                Ενημέρωση Θεματολογίας
+              </button>
+
+            </div>
+
+            <div *ngIf="editingThematologiaId === (item.id ?? item.Id)"
+                 class="selected-topic-area">
+
+              <h4>
+                Θεωρίες για:
+                {{ item.title || item.Title }}
+              </h4>
+
+              <input type="text"
+                     [(ngModel)]="newTheoryHeader"
+                     placeholder="Τίτλος θεωρίας">
+
+              <quill-editor [(ngModel)]="newTheoryDetails"
+                            [modules]="quillModules"
+                            placeholder="Γράψε τις λεπτομέρειες της θεωρίας...">
+              </quill-editor>
+
+              <button class="save-btn"
+                      (click)="addTheoryToSelected()">
+                Αποθήκευση Θεωρίας
+              </button>
+
+              <div class="theory-list-inside"
+                   *ngIf="selectedTheories.length > 0">
+
+                <div class="inner-theory-card"
+                     *ngFor="let theory of selectedTheories">
+
+                  <div class="topic-top">
+
+                    <h4>{{ theory.header || theory.Header }}</h4>
+
+                    <div class="theory-actions">
+
+                      <button class="edit-topic-btn theory-icon-btn"
+                              (click)="startEditTheory(theory)">
+                        <img src="edit.png" alt="Edit">
+                      </button>
+
+                      <button class="delete-theory-btn theory-icon-btn"
+                              (click)="deleteTheoria(theory)">
+                        <img src="delete.png" alt="Delete">
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  <div [innerHTML]="theory.details || theory.Details"></div>
+
+                  <div class="edit-theory-row"
+                       *ngIf="editingTheoryId === (theory.id ?? theory.Id) &&
+                      editingTheoryDetId === (theory.detId ?? theory.DetId)">
+
+                    <input type="text"
+                           [(ngModel)]="editingTheoryHeader"
+                           placeholder="Επεξεργασία τίτλου θεωρίας">
+
+                    <quill-editor [(ngModel)]="editingTheoryDetails"
+                                  [modules]="quillModules"
+                                  placeholder="Επεξεργασία λεπτομερειών θεωρίας...">
+                    </quill-editor>
+
+                    <button class="update-topic-btn"
+                            (click)="updateTheoria()">
+                      Ενημέρωση Θεωρίας
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+      </div>
+
+      <div *ngIf="adminEditTab === 'quiz'"
+           class="quiz-editor-layout">
+
+        <div class="quiz-left-column">
+
+          <h3>
+            {{ selectedThematologia?.title || selectedThematologia?.Title }}
+          </h3>
+
+          <div class="empty-theory"
+               *ngIf="selectedTheories.length === 0">
+            Δεν υπάρχουν θεωρίες.
+          </div>
+
+          <div class="quiz-theory-item clickable-theory"
+               *ngFor="let theory of selectedTheories"
+               (click)="selectQuizTheory(theory)"
+               [class.active]="selectedQuizTheory === theory">
+
+            {{ theory.header || theory.Header }}
+
+          </div>
+
+        </div>
+
+        <div class="quiz-right-column">
+
+          <h3>Quiz Editor</h3>
+
+          <div *ngIf="!selectedQuizTheory"
+               class="empty-theory">
+
+            Επιλέξτε μία θεωρία από αριστερά.
+
+          </div>
+
+          <div *ngIf="selectedQuizTheory"
+               class="selected-theory-box">
+
+            <small>Επιλεγμένη θεωρία</small>
+
+            <h4>
+              {{ selectedQuizTheory.header || selectedQuizTheory.Header }}
+            </h4>
+            <div *ngIf="selectedQuizTheory"
+                 class="quiz-question-form">
+
+              <button type="button"
+                      class="save-quiz-btn"
+                      (click)="addQuizQuestion()">
+                + Νέα ερώτηση
+              </button>
+
+              <div class="quiz-question-card"
+                   *ngFor="let q of quizQuestions; let qi = index">
+
+                <label>Ερώτηση {{ qi + 1 }}</label>
+
+                <textarea [(ngModel)]="q.questionText"
+                          placeholder="Γράψτε την ερώτηση...">
+    </textarea>
+
+                <button type="button"
+                        class="delete-small-btn"
+                        (click)="removeQuizQuestion(qi)">
+                  Διαγραφή ερώτησης
+                </button>
+
+                <div class="answers-header">
+                  Απαντήσεις
+                </div>
+
+                <div class="answer-row"
+                     *ngFor="let answer of q.answers; let ai = index">
+
+                  <input type="radio"
+                         [checked]="answer.isCorrect"
+                         (change)="selectCorrectAnswer(q, answer)">
+
+                  <input type="text"
+                         [(ngModel)]="answer.text"
+                         placeholder="Απάντηση {{ ai + 1 }}">
+
+                  <button type="button"
+                          class="delete-answer-btn"
+                          (click)="removeAnswer(q, ai)">
+                    ✕
+                  </button>
+
+                </div>
+
+                <button type="button"
+                        class="add-answer-btn"
+                        (click)="addAnswer(q)">
+                  + Προσθήκη απάντησης
+                </button>
+
+              </div>
+
+              <button type="button"
+                      class="save-quiz-btn"
+                      (click)="saveQuizQuestions()">
+                Αποθήκευση Quiz
+              </button>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
