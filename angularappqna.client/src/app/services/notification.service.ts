@@ -23,9 +23,6 @@ export class NotificationService {
   ) {
     this.notification.set({ type, message, position });
 
-    setTimeout(() => {
-      this.notification.set(null);
-    }, 3300);
   }
 
   success(message: string) {
@@ -38,5 +35,8 @@ export class NotificationService {
 
   error(message: string) {
     this.show('error', message);
+  }
+  clear() {
+    this.notification.set(null);
   }
 }

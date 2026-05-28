@@ -310,5 +310,79 @@ public async Task<ActionResult<List<Thematologia_Theoria_Question>>> GetQuestion
         });
     }
 }
+        [HttpPost]
+        [Route("SaveQnA")]
+        public async Task<IActionResult> SaveQuiz(SaveQnA request)
+        {
+            try
+            {
+                foreach (var q in request.Questions)
+                {
+                    int nextQId =
+                        (_context.Thematologia_Question
+                            .Where(x =>
+                                x.Id == request.ThematologiaId &&
+                                x.DetId == request.TheoriaDetId)
+                            .Max(x => (int?)x.QId) ?? 0) + 1;
+
+                    var question = new Thematologia_Question
+                    {
+                        Id = request.ThematologiaId,
+                        DetId = request.TheoriaDetId,
+                        QId = nextQId,
+                        Question = q.QuestionText,
+                        Username = "admin",
+                        CreateDate = DateTime.Now
+                    };
+
+                    _context.Thematologia_Question.Add(question);
+                    await _context.SaveChangesAsync();
+
+                    int nextAId =
+                        (_context.Thematologia_Answers
+                            .Where(x =>
+                                x.Id == request.ThematologiaId &&
+                                x.DetId == request.TheoriaDetId &&
+                                x.QId == question.QId)
+                            .Max(x => (int?)x.AId) ?? 0) + 1;
+
+                    foreach (var a in q.Answers)
+                    {
+                        var answer = new Thematologia_Answers
+                        {
+                            Id = request.ThematologiaId,
+                            DetId = request.TheoriaDetId,
+                            QId = question.QId,
+                            AId = nextAId,
+                            Answer = a.Text,
+                            IsCorrect = a.IsCorrect,
+                            Username = "admin",
+                            CreateDate = DateTime.Now
+                        };
+
+                        _context.Thematologia_Answers.Add(answer);
+                        nextAId++;
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+
+                return Ok(new
+                {
+                    IsSuccess = true,
+                    Message = "Αποθηκεύτηκε επιτυχώς"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    IsSuccess = false,
+                    Message = ex.Message,
+                    InnerMessage = ex.InnerException?.Message,
+                    FullError = ex.ToString()
+                });
+            }
+        }
     }
 }

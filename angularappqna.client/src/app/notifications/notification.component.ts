@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService } from '../services/notification.service';
 
@@ -10,5 +10,51 @@ import { NotificationService } from '../services/notification.service';
   styleUrls: ['./notification.component.css']
 })
 export class NotificationComponent {
-  constructor(public notificationService: NotificationService) { }
+  timeoutId: any;
+  remainingTime = 5000;
+  startTime = 0;
+
+  constructor(public notificationService: NotificationService) {
+    effect(() => {
+      const notification = this.notificationService.notification();
+
+      if (notification) {
+        this.remainingTime = 5000;
+        this.startTimer();
+      }
+    });
+  }
+
+  startTimer() {
+    clearTimeout(this.timeoutId);
+
+    this.startTime = Date.now();
+
+    this.timeoutId = setTimeout(() => {
+      this.closeNotification();
+    }, this.remainingTime);
+  }
+
+  pauseTimer() {
+    clearTimeout(this.timeoutId);
+
+    const elapsed = Date.now() - this.startTime;
+    this.remainingTime = Math.max(0, this.remainingTime - elapsed);
+
+    this.timeoutId = null;
+  }
+
+  resumeTimer() {
+    if (this.remainingTime <= 0) {
+      this.closeNotification();
+      return;
+    }
+
+    this.startTimer();
+  }
+
+  closeNotification() {
+    clearTimeout(this.timeoutId);
+    this.notificationService.clear();
+  }
 }

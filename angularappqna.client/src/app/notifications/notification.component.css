@@ -15,7 +15,13 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 22px 55px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   overflow: hidden;
-  animation: neoIn 0.55s cubic-bezier(0.16, 1, 0.3, 1), neoOut 0.45s cubic-bezier(0.7, 0, 0.84, 0) 2.8s forwards;
+  cursor: pointer;
+  animation: neoIn 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notification {
+  pointer-events: auto;
+  z-index: 9999;
 }
 
 .top-right {
@@ -106,6 +112,9 @@
   width: 100%;
   background: linear-gradient( 90deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15) );
   animation: progressLine 3s linear forwards;
+}
+.notification:hover::after {
+  animation-play-state: paused;
 }
 
 @keyframes neoIn {

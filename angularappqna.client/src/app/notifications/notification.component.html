@@ -1,6 +1,8 @@
 <div *ngIf="notificationService.notification() as notification"
      class="notification"
-     [ngClass]="[notification.type, notification.position]">
+     [ngClass]="[notification.type, notification.position]"
+     (mouseenter)="pauseTimer()"
+     (mouseleave)="resumeTimer()">
   <div class="notification-icon">
     <span *ngIf="notification.type === 'success'">✓</span>
     <span *ngIf="notification.type === 'warning'">!</span>

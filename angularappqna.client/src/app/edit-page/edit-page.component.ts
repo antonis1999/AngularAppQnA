@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
+import { QuizTheory, QuizQuestionView, QuizOption } from '../interfaces/models';
 
 @Component({
   selector: 'app-edit-page',
@@ -27,8 +28,8 @@ export class EditPageComponent {
   editingThematologiaTitle = '';
   editingFromDate = '';
   editingToDate = '';
-  selectedQuizTheory: any = null;
-  quizQuestions: any[] = [];
+  selectedQuizTheory: QuizTheory | null = null;
+  quizQuestions: QuizQuestionView[] = [];
   newTheoryHeader = '';
   newTheoryDetails = '';
 
@@ -190,7 +191,7 @@ export class EditPageComponent {
             this.newTheoryDetails = '';
             this.loadThematologies();
 
-            this.notificationService.success(res.message || res.Message);
+            this.notificationService.success('Η θεματολογία ενημερώθηκε επιτυχώς');
           } else {
             this.notificationService.error(res.message || res.Message);
           }
@@ -222,14 +223,14 @@ export class EditPageComponent {
       });
   }
 
-  selectQuizTheory(theory: any) {
+  selectQuizTheory(theory: QuizTheory) {
     this.selectedQuizTheory = theory;
 
     this.quizQuestions = [
       {
-        questionText: '',
-        answers: [
-          { text: '', isCorrect: false }
+        question: '',
+        options: [
+          { answer: '', is_correct: false }
         ]
       }
     ];
@@ -237,9 +238,9 @@ export class EditPageComponent {
 
   addQuizQuestion() {
     this.quizQuestions.push({
-      questionText: '',
-      answers: [
-        { text: '', isCorrect: false }
+      question: '',
+      options: [
+        { answer: '', is_correct: false }
       ]
     });
   }
@@ -248,38 +249,90 @@ export class EditPageComponent {
     this.quizQuestions.splice(index, 1);
   }
 
-  addAnswer(question: any) {
-    question.answers.push({
-      text: '',
-      isCorrect: false
+  addAnswer(question: QuizQuestionView) {
+    question.options.push({
+      answer: '',
+      is_correct: false
     });
   }
 
-  removeAnswer(question: any, answerIndex: number) {
-    question.answers.splice(answerIndex, 1);
+  removeAnswer(question: QuizQuestionView, answerIndex: number) {
+    question.options.splice(answerIndex, 1);
   }
 
-  selectCorrectAnswer(question: any, selectedAnswer: any) {
-    question.answers.forEach((a: any) => {
-      a.isCorrect = false;
+  selectCorrectAnswer(question: QuizQuestionView, selectedAnswer: QuizOption) {
+    question.options.forEach(a => {
+      a.is_correct = false;
     });
 
-    selectedAnswer.isCorrect = true;
+    selectedAnswer.is_correct = true;
   }
 
   saveQuizQuestions() {
+
     if (!this.selectedQuizTheory) {
-      this.notificationService.warning('Επιλέξτε πρώτα θεωρία');
+
+      this.notificationService.warning(
+        'Επέλεξε θεωρία'
+      );
+
       return;
     }
 
-    console.log('Quiz questions:', {
+    const mappedQuestions = this.quizQuestions.map(q => ({
+
+      questionText: q.question,
+
+      answers: q.options.map(a => ({
+
+        text: a.answer,
+
+        isCorrect: a.is_correct
+
+      }))
+
+    }));
+
+
+    const body = {
+
       thematologiaId: this.thematologiaId,
-      theoryDetId: this.selectedQuizTheory.detId ?? this.selectedQuizTheory.DetId,
-      questions: this.quizQuestions
+
+      theoriaDetId: this.selectedQuizTheory.DetId,
+
+      questions: mappedQuestions
+
+    };
+
+    console.log('FINAL BODY:', body);
+
+    this.http.post<any>(
+      'api/Service/SaveQnA',
+      body
+    ).subscribe({
+
+      next: (res) => {
+
+        console.log(res);
+
+        this.notificationService.success(
+          'Το quiz αποθηκεύτηκε'
+        );
+
+      },
+
+      error: (err) => {
+
+        console.log(err);
+
+        this.notificationService.error(
+          'Σφάλμα αποθήκευσης'
+        );
+
+      }
+
     });
 
-    this.notificationService.success('Οι ερωτήσεις είναι έτοιμες προσωρινά');
   }
 
   getNextDetId(): number {
@@ -288,7 +341,7 @@ export class EditPageComponent {
     }
 
     return Math.max(
-      ...this.selectedTheories.map((x: any) => x.detId ?? x.DetId)
+      ...this.selectedTheories.map((x: any) => x.DetId ?? x.detId)
     ) + 1;
   }
 

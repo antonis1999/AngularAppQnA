@@ -16,7 +16,11 @@ namespace AngularAppQnA.Server.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<TrainingStore> Stores { get; set; }
+
         public DbSet<Thematologia_Question> Thematologia_Question { get; set; }
+
+        public DbSet<Thematologia_Answers> Thematologia_Answers { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,16 +37,20 @@ namespace AngularAppQnA.Server.Data
                 .HasKey(x => x.Id);
 
             modelBuilder.Entity<Thematologia>()
-                .HasKey(x => x.Id);
+        .ToTable("Thematologia")
+        .HasKey(x => x.Id);
 
-            modelBuilder.Entity<Thematologia_Theoria>()
-                .HasKey(x => new { x.Id, x.DetId });
+    modelBuilder.Entity<Thematologia_Theoria>()
+        .ToTable("Thematologia_Theoria")
+        .HasKey(x => new { x.Id, x.DetId });
 
-            modelBuilder.Entity<Thematologia_Answers>()
-                .HasKey(x => new { x.Id, x.DetId, x.AId });
+    modelBuilder.Entity<Thematologia_Question>()
+        .ToTable("Thematologia_Question")
+        .HasKey(x => new { x.Id, x.DetId, x.QId });
 
-            modelBuilder.Entity<Thematologia_Question>()
-                .HasKey(x => new { x.Id, x.DetId, x.QId });
+    modelBuilder.Entity<Thematologia_Answers>()
+        .ToTable("Thematologia_answer")
+        .HasKey(x => new { x.Id, x.DetId, x.QId, x.AId });
 
         }
     }
