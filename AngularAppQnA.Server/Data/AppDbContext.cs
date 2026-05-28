@@ -16,7 +16,7 @@ namespace AngularAppQnA.Server.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<TrainingStore> Stores { get; set; }
-        public DbSet<Thematologia_Theoria> Thematologia_Theoria { get; set; }
+        public DbSet<Thematologia_Question> Thematologia_Question { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,6 +37,13 @@ namespace AngularAppQnA.Server.Data
 
             modelBuilder.Entity<Thematologia_Theoria>()
                 .HasKey(x => new { x.Id, x.DetId });
+
+            modelBuilder.Entity<Thematologia_Answers>()
+                .HasKey(x => new { x.Id, x.DetId, x.AId });
+
+            modelBuilder.Entity<Thematologia_Question>()
+                .HasKey(x => new { x.Id, x.DetId, x.QId });
+
         }
     }
 }
