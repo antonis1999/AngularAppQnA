@@ -165,7 +165,6 @@
           </div>
 
         </div>
-
         <div class="quiz-right-column">
 
           <h3>Quiz Editor</h3>
@@ -178,16 +177,79 @@
 
             <small>Επιλεγμένη θεωρία</small>
 
-            <h4>
-              {{ selectedQuizTheory?.Header }}
-            </h4>
+            <h4>{{ selectedQuizTheory?.Header }}</h4>
 
             <div class="quiz-question-form">
 
+              <div class="existing-questions-card"
+                   *ngIf="existingQuestions.length > 0">
+
+                <div class="answers-header">
+                  Υπάρχουσες ερωτήσεις
+                </div>
+
+                <div class="existing-question"
+                     *ngFor="let q of existingQuestions; let qi = index">
+
+                  <div class="existing-question-top">
+
+                    <div class="question-content">
+
+                      <label>
+                        Ερώτηση {{ qi + 1 }}
+                      </label>
+
+                      <p class="existing-question-title">
+                        {{ q.question }}
+                      </p>
+
+                    </div>
+
+                    <div class="question-actions">
+
+                      <button type="button"
+                              class="question-icon-btn edit-icon-btn"
+                              (click)="editExistingQuestion(q)">
+
+                        <img src="/edit.png"
+                             alt="Edit">
+
+                      </button>
+
+                      <button type="button"
+                              class="question-icon-btn delete-icon-btn"
+                              (click)="deleteExistingQuestion(q)">
+
+                        <img src="/delete.png"
+                             alt="Delete">
+
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  <div class="existing-answer-row"
+                       *ngFor="let a of q.answers">
+
+                    <input type="radio"
+                           disabled
+                           [checked]="a.isCorrect">
+
+                    <span class="existing-answer-text">
+                      {{ a.answer }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
               <button type="button"
-                      class="save-quiz-btn"
+                      class="save-quiz-btn add-question-main-btn"
                       (click)="addQuizQuestion()">
-                + Νέα ερώτηση
+                + Προσθήκη ερώτησης
               </button>
 
               <div class="quiz-question-card"
@@ -197,7 +259,7 @@
 
                 <textarea [(ngModel)]="q.question"
                           placeholder="Γράψτε την ερώτηση...">
-                </textarea>
+        </textarea>
 
                 <button type="button"
                         class="delete-small-btn"
@@ -233,13 +295,15 @@
                         (click)="addAnswer(q)">
                   + Προσθήκη απάντησης
                 </button>
-
               </div>
+
+            </div>
+
 
               <button type="button"
                       class="save-quiz-btn"
                       (click)="saveQuizQuestions()">
-                Αποθήκευση 
+                Αποθήκευση
               </button>
 
             </div>
@@ -253,4 +317,4 @@
     </div>
 
   </div>
-</div>
+

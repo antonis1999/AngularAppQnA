@@ -280,36 +280,45 @@ namespace AngularAppQnA.Server.Controllers
 
             return ret;
         }
-
-[HttpGet("GetQuestionsByTheoria/{id}/{detId}")]
-public async Task<ActionResult<List<Thematologia_Theoria_Question>>> GetQuestionsByTheoria(int id, int detId)
-{
-    try
-    {
-        var questions = await _context.Thematologia_Question
-            .Where(q => q.Id == id && q.DetId == detId)
-            .Select(q => new Thematologia_Theoria_Question
-            {
-                Id = q.Id,
-                DetId = q.DetId,
-                QId = q.QId,
-                Question = q.Question,
-                Username = q.Username,
-                CreateDate = q.CreateDate
-            })
-            .ToListAsync();
-
-        return Ok(questions);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, new
+        [HttpGet("GetQuestionsByTheoria/{id}/{detId}")]
+        public async Task<ActionResult<List<object>>> GetQuestionsByTheoria(int id, int detId)
         {
-            Message = "An error occurred while fetching questions.",
-            Error = ex.Message
-        });
-    }
-}
+            try
+            {
+                var questions = await _context.Thematologia_Question
+                    .Where(q => q.Id == id && q.DetId == detId)
+                    .Select(q => new
+                    {
+                        Id = q.Id,
+                        DetId = q.DetId,
+                        QId = q.QId,
+                        Question = q.Question,
+                        Username = q.Username,
+                        CreateDate = q.CreateDate,
+
+                        Answers = _context.Thematologia_Answers
+                        .Where(a => a.Id == q.Id && a.DetId == q.DetId && a.QId == q.QId)
+                        .Select(a => new
+                        { 
+                            AId = a.AId,
+                            Answer = a.Answer,
+                            IsCorrect = a.IsCorrect                         
+                        })                       
+                        .ToList()
+                    })
+                    .ToListAsync();
+
+                return Ok(questions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while fetching questions.",
+                    Error = ex.Message
+                });
+            }
+        }
         [HttpPost]
         [Route("SaveQnA")]
         public async Task<IActionResult> SaveQuiz(SaveQnA request)

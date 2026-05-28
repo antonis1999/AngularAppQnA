@@ -21,7 +21,7 @@ export class EditPageComponent {
   selectedThematologia: any = null;
   selectedTheories: any[] = [];
   thematologiaId: number = 0;
-
+  existingQuestions: any[] = [];
   thematologiaTitle = '';
 
   editingThematologiaId: number | null = null;
@@ -225,11 +225,13 @@ export class EditPageComponent {
 
   selectQuizTheory(theory: QuizTheory) {
     this.selectedQuizTheory = theory;
-
+    this.loadExistingQuestions(theory);
     this.quizQuestions = [
       {
         question: '',
         options: [
+          { answer: '', is_correct: false },
+          { answer: '', is_correct: false },
           { answer: '', is_correct: false }
         ]
       }
@@ -240,6 +242,8 @@ export class EditPageComponent {
     this.quizQuestions.push({
       question: '',
       options: [
+        { answer: '', is_correct: false },
+        { answer: '', is_correct: false },
         { answer: '', is_correct: false }
       ]
     });
@@ -468,6 +472,57 @@ export class EditPageComponent {
           this.notificationService.error('Σφάλμα διαγραφής θεωρίας');
         }
       });
+  }
+
+  loadExistingQuestions(theory: any) {
+
+    const detId =
+      theory.DetId ?? theory.detId;
+
+    this.http.get<any[]>(
+      `api/Service/GetQuestionsByTheoria/${this.thematologiaId}/${detId}`
+    )
+      .subscribe({
+
+        next: (res) => {
+
+          console.log('QUESTIONS:', res);
+
+          this.existingQuestions = (res || []).map(q => ({
+            ...q,
+            question: q.question ?? q.Question,
+            answers: (q.answers ?? q.Answers ?? []).map((a: any) => ({
+              ...a,
+              answer: a.answer ?? a.Answer,
+              isCorrect: a.isCorrect ?? a.IsCorrect
+            }))
+
+          }));
+        },
+
+        error: (err) => {
+
+          console.error(
+            'Load existing questions error:',
+            err
+          );
+
+          this.notificationService.error(
+            'Σφάλμα φόρτωσης ερωτήσεων'
+          );
+
+        }
+
+      });
+
+  }
+
+  editExistingQuestion(q: any) {
+    console.log('edit', q);
+  }
+
+  deleteExistingQuestion(q: any) {
+    console.log('delete', q);
   }
 
   setAdminEditTab(tab: string) {
