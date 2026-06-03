@@ -6,10 +6,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { NotificationComponent } from './notifications/notification.component';
+import { QuizPageComponent } from './quiz-page/quiz-page.component';
 
 @NgModule({
   declarations: [
     AppComponent,
+    QuizPageComponent,
   ],
   imports: [
     BrowserModule,

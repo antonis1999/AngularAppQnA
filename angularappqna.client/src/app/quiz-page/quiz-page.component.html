@@ -1,0 +1,91 @@
+<div class="quiz-page">
+
+  <div class="quiz-card" *ngIf="!quizFinished">
+
+    <div class="quiz-top">
+      <button type="button"
+              class="quiz-back-btn">
+        ← Πίσω
+      </button>
+
+      <div class="quiz-progress-text">
+        Ερώτηση {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+      </div>
+    </div>
+
+    <div class="quiz-progress-bar">
+      <div class="quiz-progress-fill"
+           [style.width.%]="progressPercent">
+      </div>
+    </div>
+
+    <div class="timer-wrapper">
+
+      <div class="timer-header">
+
+        <span>Χρόνος που απομένει</span>
+
+        <span>{{ timeLeft }}s</span>
+
+      </div>
+
+      <div class="timer-bar">
+
+        <div class="timer-fill"
+             [style.width.%]="(timeLeft / 15) * 100">
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="quiz-question-area" *ngIf="currentQuestion">
+
+      <h2>
+        {{ currentQuestion.Question }}
+      </h2>
+
+      <div class="quiz-answers">
+
+        <label class="quiz-answer-option"
+               *ngFor="let answer of currentQuestion.Answers"
+               [class.disabled]="timeLeft <= 0"
+               [class.selected]="selectedAnswerId === answer.AId">
+
+          <input type="radio"
+                 name="answer"
+                 [checked]="selectedAnswerId === answer.AId"
+                 [disabled]="timeLeft <= 0"
+                 (change)="selectAnswer(answer.AId)">
+
+          <span>{{ answer.Answer }}</span>
+
+        </label>
+
+      </div>
+
+    </div>
+
+    <div class="quiz-actions">
+      <button type="button"
+              class="quiz-next-btn"
+              (click)="nextQuestion()">
+        Επόμενη
+      </button>
+    </div>
+
+  </div>
+
+  <div class="quiz-card" *ngIf="quizFinished">
+
+    <div class="quiz-result">
+      <h2>Το Quiz ολοκληρώθηκε</h2>
+
+      <p>
+        Σκορ: {{ score }} / {{ questions.length }}
+      </p>
+    </div>
+
+  </div>
+
+</div>

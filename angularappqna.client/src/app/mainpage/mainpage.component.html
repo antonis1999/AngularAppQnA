@@ -129,8 +129,39 @@
       </div>
 
       <div *ngIf="activeSection === 'quiz'">
-        <h1>Quiz</h1>
-        <p>Εδώ θα ξεκινάει το quiz του εργαζομένου.</p>
+        <div class="quiz-container">
+
+          <div class="quiz-center-box">
+            <p class="quiz-subtitle">
+             <strong> Επέλεξε θεματολογία </strong>
+            </p>
+
+            <select [(ngModel)]="selectedQuizThematologiaId"
+                    
+                    class="quiz-topic-select">
+
+              <option [ngValue]="0">
+                Επιλέξτε θεματολογία
+              </option>
+
+              <option *ngFor="let t of thematologies"
+                      [ngValue]="t.Id">
+                {{ t.Title }}
+              </option>
+
+            </select>
+
+            <button type="button"
+                    class="quiz-start-btn"
+                    (click)="startQuiz()">
+
+              Έναρξη Quiz
+
+            </button>
+
+          </div>
+
+        </div>
       </div>
 
       <div *ngIf="activeSection === 'ranking'">

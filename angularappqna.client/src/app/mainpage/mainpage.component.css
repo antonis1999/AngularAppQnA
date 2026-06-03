@@ -270,6 +270,75 @@ button {
   .add-thematologia-panel .save-header-btn {
     align-self: flex-end;
   }
+
+/* QUIZ */
+.quiz-container {
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quiz-center-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+  .quiz-center-box h2 {
+    font-size: 34px;
+    font-weight: 900;
+    color: #111827;
+    margin: 0;
+  }
+
+.quiz-subtitle {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 18px;
+}
+
+.quiz-topic-select {
+  width: 280px;
+  height: 46px;
+  padding: 0 16px;
+  border: 1px solid #d8dee8;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+}
+
+  .quiz-topic-select:focus {
+    border-color: #d9a441;
+    box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.18);
+  }
+
+.quiz-start-btn {
+  width: 220px;
+  height: 46px;
+  border: none;
+  border-radius: 14px;
+  background: #0f172a;
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+  .quiz-start-btn:hover {
+    transform: translateY(-3px);
+    background: #020617;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.25);
+  }
 /* MODAL */
 
 .modal-backdrop {

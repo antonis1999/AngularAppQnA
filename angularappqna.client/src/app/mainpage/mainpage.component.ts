@@ -5,6 +5,7 @@ import { QuillModule } from 'ngx-quill';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
 import { Router } from '@angular/router';
+import { Thematologia } from '../interfaces/models';
 
 @Component({
   selector: 'app-mainpage',
@@ -32,7 +33,9 @@ export class MainpageComponent {
 
   thematologiaTitle = '';
 
-  thematologies: any[] = [];
+  thematologies: Thematologia[] = [];
+
+  selectedQuizThematologiaId = 0;
 
   openedPreviewThematologiaId: number | null = null;
   previewTheories: any[] = [];
@@ -57,6 +60,8 @@ export class MainpageComponent {
     const data = localStorage.getItem('currentUser');
 
     console.log('CURRENT USER:', this.user);
+
+   
 
     if (data) {
       this.user = JSON.parse(data);
@@ -166,6 +171,27 @@ export class MainpageComponent {
     this.router.navigate(['/edit', id]);
   }
 
+  get selectedQuizThematologiaTitle(): string {
+
+    const selected = this.thematologies.find(
+      t => t.Id === this.selectedQuizThematologiaId
+    );
+
+    return selected?.Title ?? 'Καμία επιλογή';
+  }
+
+  startQuiz() {
+
+    if (!this.selectedQuizThematologiaId) {
+      alert('Επιλέξτε θεματολογία');
+      return;
+    }
+
+    this.router.navigate([
+      '/quiz-page',
+      this.selectedQuizThematologiaId
+    ]);
+  }
  
   getStoreName(storeId: number): string {
 

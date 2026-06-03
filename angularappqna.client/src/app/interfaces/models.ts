@@ -1,6 +1,3 @@
-export interface Models {
-}
-
 export interface LoginRequest {
   Email?: string;
   Pin?: string;
@@ -25,8 +22,20 @@ export interface User {
   CreatedAt: Date;
 }
 
+export interface ApiResponse {
+  IsSuccess: boolean;
+  Message: string;
+}
+
+export interface Thematologia {
+  Id: number;
+  Title: string;
+  FromDate: string;
+  ToDate: string;
+}
+
 export interface QuizTheory {
-  id: number;
+  Id: number;
   DetId: number;
   Header: string;
   Details: string;
@@ -34,26 +43,55 @@ export interface QuizTheory {
   CreateDate: Date;
 }
 
-export interface QuizQuestion {
-  Id: number;
-  DetId: number;
-  QuestionText: string;
-  Username: string;
-  CreateDate: Date;
-}
 export interface QuizOption {
   answer: string;
   is_correct: boolean;
 }
 
 export interface QuizQuestionView {
-  Qid?: number;
+  QId?: number;
   question: string;
   options: QuizOption[];
 }
 
-export interface QuizTheoryView {
-  theory_detId: number;
-  theory_descr: string;
-  question: QuizQuestionView[];
+export interface ExistingQuizAnswer {
+  AId: number;
+  Answer: string;
+  IsCorrect: boolean;
+}
+
+export interface ExistingQuizQuestion {
+  Id: number;
+  DetId: number;
+  QId: number;
+  Question: string;
+  Username: string;
+  CreateDate: string;
+  Answers: ExistingQuizAnswer[];
+}
+
+export interface UpdateQuizAnswerRequest {
+  Answer: string;
+  IsCorrect: boolean;
+}
+
+export interface UpdateQuizQuestionRequest {
+  Id: number;
+  DetId: number;
+  QId: number;
+  Question: string;
+  Answers: UpdateQuizAnswerRequest[];
+}
+export interface QuizPreviewAnswer {
+  AId: number;
+  Answer: string;
+  IsCorrect: boolean;
+}
+
+export interface QuizPreviewQuestion {
+  Id: number;
+  DetId: number;
+  QId: number;
+  Question: string;
+  Answers: QuizPreviewAnswer[];
 }

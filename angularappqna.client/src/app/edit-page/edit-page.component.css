@@ -50,13 +50,20 @@
     object-fit: contain;
   }
 
-.edit-icon-btn {
-  background: #eef4fb;
+.edit-icon-btn,
+.delete-icon-btn {
+  transition: all 0.2s ease;
 }
 
-.delete-icon-btn {
-  background: #ffe3e3;
-}
+  .edit-icon-btn:hover {
+    background: #dbeafe;
+    transform: translateY(-3px);
+  }
+
+  .delete-icon-btn:hover {
+    background: #fecaca;
+    transform: translateY(-3px);
+  }
 
 .existing-answer-row {
   display: flex;

@@ -32,12 +32,12 @@
 
           <div class="topic-top">
             <div class="select-topic-btn topic-title-display">
-              <span>{{ item.title || item.Title }}</span>
+              <span>{{ item.Title }}</span>
 
               <small>
-                {{ (item.fromDate || item.FromDate) | date:'dd/MM/yyyy' }}
+                {{ item.FromDate | date:'dd/MM/yyyy' }}
                 -
-                {{ (item.toDate || item.ToDate) | date:'dd/MM/yyyy' }}
+                {{ item.ToDate | date:'dd/MM/yyyy' }}
               </small>
             </div>
 
@@ -55,7 +55,7 @@
           </div>
 
           <div class="edit-thematologia-row"
-               *ngIf="editingThematologiaId === (item.id ?? item.Id)">
+               *ngIf="editingThematologiaId === item.Id">
 
             <input type="text"
                    [(ngModel)]="editingThematologiaTitle"
@@ -71,12 +71,12 @@
             </button>
           </div>
 
-          <div *ngIf="editingThematologiaId === (item.id ?? item.Id)"
+          <div *ngIf="editingThematologiaId === item.Id"
                class="selected-topic-area">
 
             <h4>
               Θεωρίες για:
-              {{ item.title || item.Title }}
+              {{ item.Title }}
             </h4>
 
             <input type="text"
@@ -97,7 +97,7 @@
               <div class="inner-theory-card" *ngFor="let theory of selectedTheories">
 
                 <div class="topic-top">
-                  <h4>{{ theory.header || theory.Header }}</h4>
+                  <h4>{{ theory.Header }}</h4>
 
                   <div class="theory-actions">
                     <button class="edit-topic-btn theory-icon-btn"
@@ -112,11 +112,11 @@
                   </div>
                 </div>
 
-                <div [innerHTML]="theory.details || theory.Details"></div>
+                <div [innerHTML]="theory.Details"></div>
 
                 <div class="edit-theory-row"
-                     *ngIf="editingTheoryId === (theory.id ?? theory.Id) &&
-                            editingTheoryDetId === (theory.detId ?? theory.DetId)">
+                     *ngIf="editingTheoryId === theory.Id &&
+                            editingTheoryDetId === theory.DetId">
 
                   <input type="text"
                          [(ngModel)]="editingTheoryHeader"
@@ -148,7 +148,7 @@
         <div class="quiz-left-column">
 
           <h3>
-            {{ selectedThematologia?.title || selectedThematologia?.Title }}
+            {{ selectedThematologia?.Title }}
           </h3>
 
           <div class="empty-theory" *ngIf="selectedTheories.length === 0">
@@ -160,11 +160,12 @@
                (click)="selectQuizTheory(theory)"
                [class.active]="selectedQuizTheory === theory">
 
-            {{ theory.header || theory.Header }}
+            {{ theory.Header }}
 
           </div>
 
         </div>
+
         <div class="quiz-right-column">
 
           <h3>Quiz Editor</h3>
@@ -177,7 +178,7 @@
 
             <small>Επιλεγμένη θεωρία</small>
 
-            <h4>{{ selectedQuizTheory?.Header }}</h4>
+            <h4>{{ selectedQuizTheory.Header }}</h4>
 
             <div class="quiz-question-form">
 
@@ -200,7 +201,7 @@
                       </label>
 
                       <p class="existing-question-title">
-                        {{ q.question }}
+                        {{ q.Question }}
                       </p>
 
                     </div>
@@ -210,19 +211,13 @@
                       <button type="button"
                               class="question-icon-btn edit-icon-btn"
                               (click)="editExistingQuestion(q)">
-
-                        <img src="/edit.png"
-                             alt="Edit">
-
+                        <img src="/edit.png" alt="Edit">
                       </button>
 
                       <button type="button"
                               class="question-icon-btn delete-icon-btn"
                               (click)="deleteExistingQuestion(q)">
-
-                        <img src="/delete.png"
-                             alt="Delete">
-
+                        <img src="/delete.png" alt="Delete">
                       </button>
 
                     </div>
@@ -230,15 +225,67 @@
                   </div>
 
                   <div class="existing-answer-row"
-                       *ngFor="let a of q.answers">
+                       *ngFor="let a of q.Answers">
 
                     <input type="radio"
                            disabled
-                           [checked]="a.isCorrect">
+                           [checked]="a.IsCorrect">
 
                     <span class="existing-answer-text">
-                      {{ a.answer }}
+                      {{ a.Answer }}
                     </span>
+
+                  </div>
+
+                  <div class="quiz-question-card"
+                       *ngIf="editingQuestion?.QId === q.QId">
+
+                    <label>Επεξεργασία ερώτησης</label>
+
+                    <textarea [(ngModel)]="editingQuestionText"
+                              placeholder="Γράψτε την ερώτηση...">
+                    </textarea>
+
+                    <div class="answers-header">
+                      Απαντήσεις
+                    </div>
+
+                    <div class="answer-row"
+                         *ngFor="let a of editingQuestionAnswers; let ai = index">
+
+                      <input type="radio"
+                             [checked]="a.IsCorrect"
+                             (change)="selectCorrectExistingAnswer(a)">
+
+                      <input type="text"
+                             [(ngModel)]="a.Answer"
+                             placeholder="Απάντηση {{ ai + 1 }}">
+
+                      <button type="button"
+                              class="delete-answer-btn"
+                              (click)="removeExistingAnswer(ai)">
+                        ✕
+                      </button>
+
+                    </div>
+
+                    <button type="button"
+                            class="add-answer-btn"
+                            (click)="addExistingAnswer()">
+                      + Προσθήκη απάντησης
+                    </button>
+
+                    <button type="button"
+                            class="save-quiz-btn"
+                            (click)="updateExistingQuestion()">
+                      Αποθήκευση αλλαγών
+                    </button>
+
+                    <button type="button"
+                            class="delete-small-btn"
+                            (click)="cancelEditExistingQuestion()">
+                      Άκυρο
+                    </button>
 
                   </div>
 
@@ -259,7 +306,7 @@
 
                 <textarea [(ngModel)]="q.question"
                           placeholder="Γράψτε την ερώτηση...">
-        </textarea>
+                </textarea>
 
                 <button type="button"
                         class="delete-small-btn"
@@ -295,10 +342,8 @@
                         (click)="addAnswer(q)">
                   + Προσθήκη απάντησης
                 </button>
+
               </div>
-
-            </div>
-
 
               <button type="button"
                       class="save-quiz-btn"
@@ -317,4 +362,4 @@
     </div>
 
   </div>
-
+</div>

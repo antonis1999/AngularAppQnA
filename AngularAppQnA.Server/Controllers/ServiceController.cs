@@ -393,5 +393,154 @@ namespace AngularAppQnA.Server.Controllers
                 });
             }
         }
+        [HttpPost("UpdateQuestion")]
+        public async Task<ActionResult> UpdateQuestion([FromBody] Thematologia_UpdateQuestionRequest request)
+        {
+            try
+            {
+                var question = await _context.Thematologia_Question
+                    .FirstOrDefaultAsync(q =>
+                        q.Id == request.Id &&
+                        q.DetId == request.DetId &&
+                        q.QId == request.QId);
+
+                if (question == null)
+                {
+                    return NotFound(new
+                    {
+                        Message = "Question not found."
+                    });
+                }
+
+                question.Question = request.Question;
+
+                var oldAnswers = await _context.Thematologia_Answers
+                    .Where(a =>
+                        a.Id == request.Id &&
+                        a.DetId == request.DetId &&
+                        a.QId == request.QId)
+                    .ToListAsync();
+
+                _context.Thematologia_Answers.RemoveRange(oldAnswers);
+
+                int nextAId = 1;
+
+                foreach (var answer in request.Answers)
+                {
+                    _context.Thematologia_Answers.Add(new Thematologia_Answers
+                    {
+                        Id = request.Id,
+                        DetId = request.DetId,
+                        QId = request.QId,
+                        AId = nextAId,
+                        Answer = answer.Answer,
+                        IsCorrect = answer.IsCorrect
+                    });
+
+                    nextAId++;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    IsSuccess = true,
+                    Message = "Question updated successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while updating question.",
+                    Error = ex.Message
+                });
+            }
+        }
+        [HttpDelete("DeleteQuestion/{id}/{detId}/{qId}")]
+        public async Task<ActionResult> DeleteQuestion(int id, int detId, int qId)
+        {
+            try
+            {
+                var question = await _context.Thematologia_Question
+                    .FirstOrDefaultAsync(q =>
+                        q.Id == id &&
+                        q.DetId == detId &&
+                        q.QId == qId);
+
+                if (question == null)
+                {
+                    return NotFound(new
+                    {
+                        Message = "Question not found."
+                    });
+                }
+
+                var answers = await _context.Thematologia_Answers
+                    .Where(a =>
+                        a.Id == id &&
+                        a.DetId == detId &&
+                        a.QId == qId)
+                    .ToListAsync();
+
+                _context.Thematologia_Answers.RemoveRange(answers);
+                _context.Thematologia_Question.Remove(question);
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    IsSuccess = true,
+                    Message = "Question deleted successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while deleting question.",
+                    Error = ex.Message
+                });
+            }
+        }
+        [HttpGet("GetRandomQuizQuestions/{id}")]
+        public async Task<ActionResult> GetRandomQuizQuestions(int id)
+        {
+            try
+            {
+                var questions = await _context.Thematologia_Question
+                    .Where(q => q.Id == id)
+                    .OrderBy(q => Guid.NewGuid())
+                    .Take(10)
+                    .ToListAsync();
+
+                var result = questions.Select(q => new
+                {
+                    q.Id,
+                    q.DetId,
+                    q.QId,
+                    q.Question,
+
+                    Answers = _context.Thematologia_Answers
+                        .Where(a =>
+                            a.Id == q.Id &&
+                            a.DetId == q.DetId &&
+                            a.QId == q.QId)
+                        .Select(a => new
+                        {
+                            a.AId,
+                            a.Answer,
+                            a.IsCorrect
+                        })
+                        .ToList()
+                });
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
