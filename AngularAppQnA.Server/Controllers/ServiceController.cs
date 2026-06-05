@@ -327,6 +327,13 @@ namespace AngularAppQnA.Server.Controllers
             {
                 foreach (var q in request.Questions)
                 {
+                    var validAnswers = q.Answers
+                        .Where(a => !string.IsNullOrWhiteSpace(a.Text))
+                        .ToList();
+
+                    if (!validAnswers.Any())
+                        continue;
+
                     int nextQId =
                         (_context.Thematologia_Question
                             .Where(x =>
@@ -355,7 +362,7 @@ namespace AngularAppQnA.Server.Controllers
                                 x.QId == question.QId)
                             .Max(x => (int?)x.AId) ?? 0) + 1;
 
-                    foreach (var a in q.Answers)
+                    foreach (var a in validAnswers)
                     {
                         var answer = new Thematologia_Answers
                         {
@@ -512,30 +519,34 @@ namespace AngularAppQnA.Server.Controllers
                     .Where(q => q.Id == id)
                     .OrderBy(q => Guid.NewGuid())
                     .Take(10)
+                    .Select(q => new
+                    {
+                        q.Id,
+                        q.DetId,
+                        q.QId,
+                        q.Question,
+
+                        Details = _context.Thematologia_Theoria
+                            .Where(t => t.Id == q.Id && t.DetId == q.DetId)
+                            .Select(t => t.Details)
+                            .FirstOrDefault(),
+
+                        Answers = _context.Thematologia_Answers
+                            .Where(a =>
+                                a.Id == q.Id &&
+                                a.DetId == q.DetId &&
+                                a.QId == q.QId)
+                            .Select(a => new
+                            {
+                                a.AId,
+                                a.Answer,
+                                a.IsCorrect
+                            })
+                            .ToList()
+                    })
                     .ToListAsync();
 
-                var result = questions.Select(q => new
-                {
-                    q.Id,
-                    q.DetId,
-                    q.QId,
-                    q.Question,
-
-                    Answers = _context.Thematologia_Answers
-                        .Where(a =>
-                            a.Id == q.Id &&
-                            a.DetId == q.DetId &&
-                            a.QId == q.QId)
-                        .Select(a => new
-                        {
-                            a.AId,
-                            a.Answer,
-                            a.IsCorrect
-                        })
-                        .ToList()
-                });
-
-                return Ok(result);
+                return Ok(questions);
             }
             catch (Exception ex)
             {

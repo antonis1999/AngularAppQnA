@@ -186,17 +186,33 @@ export class EditPageComponent {
       this.notificationService.warning('Επέλεξε θεωρία');
       return;
     }
+    const validQuestions = this.quizQuestions
+      .filter(q => q.question?.trim().length > 0)
+      .map(q => ({
+        questionText: q.question.trim(),
+        answers: q.options
+          .filter(a => a.answer?.trim().length > 0)
+          .map(a => ({
+            text: a.answer.trim(),
+            isCorrect: a.is_correct
+          }))
+      }));
+    for (const q of validQuestions) {
+      if (q.answers.length === 0) {
+        this.notificationService.warning('Συμπλήρωσε τουλάχιστον μία απάντηση');
+        return;
+      }
+      const hasValidCorrectAnswer = q.answers.some(a => a.isCorrect);
 
+      if (!hasValidCorrectAnswer) {
+        this.notificationService.warning('Επέλεξε έγκυρη σωστή απάντηση');
+        return;
+      }
+    }
     const body = {
       thematologiaId: this.thematologiaId,
       theoriaDetId: this.selectedQuizTheory.DetId,
-      questions: this.quizQuestions.map(q => ({
-        questionText: q.question,
-        answers: q.options.map(a => ({
-          text: a.answer,
-          isCorrect: a.is_correct
-        }))
-      }))
+      questions: validQuestions
     };
 
     this.http.post<ApiResponse>('api/Service/SaveQnA', body)
@@ -211,7 +227,6 @@ export class EditPageComponent {
         }
       });
   }
-
   editExistingQuestion(question: ExistingQuizQuestion) {
     this.editingQuestion = question;
     this.editingQuestionText = question.Question;
@@ -254,15 +269,36 @@ export class EditPageComponent {
       return;
     }
 
+    if (!this.editingQuestionText?.trim()) {
+      this.notificationService.warning('Συμπλήρωσε την ερώτηση');
+      return;
+    }
+
+    const validAnswers = this.editingQuestionAnswers
+      .filter(a => a.Answer?.trim().length > 0)
+      .map(a => ({
+        Answer: a.Answer.trim(),
+        IsCorrect: a.IsCorrect
+      }));
+
+    if (validAnswers.length === 0) {
+      this.notificationService.warning('Συμπλήρωσε τουλάχιστον μία απάντηση');
+      return;
+    }
+
+    const hasValidCorrectAnswer = validAnswers.some(a => a.IsCorrect);
+
+    if (!hasValidCorrectAnswer) {
+      this.notificationService.warning('Επέλεξε έγκυρη σωστή απάντηση');
+      return;
+    }
+
     const body: UpdateQuizQuestionRequest = {
       Id: this.editingQuestion.Id,
       DetId: this.editingQuestion.DetId,
       QId: this.editingQuestion.QId,
-      Question: this.editingQuestionText,
-      Answers: this.editingQuestionAnswers.map(a => ({
-        Answer: a.Answer,
-        IsCorrect: a.IsCorrect
-      }))
+      Question: this.editingQuestionText.trim(),
+      Answers: validAnswers
     };
 
     this.http.post<ApiResponse>('api/Service/UpdateQuestion', body)

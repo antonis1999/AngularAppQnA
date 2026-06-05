@@ -183,7 +183,7 @@ export class MainpageComponent {
   startQuiz() {
 
     if (!this.selectedQuizThematologiaId) {
-      alert('Επιλέξτε θεματολογία');
+      this.notificationService.warning('Επέλεξε Θεματολογία');
       return;
     }
 
@@ -191,6 +191,7 @@ export class MainpageComponent {
       '/quiz-page',
       this.selectedQuizThematologiaId
     ]);
+    this.notificationService.success('Το QUIZ ξεκίνησε')
   }
  
   getStoreName(storeId: number): string {

@@ -2,6 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { QuizPreviewQuestion, QuizPreviewAnswer} from '../interfaces/models';
 import { HttpClient } from '@angular/common/http';
+import { NotificationService } from '../services/notification.service';
+import { Location } from '@angular/common';
+
+
 @Component({
   selector: 'app-quiz-page',
   standalone: false,
@@ -15,16 +19,19 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   questions: QuizPreviewQuestion[] = [];
   currentQuestionIndex = 0;
   selectedAnswerId: number | null = null;
-
+  showReview = false;
+  answers: { questionId: number; answerId: number | null }[] = [];
   timeLeft = 15;
   timer: any;
-
+  Details?: string;
+  details?: string;
   score = 0;
   quizFinished = false;
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private location: Location
   ) { }
 
   ngOnInit() {
@@ -83,7 +90,7 @@ export class QuizPageComponent implements OnInit, OnDestroy {
         error: (err) => {
 
           console.error(err);
-
+         
         }
 
       });
@@ -102,14 +109,11 @@ export class QuizPageComponent implements OnInit, OnDestroy {
 
     const currentQuestion = this.questions[this.currentQuestionIndex];
 
-    if (currentQuestion && this.selectedAnswerId !== null) {
-      const selectedAnswer = currentQuestion.Answers.find(
-        (a: QuizPreviewAnswer) => a.AId === this.selectedAnswerId
-      );
-
-      if (selectedAnswer?.IsCorrect) {
-        this.score++;
-      }
+    if (currentQuestion) {
+      this.answers[this.currentQuestionIndex] = {
+        questionId: currentQuestion.QId,
+        answerId: this.selectedAnswerId
+      };
     }
 
     this.selectedAnswerId = null;
@@ -118,10 +122,9 @@ export class QuizPageComponent implements OnInit, OnDestroy {
       this.currentQuestionIndex++;
       this.startTimer();
     } else {
-      this.quizFinished = true;
+      this.showReview = true;
     }
   }
-
   get currentQuestion() {
     return this.questions[this.currentQuestionIndex];
   }
@@ -132,5 +135,60 @@ export class QuizPageComponent implements OnInit, OnDestroy {
     }
 
     return ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+  }
+  backToQuiz() {
+    this.showReview = false;
+    this.currentQuestionIndex = this.questions.length - 1;
+
+    const savedAnswer = this.answers[this.currentQuestionIndex];
+    this.selectedAnswerId = savedAnswer?.answerId ?? null;
+
+    this.startTimer();
+  }
+
+  submitAnswers() {
+    this.clearTimer();
+
+    this.score = this.questions.filter((q, index) => {
+      const answerId = this.answers[index]?.answerId;
+      const selectedAnswer = q.Answers.find(a => a.AId === answerId);
+      return selectedAnswer?.IsCorrect === true;
+    }).length;
+
+    this.quizFinished = true;
+    this.showReview = false;
+  }
+
+  getSelectedAnswerText(question: QuizPreviewQuestion): string {
+    const index = this.questions.indexOf(question);
+    const answerId = this.answers[index]?.answerId;
+
+    const answer = question.Answers.find(a => a.AId === answerId);
+
+    return answer?.Answer || 'Δεν απαντήθηκε';
+  }
+
+  getCorrectAnswerText(question: QuizPreviewQuestion): string {
+    const answer = question.Answers.find(a => a.IsCorrect);
+    return answer?.Answer || '-';
+  }
+  getTheoryDetails(question: QuizPreviewQuestion): string {
+    return (question as any).Details || '';
+  }
+
+  shouldShowDetails(question: QuizPreviewQuestion): boolean {
+    return !this.isQuestionCorrect(question) &&
+      this.getTheoryDetails(question).trim() !== '';
+  }
+  isQuestionCorrect(question: QuizPreviewQuestion): boolean {
+    const index = this.questions.indexOf(question);
+    const answerId = this.answers[index]?.answerId;
+
+    const answer = question.Answers.find(a => a.AId === answerId);
+
+    return answer?.IsCorrect === true;
+  }
+  GoBack() {
+    this.location.back();
   }
 }
