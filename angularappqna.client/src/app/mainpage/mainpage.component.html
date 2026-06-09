@@ -161,9 +161,26 @@
         </div>
       </div>
 
-      <div *ngIf="activeSection === 'ranking'">
+      <div *ngIf="activeSection === 'ranking'" class="ranking-section">
+
         <h1>Κατάταξη</h1>
-        <p>Εδώ θα εμφανίζεται η κατάταξη των χρηστών.</p>
+        <p>Αποτελέσματα χρηστών με βάση το quiz.</p>
+
+        <div class="ranking-table">
+
+          <div class="ranking-row ranking-head">
+            <span>Θέση</span>
+            <span>Nickname</span>
+            <span>Σωστές</span>
+            <span>Σύνολο</span>
+            <span>Χρόνος</span>
+            <span>Ποσοστό</span>
+          </div>
+
+        
+
+        </div>
+
       </div>
 
       <div *ngIf="activeSection === 'settings'">

@@ -21,6 +21,7 @@ namespace AngularAppQnA.Server.Data
 
         public DbSet<Thematologia_Answers> Thematologia_Answers { get; set; }
 
+        public DbSet<Quiz_Result> Quiz_Results { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

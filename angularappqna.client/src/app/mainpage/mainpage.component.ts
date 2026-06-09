@@ -5,8 +5,7 @@ import { QuillModule } from 'ngx-quill';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
 import { Router } from '@angular/router';
-import { Thematologia } from '../interfaces/models';
-
+import { Ranking, Thematologia } from '../interfaces/models';
 @Component({
   selector: 'app-mainpage',
   standalone: true,
@@ -42,6 +41,9 @@ export class MainpageComponent {
 
   topics: any[] = [];
 
+  rankings: Ranking[] = [];
+  rankingLoading = false;
+
   showUserPreviewModal = false;
 
   quillModules = {
@@ -55,17 +57,18 @@ export class MainpageComponent {
       ['clean']
     ]
   };
+ 
 
   ngOnInit() {
     const data = localStorage.getItem('currentUser');
 
-    console.log('CURRENT USER:', this.user);
-
-   
-
     if (data) {
       this.user = JSON.parse(data);
-      this.isAdmin = this.user.roleId === 99;
+      console.log('CURRENT USER:', this.user);
+
+      this.isAdmin =
+        this.user.roleId === 99 ||
+        this.user.RoleId === 99;
     }
 
     this.loadThematologies();
@@ -157,6 +160,8 @@ export class MainpageComponent {
 
   setSection(section: string) {
     this.activeSection = section;
+
+    
   }
 
   openEditPage(topic: any) {
@@ -193,6 +198,21 @@ export class MainpageComponent {
     ]);
     this.notificationService.success('Το QUIZ ξεκίνησε')
   }
+
+  formatTime(seconds: number): string {
+    if (!seconds) {
+      return '00:00';
+    }
+
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds
+      .toString()
+      .padStart(2, '0')}`;
+  }
+
+  
  
   getStoreName(storeId: number): string {
 

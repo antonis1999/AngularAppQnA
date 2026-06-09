@@ -95,3 +95,10 @@ export interface QuizPreviewQuestion {
   Question: string;
   Answers: QuizPreviewAnswer[];
 }
+export interface Ranking {
+  Nickname: string;
+  CorrectAnswers: number;
+  TotalQuestions: number;
+  Percentage: number;
+  TotalSeconds: number;
+}

@@ -553,5 +553,63 @@ namespace AngularAppQnA.Server.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        [HttpPost("SaveQuizResult")]
+        public async Task<ActionResult> SaveQuizResult(
+            [FromBody] SaveQuizResultRequest request)
+        {
+            try
+            {
+                var result = new Quiz_Result
+                {
+                    ThematologiaId = request.ThematologiaId,
+                    UserEmail = request.UserEmail,
+                    Nickname = request.Nickname,
+                    TotalQuestions = request.TotalQuestions,
+                    CorrectAnswers = request.CorrectAnswers,
+                    WrongAnswers = request.WrongAnswers,
+                    TotalTimeSeconds = request.TotalTimeSeconds,
+                    AnswersJson = request.AnswersJson,
+                    CreateDate = DateTime.Now
+                };
+
+                _context.Quiz_Results.Add(result);
+
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        [HttpGet("GetRanking")]
+        public async Task<ActionResult<List<RankingDto>>> GetRanking()
+        {
+            var ranking = await _context.Quiz_Results
+                .Select(x => new RankingDto
+                {
+                    Nickname = x.Nickname,
+
+                    CorrectAnswers = x.CorrectAnswers,
+
+                    TotalQuestions = x.TotalQuestions,
+
+                    Percentage = x.TotalQuestions == 0
+                        ? 0
+                        : Math.Round(
+                            (decimal)x.CorrectAnswers * 100 / x.TotalQuestions,
+                            2
+                        ),
+
+                    TotalSeconds = x.TotalTimeSeconds
+                })
+                .OrderByDescending(x => x.CorrectAnswers)
+                .ThenByDescending(x => x.Percentage)
+                .ThenBy(x => x.TotalSeconds)
+                .ToListAsync();
+
+            return Ok(ranking);
+        }
     }
 }

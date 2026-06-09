@@ -27,6 +27,11 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   details?: string;
   score = 0;
   quizFinished = false;
+  quizStartTime = 0;
+
+  questionStartTime = 0;
+
+  questionTimes: number[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -35,10 +40,15 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+
+    this.quizStartTime = Date.now();
+
     this.thematologiaId = Number(
       this.route.snapshot.paramMap.get('id')
     );
+
     this.loadQuestions();
+
     this.startTimer();
   }
 
@@ -47,19 +57,26 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   }
 
   startTimer() {
+
+    this.questionStartTime = Date.now();
+
     this.clearTimer();
 
     this.timeLeft = 15;
 
     this.timer = setInterval(() => {
+
       this.timeLeft--;
 
       if (this.timeLeft <= 0) {
+
         this.timeLeft = 0;
+
         this.clearTimer();
 
         this.selectedAnswerId = null;
       }
+
     }, 1000);
   }
 
@@ -109,6 +126,14 @@ export class QuizPageComponent implements OnInit, OnDestroy {
 
     const currentQuestion = this.questions[this.currentQuestionIndex];
 
+    const secondsSpent =
+      Math.round(
+        (Date.now() - this.questionStartTime) / 1000
+      );
+
+    this.questionTimes[this.currentQuestionIndex] =
+      secondsSpent;
+
     if (currentQuestion) {
       this.answers[this.currentQuestionIndex] = {
         questionId: currentQuestion.QId,
@@ -124,6 +149,41 @@ export class QuizPageComponent implements OnInit, OnDestroy {
     } else {
       this.showReview = true;
     }
+  }
+  getCurrentUserEmail(): string {
+    const data = localStorage.getItem('currentUser');
+
+    if (!data) {
+      return '';
+    }
+
+    const user = JSON.parse(data);
+
+    return user.email || user.Email || '';
+  }
+  getTotalQuizTimeSeconds(): number {
+
+    return Math.round(
+      (Date.now() - this.quizStartTime) / 1000
+    );
+
+  }
+  getCorrectAnswersCount(): number {
+
+    return this.questions.filter((q, index) => {
+
+      const answerId =
+        this.answers[index]?.answerId;
+
+      const selectedAnswer =
+        q.Answers.find(
+          a => a.AId === answerId
+        );
+
+      return selectedAnswer?.IsCorrect === true;
+
+    }).length;
+
   }
   get currentQuestion() {
     return this.questions[this.currentQuestionIndex];
@@ -155,10 +215,72 @@ export class QuizPageComponent implements OnInit, OnDestroy {
       return selectedAnswer?.IsCorrect === true;
     }).length;
 
-    this.quizFinished = true;
-    this.showReview = false;
-  }
+    const totalQuestions = this.questions.length;
+    const correctAnswers = this.score;
+    const wrongAnswers = totalQuestions - correctAnswers;
 
+    const totalTimeSeconds = Math.round(
+      (Date.now() - this.quizStartTime) / 1000
+    );
+
+    const answersDetails = this.questions.map((q, index) => {
+      const selectedAId = this.answers[index]?.answerId ?? null;
+
+      const selectedAnswer = q.Answers.find(a => a.AId === selectedAId);
+      const correctAnswer = q.Answers.find(a => a.IsCorrect);
+
+      return {
+        DetId: q.DetId,
+        QId: q.QId,
+        Question: q.Question,
+
+        SelectedAId: selectedAId,
+        SelectedAnswer: selectedAnswer?.Answer || 'Δεν απαντήθηκε',
+
+        CorrectAId: correctAnswer?.AId ?? null,
+        CorrectAnswer: correctAnswer?.Answer || '',
+
+        IsCorrect: selectedAnswer?.IsCorrect === true
+      };
+    });
+
+    const body = {
+      ThematologiaId: this.thematologiaId,
+      UserEmail: this.getCurrentUserEmail(),
+      Nickname: this.getCurrentUserNickname(),
+
+      TotalQuestions: totalQuestions,
+      CorrectAnswers: correctAnswers,
+      WrongAnswers: wrongAnswers,
+      TotalTimeSeconds: totalTimeSeconds,
+
+      AnswersJson: JSON.stringify(answersDetails)
+    };
+
+    this.http.post('api/Service/SaveQuizResult', body)
+      .subscribe({
+        next: () => {
+          this.quizFinished = true;
+          this.showReview = false;
+        },
+        error: (err) => {
+          console.error(err);
+          this.quizFinished = true;
+          this.showReview = false;
+        }
+      });
+  }
+  getCurrentUserNickname(): string {
+    const data = localStorage.getItem('currentUser');
+
+    if (!data) {
+      return 'Χρήστης';
+    }
+
+    const user = JSON.parse(data);
+
+    return user.nickname || user.Nickname || 'Χρήστης';
+  }
   getSelectedAnswerText(question: QuizPreviewQuestion): string {
     const index = this.questions.indexOf(question);
     const answerId = this.answers[index]?.answerId;
