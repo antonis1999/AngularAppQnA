@@ -101,4 +101,5 @@ export interface Ranking {
   TotalQuestions: number;
   Percentage: number;
   TotalSeconds: number;
+  CreateDate: string;
 }

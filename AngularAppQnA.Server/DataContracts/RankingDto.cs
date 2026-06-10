@@ -9,4 +9,5 @@
     public decimal Percentage { get; set; }
 
     public int TotalSeconds { get; set; }
+    public DateTime CreateDate { get; set; }
 }

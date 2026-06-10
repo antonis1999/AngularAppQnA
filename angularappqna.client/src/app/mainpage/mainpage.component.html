@@ -18,13 +18,6 @@
         Log Out
       </button>
     </div>
-
-    <button *ngIf="isAdmin"
-            class="preview-btn"
-            (click)="openUserPreviewModal()">
-      User Preview
-    </button>
-
   </div>
 
   <div class="main-panel">
@@ -160,29 +153,97 @@
 
         </div>
       </div>
-
       <div *ngIf="activeSection === 'ranking'" class="ranking-section">
 
         <h1>Κατάταξη</h1>
         <p>Αποτελέσματα χρηστών με βάση το quiz.</p>
 
-        <div class="ranking-table">
+        <div class="ranking-filters">
+          <select class="ranking-select"
+                  [(ngModel)]="selectedRankingThematologiaId"
+                  (change)="loadRanking()">
 
-          <div class="ranking-row ranking-head">
-            <span>Θέση</span>
-            <span>Nickname</span>
-            <span>Σωστές</span>
-            <span>Σύνολο</span>
-            <span>Χρόνος</span>
-            <span>Ποσοστό</span>
+            <option [ngValue]="0">Επιλέξτε θεματολογία</option>
+
+            <option *ngFor="let t of thematologies"
+                    [ngValue]="t.Id">
+              {{ t.Title }}
+            </option>
+          </select>
+        </div>
+
+        <div *ngIf="!selectedRankingThematologiaId" class="ranking-empty">
+          Επιλέξτε quiz για να δείτε την κατάταξη.
+        </div>
+
+        <div *ngIf="selectedRankingThematologiaId">
+
+          <div class="ranking-filters">
+
+            <label class="ranking-checkbox">
+              <input type="checkbox"
+                     [(ngModel)]="showOnlyBestPerUser">
+              Μόνο καλύτερη επίδοση ανά χρήστη
+            </label>
+
+            <input type="text"
+                   class="ranking-input"
+                   [(ngModel)]="rankingSearch"
+                   placeholder="Αναζήτηση με nickname...">
+
+            <input type="date"
+                   class="ranking-input"
+                   [(ngModel)]="rankingDate">
+
+            <button *ngIf="showOnlyBestPerUser || rankingSearch || rankingDate"
+                    class="ranking-clear-btn"
+                    type="button"
+                    (click)="clearRankingFilters()">
+              Καθαρισμός
+            </button>
+
           </div>
 
-        
+          <div *ngIf="rankingLoading" class="ranking-empty">
+            Φόρτωση κατάταξης...
+          </div>
+
+          <div class="ranking-table"
+               *ngIf="!rankingLoading && filteredRankings.length > 0">
+
+            <div class="ranking-row ranking-head">
+              <span>Θέση</span>
+              <span>Nickname</span>
+              <span>Σωστές</span>
+              <span>Σύνολο</span>
+              <span>Χρόνος</span>
+              <span>Ημερομηνία</span>
+              <span>Ποσοστό</span>
+            </div>
+
+            <div class="ranking-row"
+                 *ngFor="let r of filteredRankings; let i = index">
+
+              <span>{{ i + 1 }}</span>
+              <span>{{ r.Nickname || 'Χρήστης' }}</span>
+              <span>{{ r.CorrectAnswers }}</span>
+              <span>{{ r.TotalQuestions }}</span>
+              <span>{{ formatTime(r.TotalSeconds) }}</span>
+              <span>{{ formatDate(r.CreateDate) }}</span>
+              <span>{{ r.Percentage }}%</span>
+
+            </div>
+
+          </div>
+
+          <div *ngIf="!rankingLoading && filteredRankings.length === 0"
+               class="ranking-empty">
+            Δεν βρέθηκαν αποτελέσματα.
+          </div>
 
         </div>
 
       </div>
-
       <div *ngIf="activeSection === 'settings'">
         <h1>Ρυθμίσεις</h1>
         <p>Εδώ θα μπουν οι ρυθμίσεις λογαριασμού.</p>
@@ -191,5 +252,4 @@
     </div>
 
   </div>
-
 </div>

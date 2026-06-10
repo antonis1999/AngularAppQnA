@@ -196,16 +196,6 @@ export class QuizPageComponent implements OnInit, OnDestroy {
 
     return ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
   }
-  backToQuiz() {
-    this.showReview = false;
-    this.currentQuestionIndex = this.questions.length - 1;
-
-    const savedAnswer = this.answers[this.currentQuestionIndex];
-    this.selectedAnswerId = savedAnswer?.answerId ?? null;
-
-    this.startTimer();
-  }
-
   submitAnswers() {
     this.clearTimer();
 

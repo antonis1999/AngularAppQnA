@@ -35,6 +35,7 @@ export class MainpageComponent {
   thematologies: Thematologia[] = [];
 
   selectedQuizThematologiaId = 0;
+  selectedRankingThematologiaId = 0;
 
   openedPreviewThematologiaId: number | null = null;
   previewTheories: any[] = [];
@@ -43,8 +44,9 @@ export class MainpageComponent {
 
   rankings: Ranking[] = [];
   rankingLoading = false;
-
-  showUserPreviewModal = false;
+  rankingSearch = '';
+  rankingDate = '';
+  showOnlyBestPerUser = false;
 
   quillModules = {
     toolbar: [
@@ -127,14 +129,6 @@ export class MainpageComponent {
       });
   }
 
-  openUserPreviewModal() {
-    this.showUserPreviewModal = true;
-  }
-
-  closeUserPreviewModal() {
-    this.showUserPreviewModal = false;
-  }
-
   togglePreviewThematologia(topic: any) {
     const id = topic.id ?? topic.Id;
 
@@ -161,7 +155,10 @@ export class MainpageComponent {
   setSection(section: string) {
     this.activeSection = section;
 
-    
+    if (section === 'ranking') {
+      this.loadRanking();
+    }
+
   }
 
   openEditPage(topic: any) {
@@ -212,8 +209,102 @@ export class MainpageComponent {
       .padStart(2, '0')}`;
   }
 
-  
- 
+  formatDate(date: string): string {
+
+    if (!date) {
+      return '';
+    }
+
+    return new Date(date).toLocaleString('el-GR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+  }
+
+  loadRanking() {
+    if (!this.selectedRankingThematologiaId) {
+      this.rankings = [];
+      return;
+    }
+
+    this.rankingLoading = true;
+
+    this.http.get<Ranking[]>(
+      `api/Service/GetRanking/${this.selectedRankingThematologiaId}`
+    )
+      .subscribe({
+        next: (res) => {
+          this.rankings = res;
+          this.rankingLoading = false;
+        },
+        error: (err) => {
+          console.error(err);
+          this.rankingLoading = false;
+          this.notificationService.error('Σφάλμα φόρτωσης κατάταξης');
+        }
+      });
+  }
+  get filteredRankings(): Ranking[] {
+    let result = [...this.rankings];
+
+    if (this.rankingSearch.trim()) {
+      const search = this.rankingSearch.toLowerCase().trim();
+
+      result = result.filter(x =>
+        x.Nickname.toLowerCase().includes(search)
+      );
+    }
+
+    if (this.rankingDate) {
+      result = result.filter(x =>
+        x.CreateDate?.substring(0, 10) === this.rankingDate
+      );
+    }
+
+    if (this.showOnlyBestPerUser) {
+      const bestMap = new Map<string, Ranking>();
+
+      result.forEach(item => {
+        const key = item.Nickname || 'Χρήστης';
+        const existing = bestMap.get(key);
+
+        if (
+          !existing ||
+          item.CorrectAnswers > existing.CorrectAnswers ||
+          (
+            item.CorrectAnswers === existing.CorrectAnswers &&
+            item.Percentage > existing.Percentage
+          ) ||
+          (
+            item.CorrectAnswers === existing.CorrectAnswers &&
+            item.Percentage === existing.Percentage &&
+            item.TotalSeconds < existing.TotalSeconds
+          )
+        ) {
+          bestMap.set(key, item);
+        }
+      });
+
+      result = Array.from(bestMap.values());
+    }
+
+    return result.sort((a, b) =>
+      b.CorrectAnswers - a.CorrectAnswers ||
+      b.Percentage - a.Percentage ||
+      a.TotalSeconds - b.TotalSeconds
+    );
+  }
+  clearRankingFilters(): void {
+
+    this.showOnlyBestPerUser = false;
+    this.rankingSearch = '';
+    this.rankingDate = '';
+
+  }
   getStoreName(storeId: number): string {
 
     switch (storeId) {

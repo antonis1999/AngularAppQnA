@@ -583,29 +583,23 @@ namespace AngularAppQnA.Server.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        [HttpGet("GetRanking")]
-        public async Task<ActionResult<List<RankingDto>>> GetRanking()
+        [HttpGet("GetRanking/{thematologiaId}")]
+        public async Task<ActionResult<List<RankingDto>>> GetRanking(int thematologiaId)
         {
             var ranking = await _context.Quiz_Results
+                .Where(x => x.ThematologiaId == thematologiaId)
                 .Select(x => new RankingDto
                 {
                     Nickname = x.Nickname,
-
                     CorrectAnswers = x.CorrectAnswers,
-
                     TotalQuestions = x.TotalQuestions,
-
                     Percentage = x.TotalQuestions == 0
                         ? 0
-                        : Math.Round(
-                            (decimal)x.CorrectAnswers * 100 / x.TotalQuestions,
-                            2
-                        ),
-
-                    TotalSeconds = x.TotalTimeSeconds
+                        : Math.Round((decimal)x.CorrectAnswers * 100 / x.TotalQuestions, 2),
+                    TotalSeconds = x.TotalTimeSeconds,
+                    CreateDate = x.CreateDate
                 })
                 .OrderByDescending(x => x.CorrectAnswers)
-                .ThenByDescending(x => x.Percentage)
                 .ThenBy(x => x.TotalSeconds)
                 .ToListAsync();
 

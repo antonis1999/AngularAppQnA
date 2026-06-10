@@ -23,6 +23,7 @@ public class AuthController : ControllerBase
     public async Task<LoginResponse> Login(LoginRequest request)
     {
         LoginResponse ret = new LoginResponse();
+
         if (
             string.IsNullOrWhiteSpace(request.Email) ||
             string.IsNullOrWhiteSpace(request.Pin) ||
@@ -37,104 +38,65 @@ public class AuthController : ControllerBase
 
         request.Email = request.Email.Trim().ToLower();
 
-        User userFound = await _context.Users.Where(x => x.Email == request.Email).FirstOrDefaultAsync();
+        User? userFound = await _context.Users
+            .FirstOrDefaultAsync(x => x.Email == request.Email);
 
-        if (userFound != null)
-        {
-            string passwordHash = CreateSha256(request.Email + request.Pin);
-            if (string.IsNullOrWhiteSpace(userFound.PasswordSha256))
-            {
-                userFound.PasswordSha256 = passwordHash;
-                userFound.Nickname = request.Nickname.Trim();
-                _context.Users.Update(userFound);
-                _context.SaveChangesAsync();
-
-                ret.IsSuccess = true;
-                ret.Message = "OK login";
-                ret.User = userFound;
-                return ret;
-            }
-            else
-            {
-                if (userFound.PasswordSha256 == passwordHash)
-                {
-                    ret.IsSuccess = true;
-                    ret.Message = "OK login";
-                    ret.User = userFound;
-                    return ret;
-                }
-                else
-                {
-                    ret.IsSuccess = false;
-                    ret.Message = "Invalid password";
-                    return ret;
-                }
-            }
-        }
-        else
+        if (userFound == null)
         {
             ret.IsSuccess = false;
             ret.Message = "User not found";
             return ret;
         }
 
-        /*
-        string email = request.Email.Trim().ToLower();
+        string passwordHash = CreateSha256(request.Email + request.Pin);
 
-        string passwordHash = CreateSha256(email + request.Pin);
-
-        var user = _context.Users.FirstOrDefault(x =>
-         x.PasswordSha256 == passwordHash);
-
-        if (user != null)
+        if (string.IsNullOrWhiteSpace(userFound.PasswordSha256))
         {
-            returnContract.IsSuccess = true;
-            returnContract.IsNewUser = false;
-            returnContract.Message = "OK login";
-            return returnContract;
+            string nickname = request.Nickname.Trim();
+
+            bool nicknameExists = await _context.Users
+                .AnyAsync(x =>
+                    x.Nickname.ToLower() == nickname.ToLower()
+                    && x.Email != request.Email
+                );
+
+            if (nicknameExists)
+            {
+                ret.IsSuccess = false;
+                ret.Message = "Το nickname χρησιμοποιείται ήδη";
+                return ret;
+            }
+
+            userFound.PasswordSha256 = passwordHash;
+            userFound.Nickname = nickname;
+
+            _context.Users.Update(userFound);
+            await _context.SaveChangesAsync();
+
+            ret.IsSuccess = true;
+            ret.Message = "OK login";
+            ret.User = userFound;
+            return ret;
         }
 
-        string[] adminEmails =
+        if (userFound.PasswordSha256 == passwordHash)
         {
-            "admin@masoutis.gr" 
-            //passwrod:1234
-        };
+            ret.IsSuccess = true;
+            ret.Message = "OK login";
+            ret.User = userFound;
+            return ret;
+        }
 
-        int roleId =
-            adminEmails.Contains(email)
-            ? 99
-            : 1;
-
-        User newUser = new User
-        {
-            Email = email,
-            PasswordSha256 = passwordHash,
-            Nickname = request.Nickname.Trim(),
-            StoreId = request.StoreId,
-            RoleId = roleId,
-            CreatedAt = DateTime.Now
-        };
-
-        _context.Users.Add(newUser);
-
-        _context.SaveChanges();
-        */
-        return new LoginResponse
-        {
-            IsSuccess = true,
-            Message = "OK register",
-            IsNewUser = true,
-            User = new User()
-        };
-
+        ret.IsSuccess = false;
+        ret.Message = "Invalid password";
+        return ret;
     }
 
     private static string CreateSha256(string value)
     {
-        byte[] bytes =
-            SHA256.HashData(
-                Encoding.UTF8.GetBytes(value)
-            );
+        byte[] bytes = SHA256.HashData(
+            Encoding.UTF8.GetBytes(value)
+        );
 
         return Convert
             .ToHexString(bytes)
