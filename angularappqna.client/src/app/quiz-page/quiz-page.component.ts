@@ -199,21 +199,29 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   submitAnswers() {
     this.clearTimer();
 
-    this.score = this.questions.filter((q, index) => {
+    const lastQuestionTime = Math.round(
+      (Date.now() - this.questionStartTime) / 1000
+    );
+
+    if (this.questionTimes[this.currentQuestionIndex] == null) {
+      this.questionTimes[this.currentQuestionIndex] = lastQuestionTime;
+    }
+
+     this.score = this.questions.filter((q, index) => {
       const answerId = this.answers[index]?.answerId;
       const selectedAnswer = q.Answers.find(a => a.AId === answerId);
       return selectedAnswer?.IsCorrect === true;
     }).length;
 
-    const totalQuestions = this.questions.length;
-    const correctAnswers = this.score;
-    const wrongAnswers = totalQuestions - correctAnswers;
+     const totalQuestions = this.questions.length;
+     const correctAnswers = this.score;
+     const wrongAnswers = totalQuestions - correctAnswers;
 
-    const totalTimeSeconds = Math.round(
+     const totalTimeSeconds = Math.round(
       (Date.now() - this.quizStartTime) / 1000
     );
 
-    const answersDetails = this.questions.map((q, index) => {
+      const answersDetails = this.questions.map((q, index) => {
       const selectedAId = this.answers[index]?.answerId ?? null;
 
       const selectedAnswer = q.Answers.find(a => a.AId === selectedAId);
@@ -230,7 +238,9 @@ export class QuizPageComponent implements OnInit, OnDestroy {
         CorrectAId: correctAnswer?.AId ?? null,
         CorrectAnswer: correctAnswer?.Answer || '',
 
-        IsCorrect: selectedAnswer?.IsCorrect === true
+        IsCorrect: selectedAnswer?.IsCorrect === true,
+
+        TimeSeconds: this.questionTimes[index] ?? 0
       };
     });
 

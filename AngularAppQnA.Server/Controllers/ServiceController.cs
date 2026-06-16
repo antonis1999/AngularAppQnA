@@ -515,10 +515,15 @@ namespace AngularAppQnA.Server.Controllers
         {
             try
             {
+                var thematologia = await _context.Thematologia
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                int questionCount = thematologia?.QuizQuestionCount ?? 10;
+
                 var questions = await _context.Thematologia_Question
                     .Where(q => q.Id == id)
                     .OrderBy(q => Guid.NewGuid())
-                    .Take(10)
+                    .Take(questionCount)
                     .Select(q => new
                     {
                         q.Id,
@@ -586,24 +591,72 @@ namespace AngularAppQnA.Server.Controllers
         [HttpGet("GetRanking/{thematologiaId}")]
         public async Task<ActionResult<List<RankingDto>>> GetRanking(int thematologiaId)
         {
-            var ranking = await _context.Quiz_Results
-                .Where(x => x.ThematologiaId == thematologiaId)
-                .Select(x => new RankingDto
+            var ranking = await
+                (
+                from q in _context.Quiz_Results
+                join u in _context.Users
+                    on q.UserEmail equals u.Email
+                where u.RoleId != 99
+                select new RankingDto
                 {
-                    Nickname = x.Nickname,
-                    CorrectAnswers = x.CorrectAnswers,
-                    TotalQuestions = x.TotalQuestions,
-                    Percentage = x.TotalQuestions == 0
+                    Nickname = q.Nickname,
+                    CorrectAnswers = q.CorrectAnswers,
+                    TotalQuestions = q.TotalQuestions,
+                    Percentage = q.TotalQuestions == 0
                         ? 0
-                        : Math.Round((decimal)x.CorrectAnswers * 100 / x.TotalQuestions, 2),
-                    TotalSeconds = x.TotalTimeSeconds,
-                    CreateDate = x.CreateDate
-                })
-                .OrderByDescending(x => x.CorrectAnswers)
-                .ThenBy(x => x.TotalSeconds)
-                .ToListAsync();
-
+                        : Math.Round(
+                            (decimal)q.CorrectAnswers * 100 / q.TotalQuestions,
+                            2
+                        ),
+                    TotalSeconds = q.TotalTimeSeconds,
+                    CreateDate = q.CreateDate
+                }
+            )
+            .OrderByDescending(x => x.CorrectAnswers)
+            .ThenBy(x => x.TotalSeconds)
+            .ToListAsync();
             return Ok(ranking);
+        }
+        [HttpPost("UpdateQuizQuestionCount")]
+        public async Task<IActionResult> UpdateQuizQuestionCount(UpdateQuizQuestionCountRequest request)
+        {
+            if (request.QuizQuestionCount <= 0)
+            {
+                return BadRequest("Ο αριθμός ερωτήσεων πρέπει να είναι μεγαλύτερος από 0.");
+            }
+
+            var thematologia = await _context.Thematologia
+                .FirstOrDefaultAsync(x => x.Id == request.ThematologiaId);
+
+            if (thematologia == null)
+            {
+                return NotFound("Δεν βρέθηκε η θεματολογία.");
+            }
+
+            thematologia.QuizQuestionCount = request.QuizQuestionCount;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                isSuccess = true,
+                message = "Η ρύθμιση αποθηκεύτηκε."
+            });
+        }
+        [HttpGet("GetQuizQuestionsCount/{id}")]
+        public async Task<ActionResult<int>> GetQuizQuestionsCount(int id)
+        {
+            try
+            {
+                int count = await _context.Thematologia_Question
+                    .CountAsync(x => x.Id == id);
+
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

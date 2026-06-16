@@ -5,7 +5,16 @@ import { QuillModule } from 'ngx-quill';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
 import { Router } from '@angular/router';
-import { Ranking, Thematologia } from '../interfaces/models';
+import { Ranking, Thematologia, User } from '../interfaces/models';
+
+type AppUser = User & {
+  id?: number;
+  email?: string;
+  nickname?: string;
+  roleId?: number;
+  storeId?: number;
+};
+
 @Component({
   selector: 'app-mainpage',
   standalone: true,
@@ -21,17 +30,13 @@ export class MainpageComponent {
     private router: Router
   ) { }
 
-  logout() {
-    localStorage.removeItem('currentUser');
-    window.location.href = '/';
-  }
-  user: any;
-  isAdmin = false;
+  user: AppUser | null = null;
+  users: AppUser[] = [];
 
+  isAdmin = false;
   activeSection = 'theory';
 
   thematologiaTitle = '';
-
   thematologies: Thematologia[] = [];
 
   selectedQuizThematologiaId = 0;
@@ -39,7 +44,6 @@ export class MainpageComponent {
 
   openedPreviewThematologiaId: number | null = null;
   previewTheories: any[] = [];
-
   topics: any[] = [];
 
   rankings: Ranking[] = [];
@@ -47,6 +51,13 @@ export class MainpageComponent {
   rankingSearch = '';
   rankingDate = '';
   showOnlyBestPerUser = false;
+
+  showUserDetailsPopup = false;
+  selectedUserId: number | null = null;
+  userSearchText = '';
+  newPin = '';
+  confirmPin = '';
+
 
   quillModules = {
     toolbar: [
@@ -59,21 +70,40 @@ export class MainpageComponent {
       ['clean']
     ]
   };
- 
 
   ngOnInit() {
     const data = localStorage.getItem('currentUser');
 
     if (data) {
-      this.user = JSON.parse(data);
-      console.log('CURRENT USER:', this.user);
+      this.user = JSON.parse(data) as AppUser;
 
       this.isAdmin =
-        this.user.roleId === 99 ||
-        this.user.RoleId === 99;
+        this.user.RoleId === 99 ||
+        this.user.roleId === 99;
+
+      if (this.isAdmin) {
+        this.loadUsers();
+      }
     }
 
     this.loadThematologies();
+  }
+
+  logout() {
+    localStorage.removeItem('currentUser');
+    window.location.href = '/';
+  }
+
+  loadUsers() {
+    this.http.get<AppUser[]>('api/Auth/GetUsers')
+      .subscribe({
+        next: (res) => {
+          this.users = res;
+        },
+        error: (err) => {
+          console.error('Load users error:', err);
+        }
+      });
   }
 
   loadThematologies() {
@@ -101,7 +131,6 @@ export class MainpageComponent {
     }
 
     const fromDate = new Date();
-
     const toDate = new Date();
     toDate.setMonth(toDate.getMonth() + 1);
 
@@ -158,23 +187,19 @@ export class MainpageComponent {
     if (section === 'ranking') {
       this.loadRanking();
     }
-
   }
 
   openEditPage(topic: any) {
-
     if (!this.isAdmin) {
       this.togglePreviewThematologia(topic);
       return;
     }
 
     const id = topic.id ?? topic.Id;
-
     this.router.navigate(['/edit', id]);
   }
 
   get selectedQuizThematologiaTitle(): string {
-
     const selected = this.thematologies.find(
       t => t.Id === this.selectedQuizThematologiaId
     );
@@ -183,7 +208,6 @@ export class MainpageComponent {
   }
 
   startQuiz() {
-
     if (!this.selectedQuizThematologiaId) {
       this.notificationService.warning('Επέλεξε Θεματολογία');
       return;
@@ -193,7 +217,8 @@ export class MainpageComponent {
       '/quiz-page',
       this.selectedQuizThematologiaId
     ]);
-    this.notificationService.success('Το QUIZ ξεκίνησε')
+
+    this.notificationService.success('Το QUIZ ξεκίνησε');
   }
 
   formatTime(seconds: number): string {
@@ -210,7 +235,6 @@ export class MainpageComponent {
   }
 
   formatDate(date: string): string {
-
     if (!date) {
       return '';
     }
@@ -222,7 +246,6 @@ export class MainpageComponent {
       hour: '2-digit',
       minute: '2-digit'
     });
-
   }
 
   loadRanking() {
@@ -248,6 +271,7 @@ export class MainpageComponent {
         }
       });
   }
+
   get filteredRankings(): Ranking[] {
     let result = [...this.rankings];
 
@@ -298,15 +322,102 @@ export class MainpageComponent {
       a.TotalSeconds - b.TotalSeconds
     );
   }
-  clearRankingFilters(): void {
 
+  clearRankingFilters(): void {
     this.showOnlyBestPerUser = false;
     this.rankingSearch = '';
     this.rankingDate = '';
-
   }
-  getStoreName(storeId: number): string {
 
+  openUserDetailsPopup() {
+    this.showUserDetailsPopup = true;
+
+    if (this.users.length === 0) {
+      this.loadUsers();
+    }
+  }
+
+  closeUserDetailsPopup() {
+    this.showUserDetailsPopup = false;
+    this.selectedUserId = null;
+    this.userSearchText = '';
+  }
+
+  onPickerUserChange() {
+    this.userSearchText = '';
+    this.newPin = '';
+    this.confirmPin = '';
+  }
+
+  get filteredUsers(): AppUser[] {
+    if (!this.userSearchText.trim()) {
+      return [];
+    }
+
+    const search = this.userSearchText.toLowerCase().trim();
+
+    return this.users.filter(u =>
+      (u.Nickname || u.nickname || '').toLowerCase().includes(search) ||
+      (u.Email || u.email || '').toLowerCase().includes(search)
+    );
+  }
+  get selectedPopupUser(): AppUser | null {
+    if (!this.selectedUserId) {
+      return null;
+    }
+
+    return this.users.find(u =>
+      (u.Id ?? u.id) === this.selectedUserId
+    ) ?? null;
+  }
+  selectUserFromPopup(user: AppUser) {
+    this.selectedUserId = user.Id ?? user.id ?? null;
+    this.userSearchText = '';
+    this.newPin = '';
+    this.confirmPin = '';
+  }
+  changeUserPin() {
+
+    const userId = this.isAdmin
+      ? this.selectedUserId
+      : this.user?.Id;
+
+    if (!userId) {
+      this.notificationService.warning('Δεν επιλέχθηκε χρήστης.');
+      return;
+    }
+
+    if (this.newPin !== this.confirmPin) {
+      this.notificationService.warning('Τα PIN δεν ταιριάζουν.');
+      return;
+    }
+    if (this.newPin.length < 4) {
+      this.notificationService.warning(
+        'Το PIN πρέπει να αποτελείται από τουλάχιστον 4 χαρακτήρες.'
+      );
+      return;
+    }
+
+    const body = {
+      userId: userId,
+      pin: this.newPin
+    };
+
+    this.http.post('api/Auth/ChangeUserPin', body)
+      .subscribe({
+        next: () => {
+
+          this.notificationService.success('Το PIN άλλαξε επιτυχώς.');
+
+          this.newPin = '';
+          this.confirmPin = '';
+        },
+        error: () => {
+          this.notificationService.error('Σφάλμα αλλαγής PIN.');
+        }
+      });
+  }
+  getStoreName(storeId: number | undefined): string {
     switch (storeId) {
       case 1:
         return 'Κατάστημα';
@@ -321,5 +432,4 @@ export class MainpageComponent {
         return 'Άγνωστο κατάστημα';
     }
   }
-  
 }

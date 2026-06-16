@@ -244,12 +244,235 @@
         </div>
 
       </div>
-      <div *ngIf="activeSection === 'settings'">
+      <div *ngIf="activeSection === 'settings'" class="settings-section">
+
         <h1>Ρυθμίσεις</h1>
-        <p>Εδώ θα μπουν οι ρυθμίσεις λογαριασμού.</p>
+        <p>Διαχείριση ρυθμίσεων λογαριασμού.</p>
+
+        <div *ngIf="isAdmin" class="settings-card admin-settings-card">
+
+          <div class="settings-card-text">
+            <h3>Διαχείριση χρηστών</h3>
+            <p>
+              Αναζήτηση και προβολή λεπτομερειών χρήστη.
+            </p>
+          </div>
+
+          <button type="button"
+                  class="settings-action-btn"
+                  (click)="openUserDetailsPopup()">
+            Εμφάνιση λεπτομερειών χρήστη
+          </button>
+
+        </div>
+        <div *ngIf="!isAdmin && user" class="selected-user-card user-own-settings-card">
+
+          <h3>Στοιχεία λογαριασμού</h3>
+
+          <div class="user-detail-row">
+            <span>Nickname</span>
+            <strong>{{ user.Nickname || user.nickname }}</strong>
+          </div>
+
+          <div class="user-detail-row">
+            <span>Email</span>
+            <strong>{{ user.Email || user.email }}</strong>
+          </div>
+
+          <div class="user-detail-row">
+            <span>Κατάστημα</span>
+            <strong>{{ getStoreName(user.StoreId || user.storeId) }}</strong>
+          </div>
+
+          <div class="user-detail-row">
+            <span>Ρόλος</span>
+            <strong>
+              {{ (user.RoleId || user.roleId) === 99 ? 'Admin' : 'Χρήστης' }}
+            </strong>
+          </div>
+
+          <hr class="user-divider">
+
+          <h3>Αλλαγή PIN</h3>
+
+          <div class="pin-change-area">
+
+            <div class="pin-input-group">
+              <label>Νέο PIN</label>
+
+              <input type="password"
+                  
+                     [(ngModel)]="newPin"
+                     placeholder="">
+            </div>
+
+            <div class="pin-input-group">
+              <label>Επιβεβαίωση PIN</label>
+
+              <input type="password"
+                     
+                     [(ngModel)]="confirmPin"
+                     placeholder="">
+            </div>
+
+            <button type="button"
+                    class="save-pin-btn"
+                    (click)="changeUserPin()">
+
+              Αποθήκευση PIN
+
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    
+    </div>
+    <div class="modal-backdrop"
+         *ngIf="showUserDetailsPopup">
+
+      <div class="user-details-modal">
+
+        <div class="modal-header">
+          <h2>Λεπτομέρειες χρήστη</h2>
+
+          <button type="button"
+                  class="close-btn"
+                  (click)="closeUserDetailsPopup()">
+            ×
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="user-top-row">
+            <div class="user-search-box">
+
+              <label>Αναζήτηση με nickname</label>
+
+              <input type="text"
+                     class="search-input"
+                     placeholder="Πληκτρολογήστε nickname..."
+                     [(ngModel)]="userSearchText"
+                     autocomplete="off"
+                     name="userNicknameSearch">
+
+            </div>
+
+        
+            <div class="user-picker-box">
+
+              <label>Επιλογή χρήστη</label>
+
+              <select [(ngModel)]="selectedUserId"
+                      (ngModelChange)="onPickerUserChange()"
+                      class="user-picker"
+                      name="userPicker">
+
+                <option [ngValue]="null">
+                  Επιλέξτε χρήστη
+                </option>
+
+                <option *ngFor="let u of users"
+                        [ngValue]="u.Id ?? u.id">
+
+                  {{ u.Email || u.email }}
+
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+          <div class="user-details-area">
+
+            <div class="search-results"
+                 *ngIf="filteredUsers.length > 0">
+
+              <div class="search-user-item"
+                   *ngFor="let u of filteredUsers"
+                   (click)="selectUserFromPopup(u)">
+
+                <strong>
+                  {{ u.Nickname || u.nickname }}
+                </strong>
+
+                <span>
+                  {{ u.Email || u.email }}
+                </span>
+
+              </div>
+
+            </div>
+
+            <div class="empty-results"
+                 *ngIf="userSearchText && filteredUsers.length === 0">
+
+              Δεν βρέθηκε χρήστης.
+
+            </div>
+            <div class="selected-user-card" *ngIf="selectedPopupUser">
+
+              <h3>Στοιχεία χρήστη</h3>
+
+              <div class="user-detail-row">
+                <span>Nickname</span>
+                <strong>{{ selectedPopupUser.Nickname || selectedPopupUser.nickname }}</strong>
+              </div>
+
+              <div class="user-detail-row">
+                <span>Email</span>
+                <strong>{{ selectedPopupUser.Email || selectedPopupUser.email }}</strong>
+              </div>
+
+              <div class="user-detail-row">
+                <span>Κατάστημα</span>
+                <strong>{{ getStoreName(selectedPopupUser.StoreId || selectedPopupUser.storeId) }}</strong>
+              </div>
+              <hr class="user-divider">
+
+              <h3>Αλλαγή PIN</h3>
+
+              <div class="pin-change-area">
+
+                <div class="pin-input-group">
+
+                  <label>Νέο PIN</label>
+
+                  <input type="password"
+                         [(ngModel)]="newPin"
+                         placeholder="">
+
+                </div>
+
+                <div class="pin-input-group">
+
+                  <label>Επιβεβαίωση PIN</label>
+
+                  <input type="password"                     
+                         [(ngModel)]="confirmPin"
+                         placeholder="">
+
+                </div>
+
+                <button class="save-pin-btn"
+                        (click)="changeUserPin()">
+
+                  Αποθήκευση PIN
+
+                </button>
+
+              </div>
+            </div>
+           
+          </div>
+
+        </div>
+
       </div>
 
     </div>
-
   </div>
 </div>

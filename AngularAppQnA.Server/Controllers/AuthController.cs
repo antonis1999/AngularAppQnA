@@ -1,4 +1,5 @@
 ﻿using AngularAppQnA.Server.Data;
+using AngularAppQnA.Server.DataContract;
 using AngularAppQnA.Server.DataContracts;
 using AngularAppQnA.Server.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -101,5 +102,91 @@ public class AuthController : ControllerBase
         return Convert
             .ToHexString(bytes)
             .ToLower();
+    }
+    [HttpGet("GetUsers")]
+    public IActionResult GetUsers()
+    {
+        var users = _context.Users
+            .Select(x => new
+            {
+                x.Id,
+                x.Email,
+                x.Nickname,
+                x.StoreId,
+                x.RoleId,
+                x.CreatedAt
+            })
+            .ToList();
+
+        return Ok(users);
+    }
+    [HttpPost("ChangeUserPin")]
+    public async Task<IActionResult> ChangeUserPin([FromBody] ChangeUserPinRequest request)
+    {
+        try
+        {
+            if (request.UserId <= 0)
+            {
+                return BadRequest(new
+                {
+                    IsSuccess = false,
+                    Message = "Δεν επιλέχθηκε χρήστης."
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Pin))
+            {
+                return BadRequest(new
+                {
+                    IsSuccess = false,
+                    Message = "Το PIN είναι υποχρεωτικό."
+                });
+            }
+
+            if (request.Pin.Length < 4 || !request.Pin.All(char.IsDigit))
+            {
+                return BadRequest(new
+                {
+                    IsSuccess = false,
+                    Message = "Το PIN πρέπει να έχει τουλάχιστον 4 ψηφία."
+                });
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(x => x.Id == request.UserId);
+
+            if (user == null)
+            {
+                return NotFound(new
+                {
+                    IsSuccess = false,
+                    Message = "Ο χρήστης δεν βρέθηκε."
+                });
+            }
+
+            using var sha256 = System.Security.Cryptography.SHA256.Create();
+
+            var newValue = user.Email + request.Pin;
+            var bytes = System.Text.Encoding.UTF8.GetBytes(newValue);
+            var hashBytes = sha256.ComputeHash(bytes);
+
+            user.PasswordSha256 = Convert.ToHexString(hashBytes).ToLower();
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                IsSuccess = true,
+                Message = "Το PIN άλλαξε επιτυχώς."
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                IsSuccess = false,
+                Message = ex.Message
+            });
+        }
     }
 }

@@ -32,6 +32,8 @@ export interface Thematologia {
   Title: string;
   FromDate: string;
   ToDate: string;
+  QuizQuestionCount?: number;
+  quizQuestionCount?: number;
 }
 
 export interface QuizTheory {

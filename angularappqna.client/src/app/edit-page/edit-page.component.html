@@ -163,11 +163,35 @@
             {{ theory.Header }}
 
           </div>
+          <div class="quiz-settings-card">
+            <p class="quiz-settings-info">
+              Επιλέξτε πόσες τυχαίες ερωτήσεις θα εμφανίζονται σε κάθε εκτέλεση του quiz.
+            </p>
+            <label>
+              Αριθμός ερωτήσεων Quiz
+            </label>
 
+            <div class="quiz-settings-row">
+              <div class="quiz-count-box">
+                <input type="number"
+                       min="1"
+                       [max]="totalQuizQuestions"
+                       [(ngModel)]="quizQuestionCount">
+
+                <span>/ {{ totalQuizQuestions }} διαθέσιμες</span>
+              </div>
+              <button type="button"
+                      (click)="saveQuizQuestionCount()">
+                Αποθήκευση
+              </button>
+
+            </div>
+
+          </div>
         </div>
 
         <div class="quiz-right-column">
-
+         
           <h3>Quiz Editor</h3>
 
           <div *ngIf="!selectedQuizTheory" class="empty-theory">
