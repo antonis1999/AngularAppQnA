@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
 import { Router } from '@angular/router';
 import { Ranking, Thematologia, User } from '../interfaces/models';
+import { ActivatedRoute } from '@angular/router';
 
 type AppUser = User & {
   id?: number;
@@ -25,6 +26,7 @@ type AppUser = User & {
 export class MainpageComponent {
 
   constructor(
+    private route: ActivatedRoute,
     private http: HttpClient,
     private notificationService: NotificationService,
     private router: Router
@@ -87,6 +89,19 @@ export class MainpageComponent {
     }
 
     this.loadThematologies();
+    this.route.queryParams.subscribe(params => {
+
+      if (params['section'] === 'ranking') {
+
+        this.activeSection = 'ranking';
+
+        this.selectedRankingThematologiaId =
+          Number(params['thematologiaId']);
+
+        this.loadRanking();
+      }
+
+    });
   }
 
   logout() {
@@ -270,6 +285,18 @@ export class MainpageComponent {
           this.notificationService.error('Σφάλμα φόρτωσης κατάταξης');
         }
       });
+  }
+
+  openQuizDetails(r: Ranking) {
+    if (!this.selectedRankingThematologiaId || !r.Nickname) {
+      return;
+    }
+
+    this.router.navigate([
+      '/quiz-details',
+      this.selectedRankingThematologiaId,
+      r.Nickname
+    ]);
   }
 
   get filteredRankings(): Ranking[] {

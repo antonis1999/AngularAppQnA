@@ -658,5 +658,58 @@ namespace AngularAppQnA.Server.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        [HttpGet("GetUserQuizAttempts/{thematologiaId}/{nickname}")]
+        public async Task<IActionResult> GetUserQuizAttempts(int thematologiaId, string nickname)
+        {
+            try
+            {
+                var thematologia = await _context.Thematologia
+                    .FirstOrDefaultAsync(x => x.Id == thematologiaId);
+
+                if (thematologia == null)
+                {
+                    return NotFound(new
+                    {
+                        ThematologiaTitle = "",
+                        Attempts = new List<object>()
+                    });
+                }
+
+                var attempts = await _context.Quiz_Results
+                    .Where(x =>
+                        x.ThematologiaId == thematologiaId &&
+                        x.Nickname == nickname)
+                    .OrderByDescending(x => x.CreateDate)
+                    .Select(x => new
+                    {
+                        x.Nickname,
+                        x.CorrectAnswers,
+                        x.TotalQuestions,
+                        Percentage = x.TotalQuestions == 0
+                        ? 0
+                        : Math.Round((decimal)x.CorrectAnswers * 100 / x.TotalQuestions, 2),
+
+                        x.TotalTimeSeconds,
+
+                        x.CreateDate
+                    })
+                    .ToListAsync();
+
+                return Ok(new
+                {
+                    ThematologiaTitle = thematologia.Title,
+                    Attempts = attempts
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    ThematologiaTitle = "",
+                    Attempts = new List<object>(),
+                    Message = ex.Message
+                });
+            }
+        }
     }
 }

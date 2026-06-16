@@ -105,3 +105,11 @@ export interface Ranking {
   TotalSeconds: number;
   CreateDate: string;
 }
+export interface QuizAttemptDetail {
+  Nickname: string;
+  CorrectAnswers: number;
+  TotalQuestions: number;
+  Percentage: number;
+  TotalTimeSeconds: number;
+  CreateDate: string;
+}

@@ -1,0 +1,57 @@
+<div class="page">
+
+  <div class="main-panel">
+
+    <div class="section-card quiz-details-section">
+
+      <button type="button"
+              class="ranking-clear-btn"
+              (click)="goBack()">
+        ← Πίσω
+      </button>
+
+      <h1>{{ thematologiaTitle }}</h1>
+
+      <p>
+        Αναλυτικές προσπάθειες χρήστη:
+        <strong>{{ nickname }}</strong>
+      </p>
+
+      <div class="details-table"
+           *ngIf="attempts.length > 0">
+
+        <div class="details-row details-head">
+          <span>#</span>
+          <span>Nickname</span>
+          <span>Σωστές</span>
+          <span>Σύνολο</span>
+          <span>Χρόνος</span>
+          <span>Ημερομηνία</span>
+          <span>Ποσοστό</span>
+        </div>
+
+        <div class="details-row"
+             *ngFor="let a of attempts; let i = index">
+
+          <span>{{ i + 1 }}</span>
+          <span>{{ a.Nickname }}</span>
+          <span>{{ a.CorrectAnswers }}</span>
+          <span>{{ a.TotalQuestions }}</span>
+          <span>{{ formatTime(a.TotalTimeSeconds) }}</span>
+          <span>{{ formatDate(a.CreateDate) }}</span>
+          <span>{{ a.Percentage }}%</span>
+
+        </div>
+
+      </div>
+
+      <div *ngIf="attempts.length === 0"
+           class="ranking-empty">
+        Δεν βρέθηκαν προσπάθειες για αυτόν τον χρήστη.
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

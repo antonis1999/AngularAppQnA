@@ -26,17 +26,8 @@ import {
 })
 export class EditPageComponent implements OnInit {
 
-  // =========================
-  // General State
-  // =========================
-
   thematologiaId = 0;
   adminEditTab = 'theory';
-
-  // =========================
-  // Thematologia State
-  // =========================
-
   thematologies: Thematologia[] = [];
   selectedThematologia: Thematologia | null = null;
 
@@ -46,11 +37,6 @@ export class EditPageComponent implements OnInit {
   editingThematologiaTitle = '';
   editingFromDate = '';
   editingToDate = '';
-
-  // =========================
-  // Theories State
-  // =========================
-
   selectedTheories: QuizTheory[] = [];
 
   newTheoryHeader = '';
@@ -60,11 +46,6 @@ export class EditPageComponent implements OnInit {
   editingTheoryDetId: number | null = null;
   editingTheoryHeader = '';
   editingTheoryDetails = '';
-
-  // =========================
-  // Quiz State
-  // =========================
-
   selectedQuizTheory: QuizTheory | null = null;
 
   quizQuestions: QuizQuestionView[] = [];
@@ -73,18 +54,9 @@ export class EditPageComponent implements OnInit {
   quizQuestionCount = 4;
   totalQuizQuestions = 0;
 
-  // =========================
-  // Existing Question Edit State
-  // =========================
-
   editingQuestion: ExistingQuizQuestion | null = null;
   editingQuestionText = '';
   editingQuestionAnswers: ExistingQuizAnswer[] = [];
-
-  // =========================
-  // Quill
-  // =========================
-
   quillModules = {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
@@ -103,21 +75,12 @@ export class EditPageComponent implements OnInit {
     private http: HttpClient,
     private notificationService: NotificationService
   ) { }
-
-  // =========================
-  // Lifecycle
-  // =========================
-
   ngOnInit(): void {
     this.thematologiaId = Number(this.route.snapshot.paramMap.get('id'));
 
     this.loadThematologies();
     this.loadQuizQuestionsCount();
   }
-
-  // =========================
-  // Loaders
-  // =========================
 
   loadThematologies(): void {
     this.http.get<Thematologia[]>('api/Service/GetThematologies')
@@ -174,17 +137,9 @@ export class EditPageComponent implements OnInit {
       });
   }
 
-  // =========================
-  // Tab Actions
-  // =========================
-
   setAdminEditTab(tab: string): void {
     this.adminEditTab = tab;
   }
-
-  // =========================
-  // Thematologia Actions
-  // =========================
 
   selectThematologia(item: Thematologia): void {
     this.selectedThematologia = item;
@@ -316,10 +271,6 @@ export class EditPageComponent implements OnInit {
     this.newTheoryDetails = '';
   }
 
-  // =========================
-  // Theory Actions
-  // =========================
-
   getNextDetId(): number {
     if (!this.selectedTheories || this.selectedTheories.length === 0) {
       return 1;
@@ -450,10 +401,6 @@ export class EditPageComponent implements OnInit {
     this.editingTheoryDetails = '';
   }
 
-  // =========================
-  // Quiz Settings
-  // =========================
-
   saveQuizQuestionCount(): void {
     if (this.quizQuestionCount <= 0) {
       this.notificationService.warning('Ο αριθμός ερωτήσεων πρέπει να είναι μεγαλύτερος από 0.');
@@ -483,10 +430,6 @@ export class EditPageComponent implements OnInit {
         }
       });
   }
-
-  // =========================
-  // New Quiz Questions
-  // =========================
 
   selectQuizTheory(theory: QuizTheory): void {
     this.selectedQuizTheory = theory;
@@ -596,11 +539,6 @@ export class EditPageComponent implements OnInit {
       ]
     };
   }
-
-  // =========================
-  // Existing Quiz Questions
-  // =========================
-
   editExistingQuestion(question: ExistingQuizQuestion): void {
     this.editingQuestion = question;
     this.editingQuestionText = question.Question;
@@ -717,11 +655,6 @@ export class EditPageComponent implements OnInit {
         }
       });
   }
-
-  // =========================
-  // Navigation
-  // =========================
-
   goBack(): void {
     this.router.navigate(['/mainpage']);
   }

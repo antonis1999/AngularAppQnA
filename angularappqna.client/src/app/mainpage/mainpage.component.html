@@ -222,7 +222,9 @@
             </div>
 
             <div class="ranking-row"
-                 *ngFor="let r of filteredRankings; let i = index">
+                 [class.ranking-clickable]="isAdmin"
+                 *ngFor="let r of filteredRankings; let i = index"
+                 (click)="isAdmin && openQuizDetails(r)">
 
               <span>{{ i + 1 }}</span>
               <span>{{ r.Nickname || 'Χρήστης' }}</span>

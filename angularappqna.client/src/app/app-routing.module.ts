@@ -4,6 +4,7 @@ import { HomeComponent } from './home/home.component';
 import { MainpageComponent } from './mainpage/mainpage.component';
 import { EditPageComponent } from './edit-page/edit-page.component';
 import { QuizPageComponent } from './quiz-page/quiz-page.component';
+import { QuizDetailsComponent } from './quiz-details/quiz-details.component';
 
 
 const routes: Routes = [
@@ -12,6 +13,7 @@ const routes: Routes = [
   { path: 'mainpage', component: MainpageComponent },
   { path: 'edit/:id', component: EditPageComponent },
   { path: 'quiz-page/:id', component: QuizPageComponent },
+  { path: 'quiz-details/:thematologiaId/:nickname', component: QuizDetailsComponent  },
   { path: '**', redirectTo: '' }
 ];
 
