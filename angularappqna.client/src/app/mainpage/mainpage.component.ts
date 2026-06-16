@@ -389,6 +389,8 @@ export class MainpageComponent {
     );
   }
   get selectedPopupUser(): AppUser | null {
+    console.log(this.selectedUserId ?? '-');
+
     if (!this.selectedUserId) {
       return null;
     }

@@ -78,8 +78,10 @@
           "defaultConfiguration": "development",
           "options": {
             "proxyConfig": "src/proxy.conf.js",
-            "port": 51418
-           // "ssl": false
+            "port": 51418,
+            "ssl": true,
+            "sslCert": "ssl/localhost-cert.pem",
+            "sslKey": "ssl/localhost-key.pem"
 
           }
         },

@@ -366,9 +366,9 @@
             <div class="user-picker-box">
 
               <label>Επιλογή χρήστη</label>
-
+              <!--(ngModelChange)="onPickerUserChange()"-->
               <select [(ngModel)]="selectedUserId"
-                      (ngModelChange)="onPickerUserChange()"
+                      (change)="onPickerUserChange()"
                       class="user-picker"
                       name="userPicker">
 
