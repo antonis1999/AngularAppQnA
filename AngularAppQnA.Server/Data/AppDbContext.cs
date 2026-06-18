@@ -1,4 +1,6 @@
 ﻿using AngularAppQnA.Server.Models;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace AngularAppQnA.Server.Data
@@ -23,6 +25,8 @@ namespace AngularAppQnA.Server.Data
 
         public DbSet<Quiz_Result> Quiz_Results { get; set; }
 
+        public virtual DbSet<DeleteTheoria_Result> DeleteTheoria_Results { get; set; }  
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
@@ -38,21 +42,34 @@ namespace AngularAppQnA.Server.Data
                 .HasKey(x => x.Id);
 
             modelBuilder.Entity<Thematologia>()
-        .ToTable("Thematologia")
-        .HasKey(x => x.Id);
+                .ToTable("Thematologia")
+                .HasKey(x => x.Id);
 
-    modelBuilder.Entity<Thematologia_Theoria>()
-        .ToTable("Thematologia_Theoria")
-        .HasKey(x => new { x.Id, x.DetId });
+            modelBuilder.Entity<Thematologia_Theoria>()
+                .ToTable("Thematologia_Theoria")
+                .HasKey(x => new { x.Id, x.DetId });
 
-    modelBuilder.Entity<Thematologia_Question>()
-        .ToTable("Thematologia_Question")
-        .HasKey(x => new { x.Id, x.DetId, x.QId });
+            modelBuilder.Entity<Thematologia_Question>()
+                .ToTable("Thematologia_Question")
+                .HasKey(x => new { x.Id, x.DetId, x.QId });
 
-    modelBuilder.Entity<Thematologia_Answers>()
-        .ToTable("Thematologia_answer")
-        .HasKey(x => new { x.Id, x.DetId, x.QId, x.AId });
+            modelBuilder.Entity<Thematologia_Answers>()
+                .ToTable("Thematologia_answer")
+                .HasKey(x => new { x.Id, x.DetId, x.QId, x.AId });
 
+            modelBuilder.Entity<DeleteTheoria_Result>()
+                .ToTable("DeleteTheoria_Result")
+                .HasKey(x => x.Result);
+        }
+
+        public async Task<bool> DeleteTheoriaAsync(int id,int detid)
+        {
+            var idParam = new SqlParameter("@id", id);
+            var detIdParam = new SqlParameter("@detid", detid);
+            var answer = await this.DeleteTheoria_Results
+                .FromSqlRaw("EXEC dbo.DeleteTheoria @id, @detid", idParam, detIdParam)
+                .FirstOrDefaultAsync();
+            return answer.Result;
         }
     }
 }

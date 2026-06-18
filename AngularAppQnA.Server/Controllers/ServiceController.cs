@@ -5,6 +5,11 @@ using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ganss.Excel;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using Newtonsoft.Json;
+using Org.BouncyCastle.Crypto.Signers;
+using NPOI.OpenXmlFormats.Dml.Diagram;
 
 namespace AngularAppQnA.Server.Controllers
 {
@@ -268,11 +273,22 @@ namespace AngularAppQnA.Server.Controllers
                     return ret;
                 }
 
-                _context.Thematologia_Theoria.Remove(theory);
-                await _context.SaveChangesAsync();
+                if (await _context.DeleteTheoriaAsync(id, detId))
+                {
+                    ret.IsSuccess = true;
+                    ret.Message = $"Theory with ID: {id} and DetId: {detId} deleted successfully.";
+                }
+                else
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Failed to delete theory. It may have associated questions or answers.";
+                }
 
-                ret.IsSuccess = true;
-                ret.Message = $"Theory with ID: {id} and DetId: {detId} deleted successfully.";
+                //_context.Thematologia_Theoria.Remove(theory);
+                //await _context.SaveChangesAsync();
+
+                //ret.IsSuccess = true;
+                //ret.Message = $"Theory with ID: {id} and DetId: {detId} deleted successfully.";
             }
             catch (Exception ex)
             {
@@ -809,7 +825,7 @@ namespace AngularAppQnA.Server.Controllers
             IFormFile file)
         {
             BasicResponse ret = new BasicResponse();
-
+            string log = "";
             try
             {
                 if (file == null || file.Length == 0)
@@ -844,7 +860,7 @@ namespace AngularAppQnA.Server.Controllers
                     HeaderRow = true
                 };
 
-                var rows = mapper
+                List<QuizImportRow> rows = mapper
                     .Fetch<QuizImportRow>("Quiz Template")
                     .Where(x =>
                         !string.IsNullOrWhiteSpace(x.Theory) ||
@@ -853,158 +869,271 @@ namespace AngularAppQnA.Server.Controllers
                         !string.IsNullOrWhiteSpace(x.Answers))
                     .ToList();
 
+                string aaa = JsonConvert.SerializeObject(rows);
+
+                if (rows.Count > 0)
+                {
+                    // OK
+                    List<Thematologia_Theoria> theories = await _context.Thematologia_Theoria
+                        .Where(x => x.Id == thematologiaId).ToListAsync();
+
+                    
+
+                    //List<Thematologia_Answers> answers = await _context.Thematologia_Answers.Where(x => x.Id == thematologiaId).ToListAsync();
+
+                    foreach (QuizImportRow row in rows)
+                    {
+                        int detIdNew = 1;
+                        List<Thematologia_Answers> answersToAdd = new List<Thematologia_Answers>();
+
+                        Thematologia_Theoria theoryFound = theories.Where(x => x.Header.Trim() == row.Theory.Trim()).FirstOrDefault();
+                        if (theoryFound != null)
+                        {
+                            detIdNew = theoryFound.DetId;
+                        }
+                        else
+                        {
+                            Thematologia_Theoria newRow = new Thematologia_Theoria()
+                            {
+                                Id = thematologiaId,
+                                DetId = theories.Max(x => (x.DetId + 1)),
+                                CreateDate = DateTime.Now,
+                                Username = "admin",
+                                Header = row.Theory,
+                                Details = row.TheoryDetails
+                            };
+                            _context.Thematologia_Theoria.Add(newRow);
+                            detIdNew = newRow.DetId;
+                            theoryFound = newRow;
+                        }
+                        // theoria done
+
+                        // Questions/Answers add --start
+
+                        List<Thematologia_Question> questions = await _context.Thematologia_Question
+                            .Where(x => x.Id == thematologiaId && x.DetId == detIdNew).ToListAsync();
+
+                        Thematologia_Question questionFound = questions.Where(x => x.DetId == theoryFound.DetId && x.Question == row.Question).FirstOrDefault();
+                        if (questionFound != null)
+                        {
+                            log += $"question No {rows.IndexOf(row) + 1} already exists";
+                            continue;
+                        }
+                        else
+                        {
+                            int qidNew = questions.Count > 0 ? questions.Max(x => x.QId + 1) : 1;
+                            Thematologia_Question newRow = new Thematologia_Question()
+                            {
+                                Id = thematologiaId,
+                                DetId = detIdNew,
+                                QId = qidNew,
+                                CreateDate = DateTime.Now,
+                                Username = "admin",
+                                Question = row.Question
+                            };
+                            _context.Thematologia_Question.Add(newRow);
+                            
+
+                            var aa = row.Answers.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                            if (aa.Length < (row.CorrectAnswer))
+                            {
+                                log += $"Correct answer for question No {rows.IndexOf(row) +1} is not available";
+                                continue;
+                            }
+                            else
+                            {
+                                int cc = 1;
+                                foreach (var answer in aa)
+                                {
+                                    Thematologia_Answers newAnswer = new Thematologia_Answers
+                                    {
+                                        Id = thematologiaId,
+                                        DetId = detIdNew,
+                                        QId = newRow.QId,
+                                        AId = cc,
+                                        CreateDate = DateTime.Now,
+                                        Username = "admin",
+                                        Answer = answer,
+                                        IsCorrect = row.CorrectAnswer == cc
+                                    };
+                                    answersToAdd.Add(newAnswer);
+                                    cc++;
+                                }
+                            }
+
+                        }
+                        // Questions/Answers add --end
+                        if (answersToAdd.Count > 0 )
+                            await _context.Thematologia_Answers.AddRangeAsync(answersToAdd);
+
+                        await _context.SaveChangesAsync();
+                    }
+
+
+                }
+                else
+                {
+                    ret.IsSuccess = false;
+                    ret.Message += "Δεν βρέθηκαν εγγραφές";
+                    return ret;
+                }
+
+
+
                 if (!rows.Any())
                 {
                     ret.IsSuccess = false;
-                    ret.Message = "Το Excel δεν περιέχει δεδομένα.";
+                    ret.Message += "Το Excel δεν περιέχει δεδομένα.";
                     return ret;
                 }
 
-                var errors = new List<string>();
+                //var errors = new List<string>();
 
-                for (int i = 0; i < rows.Count; i++)
-                {
-                    var row = rows[i];
-                    int excelRowNumber = i + 2;
+                //for (int i = 0; i < rows.Count; i++)
+                //{
+                //    var row = rows[i];
+                //    int excelRowNumber = i + 2;
 
-                    if (string.IsNullOrWhiteSpace(row.Theory))
-                    {
-                        errors.Add($"Γραμμή {excelRowNumber}: Λείπει η θεωρία.");
-                    }
+                //    if (string.IsNullOrWhiteSpace(row.Theory))
+                //    {
+                //        errors.Add($"Γραμμή {excelRowNumber}: Λείπει η θεωρία.");
+                //    }
 
-                    if (string.IsNullOrWhiteSpace(row.TheoryDetails))
-                    {
-                        errors.Add($"Γραμμή {excelRowNumber}: Λείπουν οι λεπτομέρειες θεωρίας.");
-                    }
+                //    if (string.IsNullOrWhiteSpace(row.TheoryDetails))
+                //    {
+                //        errors.Add($"Γραμμή {excelRowNumber}: Λείπουν οι λεπτομέρειες θεωρίας.");
+                //    }
 
-                    if (string.IsNullOrWhiteSpace(row.Question))
-                    {
-                        errors.Add($"Γραμμή {excelRowNumber}: Λείπει η ερώτηση.");
-                    }
+                //    if (string.IsNullOrWhiteSpace(row.Question))
+                //    {
+                //        errors.Add($"Γραμμή {excelRowNumber}: Λείπει η ερώτηση.");
+                //    }
 
-                    if (string.IsNullOrWhiteSpace(row.Answers))
-                    {
-                        errors.Add($"Γραμμή {excelRowNumber}: Λείπουν οι απαντήσεις.");
-                        continue;
-                    }
+                //    if (string.IsNullOrWhiteSpace(row.Answers))
+                //    {
+                //        errors.Add($"Γραμμή {excelRowNumber}: Λείπουν οι απαντήσεις.");
+                //        continue;
+                //    }
 
-                    var answers = row.Answers
-                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(x => x.Trim())
-                        .Where(x => !string.IsNullOrWhiteSpace(x))
-                        .ToList();
+                //    var answers = row.Answers
+                //        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                //        .Select(x => x.Trim())
+                //        .Where(x => !string.IsNullOrWhiteSpace(x))
+                //        .ToList();
 
-                    if (answers.Count < 2)
-                    {
-                        errors.Add($"Γραμμή {excelRowNumber}: Η ερώτηση πρέπει να έχει τουλάχιστον 2 απαντήσεις.");
-                    }
+                //    if (answers.Count < 2)
+                //    {
+                //        errors.Add($"Γραμμή {excelRowNumber}: Η ερώτηση πρέπει να έχει τουλάχιστον 2 απαντήσεις.");
+                //    }
 
-                    if (row.CorrectAnswer <= 0)
-                    {
-                        errors.Add($"Γραμμή {excelRowNumber}: Η σωστή απάντηση πρέπει να είναι αριθμός.");
-                    }
-                    else if (row.CorrectAnswer > answers.Count)
-                    {
-                        errors.Add($"Γραμμή {excelRowNumber}: Η σωστή απάντηση πρέπει να είναι από 1 έως {answers.Count}.");
-                    }
-                }
+                //    if (row.CorrectAnswer <= 0)
+                //    {
+                //        errors.Add($"Γραμμή {excelRowNumber}: Η σωστή απάντηση πρέπει να είναι αριθμός.");
+                //    }
+                //    else if (row.CorrectAnswer > answers.Count)
+                //    {
+                //        errors.Add($"Γραμμή {excelRowNumber}: Η σωστή απάντηση πρέπει να είναι από 1 έως {answers.Count}.");
+                //    }
+                //}
 
-                if (errors.Any())
-                {
-                    ret.IsSuccess = false;
-                    ret.Message = string.Join("\n", errors);
-                    return ret;
-                }
+                //if (errors.Any())
+                //{
+                //    ret.IsSuccess = false;
+                //    ret.Message += string.Join("\n", errors);
+                //    return ret;
+                //}
 
-                int nextDetId =
-                    (_context.Thematologia_Theoria
-                        .Where(x => x.Id == thematologiaId)
-                        .Max(x => (int?)x.DetId) ?? 0) + 1;
+                //int nextDetId =
+                //    (_context.Thematologia_Theoria
+                //        .Where(x => x.Id == thematologiaId)
+                //        .Max(x => (int?)x.DetId) ?? 0) + 1;
 
-                int insertedTheories = 0;
-                int insertedQuestions = 0;
-                int insertedAnswers = 0;
+                //int insertedTheories = 0;
+                //int insertedQuestions = 0;
+                //int insertedAnswers = 0;
 
-                var theoryGroups = rows.GroupBy(x => new
-                {
-                    Theory = x.Theory.Trim(),
-                    TheoryDetails = x.TheoryDetails.Trim()
-                });
+                //var theoryGroups = rows.GroupBy(x => new
+                //{
+                //    Theory = x.Theory.Trim(),
+                //    TheoryDetails = x.TheoryDetails.Trim()
+                //});
 
-                foreach (var theoryGroup in theoryGroups)
-                {
-                    int currentDetId = nextDetId;
+                //foreach (var theoryGroup in theoryGroups)
+                //{
+                //    int currentDetId = nextDetId;
 
-                    var theory = new Thematologia_Theoria
-                    {
-                        Id = thematologiaId,
-                        DetId = currentDetId,
-                        Header = theoryGroup.Key.Theory,
-                        Details = theoryGroup.Key.TheoryDetails,
-                        Username = "Admin",
-                        CreateDate = DateTime.Now
-                    };
+                //    var theory = new Thematologia_Theoria
+                //    {
+                //        Id = thematologiaId,
+                //        DetId = currentDetId,
+                //        Header = theoryGroup.Key.Theory,
+                //        Details = theoryGroup.Key.TheoryDetails,
+                //        Username = "Admin",
+                //        CreateDate = DateTime.Now
+                //    };
 
-                    _context.Thematologia_Theoria.Add(theory);
-                    insertedTheories++;
+                //    _context.Thematologia_Theoria.Add(theory);
+                //    insertedTheories++;
 
-                    int nextQId = 1;
+                //    int nextQId = 1;
 
-                    foreach (var row in theoryGroup)
-                    {
-                        var question = new Thematologia_Question
-                        {
-                            Id = thematologiaId,
-                            DetId = currentDetId,
-                            QId = nextQId,
-                            Question = row.Question.Trim(),
-                            Username = "Admin",
-                            CreateDate = DateTime.Now
-                        };
+                //    foreach (var row in theoryGroup)
+                //    {
+                //        var question = new Thematologia_Question
+                //        {
+                //            Id = thematologiaId,
+                //            DetId = currentDetId,
+                //            QId = nextQId,
+                //            Question = row.Question.Trim(),
+                //            Username = "Admin",
+                //            CreateDate = DateTime.Now
+                //        };
 
-                        _context.Thematologia_Question.Add(question);
-                        insertedQuestions++;
+                //        _context.Thematologia_Question.Add(question);
+                //        insertedQuestions++;
 
-                        var answers = row.Answers
-                            .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(x => x.Trim())
-                            .Where(x => !string.IsNullOrWhiteSpace(x))
-                            .ToList();
+                //        var answers = row.Answers
+                //            .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                //            .Select(x => x.Trim())
+                //            .Where(x => !string.IsNullOrWhiteSpace(x))
+                //            .ToList();
 
-                        int nextAId = 1;
+                //        int nextAId = 1;
 
-                        for (int i = 0; i < answers.Count; i++)
-                        {
-                            var answer = new Thematologia_Answers
-                            {
-                                Id = thematologiaId,
-                                DetId = currentDetId,
-                                QId = nextQId,
-                                AId = nextAId,
-                                Answer = answers[i],
-                                IsCorrect = (i + 1) == row.CorrectAnswer,
-                                Username = "Admin",
-                                CreateDate = DateTime.Now
-                            };
+                //        for (int i = 0; i < answers.Count; i++)
+                //        {
+                //            var answer = new Thematologia_Answers
+                //            {
+                //                Id = thematologiaId,
+                //                DetId = currentDetId,
+                //                QId = nextQId,
+                //                AId = nextAId,
+                //                Answer = answers[i],
+                //                IsCorrect = (i + 1) == row.CorrectAnswer,
+                //                Username = "Admin",
+                //                CreateDate = DateTime.Now
+                //            };
 
-                            _context.Thematologia_Answers.Add(answer);
-                            insertedAnswers++;
-                            nextAId++;
-                        }
+                //            _context.Thematologia_Answers.Add(answer);
+                //            insertedAnswers++;
+                //            nextAId++;
+                //        }
 
-                        nextQId++;
-                    }
+                //        nextQId++;
+                //    }
 
-                    nextDetId++;
-                }
+                //    nextDetId++;
+                //}
 
                 await _context.SaveChangesAsync();
                 ret.IsSuccess = true;
-                ret.Message =
-                    $"Η εισαγωγή ολοκληρώθηκε. " +
-                    $"Θεωρίες: {insertedTheories}, " +
-                    $"Ερωτήσεις: {insertedQuestions}, " +
-                    $"Απαντήσεις: {insertedAnswers}.";
+                //ret.Message =
+                //    $"Η εισαγωγή ολοκληρώθηκε. " +
+                //    $"Θεωρίες: {insertedTheories}, " +
+                //    $"Ερωτήσεις: {insertedQuestions}, " +
+                //    $"Απαντήσεις: {insertedAnswers}.";
+
+                ret.Message = string.IsNullOrEmpty(log) ? ret.Message : ret.Message += log; 
 
                 return ret;
             }
