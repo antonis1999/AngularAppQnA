@@ -818,6 +818,33 @@ quill-editor {
     grid-template-columns: 1fr;
   }
 }
+.excel-action-btn {
+  border: 1px solid #d7dde8;
+  background: #ffffff;
+  color: #243047;
+  padding: 9px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+  .excel-action-btn:hover {
+    background: #f4f7fb;
+    border-color: #b9c4d6;
+    transform: translateY(-1px);
+  }
+
+.import-btn {
+  background: #243047;
+  color: #ffffff;
+  border-color: #243047;
+}
+
+  .import-btn:hover {
+    background: #1b2436;
+  }
 
 @media (max-width: 560px) {
   .modal-tabs {
@@ -838,3 +865,4 @@ quill-editor {
     align-self: flex-end;
   }
 }
+

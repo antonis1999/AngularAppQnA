@@ -14,6 +14,24 @@
       <button [class.active]="adminEditTab === 'quiz'" (click)="setAdminEditTab('quiz')">
         Quiz
       </button>
+      <button type="button"
+              class="excel-action-btn"
+              (click)="downloadQuizExcelTemplate()">
+        Λήψη Excel Template
+      </button>
+
+      <button type="button"
+              class="excel-action-btn import-btn"
+              (click)="openQuizExcelImport()">
+        Εισαγωγή Excel
+      </button>
+
+      <input type="file"
+             #quizExcelInput
+             accept=".xlsx"
+             hidden
+             (change)="onQuizExcelSelected($event)" />
+
     </div>
 
     <div class="section-card">

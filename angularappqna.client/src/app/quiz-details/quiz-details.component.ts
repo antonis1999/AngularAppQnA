@@ -67,9 +67,6 @@ export class QuizDetailsComponent {
       `api/Service/GetUserQuizAttempts/${this.thematologiaId}/${this.nickname}`
     ).subscribe({
       next: (res: any) => {
-
-        console.log("API RESPONSE", res);
-        console.log("ATTEMPTS", res.Attempts);
         this.thematologiaTitle = res.ThematologiaTitle ?? '';
         this.attempts = res.Attempts ?? [];
 

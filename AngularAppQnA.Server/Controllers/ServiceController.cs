@@ -1,8 +1,10 @@
 ﻿using AngularAppQnA.Server.Data;
 using AngularAppQnA.Server.DataContracts;
 using AngularAppQnA.Server.Models;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Ganss.Excel;
 
 namespace AngularAppQnA.Server.Controllers
 {
@@ -709,6 +711,308 @@ namespace AngularAppQnA.Server.Controllers
                     Attempts = new List<object>(),
                     Message = ex.Message
                 });
+            }
+        }
+        [HttpGet("DownloadQuizTemplate")]
+        public IActionResult DownloadQuizTemplate()
+        {
+            using var workbook = new XLWorkbook();
+
+            var ws = workbook.Worksheets.Add("Quiz Template");
+
+            ws.Cell(1, 1).Value = "ΘΕΩΡΙΑ";
+            ws.Cell(1, 2).Value = "ΛΕΠΤΟΜΕΡΕΙΕΣ ΘΕΩΡΙΑΣ";
+            ws.Cell(1, 3).Value = "ΕΡΩΤΗΣΗ";
+            ws.Cell(1, 4).Value = "ΑΠΑΝΤΗΣΕΙΣ (Διαχωρισμός με ;)";
+            ws.Cell(1, 5).Value = "ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ(Δήλωση με αριθμό)";
+
+            var header = ws.Range(1, 1, 1, 5);
+
+            header.Style.Font.Bold = true;
+            header.Style.Font.FontSize = 12;
+            header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            header.Style.Fill.BackgroundColor = XLColor.FromHtml("#D9EAF7");
+            header.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            header.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            ws.Row(1).Height = 28;
+
+            ws.Column(1).Width = 30;
+            ws.Column(2).Width = 55;
+            ws.Column(3).Width = 45;
+            ws.Column(4).Width = 70;
+            ws.Column(5).Width = 40;
+
+            ws.Column(2).Style.Alignment.WrapText = true;
+            ws.Column(3).Style.Alignment.WrapText = true;
+            ws.Column(4).Style.Alignment.WrapText = true;
+
+            ws.SheetView.FreezeRows(1);
+
+            var guide = workbook.Worksheets.Add("Οδηγίες");
+
+            guide.Cell(1, 1).Value = "Οδηγίες Συμπλήρωσης Quiz Excel";
+            guide.Cell(1, 1).Style.Font.Bold = true;
+            guide.Cell(1, 1).Style.Font.FontSize = 16;
+
+            guide.Cell(3, 1).Value = "1. Συμπληρώνεις τα δεδομένα στο sheet 'Quiz Template'.";
+            guide.Cell(4, 1).Value = "2. Κάθε γραμμή είναι μία ερώτηση.";
+            guide.Cell(5, 1).Value = "3. Οι απαντήσεις γράφονται όλες στο ίδιο κελί και χωρίζονται με ;";
+            guide.Cell(6, 1).Value = "4. Η σωστή απάντηση δηλώνεται με αριθμό. Π.χ. 1 σημαίνει η πρώτη απάντηση.";
+            guide.Cell(7, 1).Value = "5. Η θεματολογία δεν γράφεται στο Excel. Επιλέγεται από την εφαρμογή.";
+
+            guide.Cell(9, 1).Value = "Παράδειγμα:";
+            guide.Cell(9, 1).Style.Font.Bold = true;
+
+            guide.Cell(11, 1).Value = "ΘΕΩΡΙΑ";
+            guide.Cell(11, 2).Value = "ΛΕΠΤΟΜΕΡΕΙΕΣ ΘΕΩΡΙΑΣ";
+            guide.Cell(11, 3).Value = "ΕΡΩΤΗΣΗ";
+            guide.Cell(11, 4).Value = "ΑΠΑΝΤΗΣΕΙΣ (Διαχωρισμός με ;)";
+            guide.Cell(11, 5).Value = "ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ(Δήλωση με αριθμό)";
+
+            guide.Cell(12, 1).Value = "Πρόληψη";
+            guide.Cell(12, 2).Value = "Οι έξοδοι κινδύνου και οι διάδρομοι διαφυγής πρέπει να είναι πάντα ελεύθεροι.";
+            guide.Cell(12, 3).Value = "Ποιος είναι ο βασικός στόχος της πρόληψης στον χώρο εργασίας;";
+            guide.Cell(12, 4).Value = "Η αποφυγή ατυχημάτων;Η ταχύτερη ολοκλήρωση των εργασιών;Η μείωση των διαλειμμάτων";
+            guide.Cell(12, 5).Value = "1";
+
+            var guideHeader = guide.Range(11, 1, 11, 5);
+            guideHeader.Style.Font.Bold = true;
+            guideHeader.Style.Fill.BackgroundColor = XLColor.FromHtml("#D9EAF7");
+            guideHeader.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            guideHeader.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            guideHeader.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            var exampleRow = guide.Range(12, 1, 12, 5);
+            exampleRow.Style.Font.Italic = true;
+            exampleRow.Style.Font.FontColor = XLColor.Gray;
+            exampleRow.Style.Fill.BackgroundColor = XLColor.FromHtml("#F7F9FC");
+
+            guide.Columns().AdjustToContents();
+            guide.Column(2).Width = 60;
+            guide.Column(3).Width = 55;
+            guide.Column(4).Width = 75;
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            return File(
+                stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "QuizTemplate.xlsx"
+            );
+        }
+        [HttpPost("ImportQuizExcel/{thematologiaId}")]
+        public async Task<BasicResponse> ImportQuizExcel(
+            int thematologiaId,
+            IFormFile file)
+        {
+            BasicResponse ret = new BasicResponse();
+
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Δεν επιλέχθηκε αρχείο.";
+                    return ret;
+                }
+
+                if (!Path.GetExtension(file.FileName)
+                    .Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Το αρχείο πρέπει να είναι .xlsx.";
+                    return ret;
+                }
+
+                var thematologiaExists = await _context.Thematologia
+                    .AnyAsync(x => x.Id == thematologiaId);
+
+                if (!thematologiaExists)
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Δεν βρέθηκε η θεματολογία.";
+                    return ret;
+                }
+
+                using var stream = file.OpenReadStream();
+
+                var mapper = new ExcelMapper(stream)
+                {
+                    HeaderRow = true
+                };
+
+                var rows = mapper
+                    .Fetch<QuizImportRow>("Quiz Template")
+                    .Where(x =>
+                        !string.IsNullOrWhiteSpace(x.Theory) ||
+                        !string.IsNullOrWhiteSpace(x.TheoryDetails) ||
+                        !string.IsNullOrWhiteSpace(x.Question) ||
+                        !string.IsNullOrWhiteSpace(x.Answers))
+                    .ToList();
+
+                if (!rows.Any())
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Το Excel δεν περιέχει δεδομένα.";
+                    return ret;
+                }
+
+                var errors = new List<string>();
+
+                for (int i = 0; i < rows.Count; i++)
+                {
+                    var row = rows[i];
+                    int excelRowNumber = i + 2;
+
+                    if (string.IsNullOrWhiteSpace(row.Theory))
+                    {
+                        errors.Add($"Γραμμή {excelRowNumber}: Λείπει η θεωρία.");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(row.TheoryDetails))
+                    {
+                        errors.Add($"Γραμμή {excelRowNumber}: Λείπουν οι λεπτομέρειες θεωρίας.");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(row.Question))
+                    {
+                        errors.Add($"Γραμμή {excelRowNumber}: Λείπει η ερώτηση.");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(row.Answers))
+                    {
+                        errors.Add($"Γραμμή {excelRowNumber}: Λείπουν οι απαντήσεις.");
+                        continue;
+                    }
+
+                    var answers = row.Answers
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Trim())
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .ToList();
+
+                    if (answers.Count < 2)
+                    {
+                        errors.Add($"Γραμμή {excelRowNumber}: Η ερώτηση πρέπει να έχει τουλάχιστον 2 απαντήσεις.");
+                    }
+
+                    if (row.CorrectAnswer <= 0)
+                    {
+                        errors.Add($"Γραμμή {excelRowNumber}: Η σωστή απάντηση πρέπει να είναι αριθμός.");
+                    }
+                    else if (row.CorrectAnswer > answers.Count)
+                    {
+                        errors.Add($"Γραμμή {excelRowNumber}: Η σωστή απάντηση πρέπει να είναι από 1 έως {answers.Count}.");
+                    }
+                }
+
+                if (errors.Any())
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = string.Join("\n", errors);
+                    return ret;
+                }
+
+                int nextDetId =
+                    (_context.Thematologia_Theoria
+                        .Where(x => x.Id == thematologiaId)
+                        .Max(x => (int?)x.DetId) ?? 0) + 1;
+
+                int insertedTheories = 0;
+                int insertedQuestions = 0;
+                int insertedAnswers = 0;
+
+                var theoryGroups = rows.GroupBy(x => new
+                {
+                    Theory = x.Theory.Trim(),
+                    TheoryDetails = x.TheoryDetails.Trim()
+                });
+
+                foreach (var theoryGroup in theoryGroups)
+                {
+                    int currentDetId = nextDetId;
+
+                    var theory = new Thematologia_Theoria
+                    {
+                        Id = thematologiaId,
+                        DetId = currentDetId,
+                        Header = theoryGroup.Key.Theory,
+                        Details = theoryGroup.Key.TheoryDetails,
+                        Username = "Admin",
+                        CreateDate = DateTime.Now
+                    };
+
+                    _context.Thematologia_Theoria.Add(theory);
+                    insertedTheories++;
+
+                    int nextQId = 1;
+
+                    foreach (var row in theoryGroup)
+                    {
+                        var question = new Thematologia_Question
+                        {
+                            Id = thematologiaId,
+                            DetId = currentDetId,
+                            QId = nextQId,
+                            Question = row.Question.Trim(),
+                            Username = "Admin",
+                            CreateDate = DateTime.Now
+                        };
+
+                        _context.Thematologia_Question.Add(question);
+                        insertedQuestions++;
+
+                        var answers = row.Answers
+                            .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(x => x.Trim())
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .ToList();
+
+                        int nextAId = 1;
+
+                        for (int i = 0; i < answers.Count; i++)
+                        {
+                            var answer = new Thematologia_Answers
+                            {
+                                Id = thematologiaId,
+                                DetId = currentDetId,
+                                QId = nextQId,
+                                AId = nextAId,
+                                Answer = answers[i],
+                                IsCorrect = (i + 1) == row.CorrectAnswer,
+                                Username = "Admin",
+                                CreateDate = DateTime.Now
+                            };
+
+                            _context.Thematologia_Answers.Add(answer);
+                            insertedAnswers++;
+                            nextAId++;
+                        }
+
+                        nextQId++;
+                    }
+
+                    nextDetId++;
+                }
+
+                await _context.SaveChangesAsync();
+                ret.IsSuccess = true;
+                ret.Message =
+                    $"Η εισαγωγή ολοκληρώθηκε. " +
+                    $"Θεωρίες: {insertedTheories}, " +
+                    $"Ερωτήσεις: {insertedQuestions}, " +
+                    $"Απαντήσεις: {insertedAnswers}.";
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                ret.IsSuccess = false;
+                ret.Message = ex.InnerException?.Message ?? ex.Message;
+                return ret;
             }
         }
     }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -68,7 +68,8 @@ export class EditPageComponent implements OnInit {
       ['clean']
     ]
   };
-
+  @ViewChild('quizExcelInput')
+  quizExcelInput!: ElementRef<HTMLInputElement>;
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -654,6 +655,98 @@ export class EditPageComponent implements OnInit {
           this.notificationService.error('Σφάλμα διαγραφής ερώτησης');
         }
       });
+  }
+  downloadQuizExcelTemplate(): void {
+
+    this.http.get(
+      'api/Service/DownloadQuizTemplate',
+      {
+        responseType: 'blob'
+      }
+    ).subscribe({
+
+      next: (blob) => {
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'QuizTemplate.xlsx';
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        document.body.removeChild(a);
+
+        window.URL.revokeObjectURL(url);
+      },
+
+      error: (err) => {
+
+        console.error(err);
+
+        this.notificationService.error(
+          'Αποτυχία λήψης προτύπου Excel'
+        );
+
+      }
+
+    });
+
+  }
+
+  openQuizExcelImport(): void {
+
+    this.quizExcelInput.nativeElement.click();
+
+  }
+
+  onQuizExcelSelected(event: Event): void {
+
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      this.notificationService.warning('Επίλεξε αρχείο Excel (.xlsx)');
+      input.value = '';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.http.post<ApiResponse>(
+      `api/Service/ImportQuizExcel/${this.thematologiaId}`,
+      formData
+    ).subscribe({
+      next: (res) => {
+        if (res.IsSuccess) {
+          this.notificationService.success(res.Message || 'Το Excel εισήχθη επιτυχώς');
+
+          this.loadThematologies();
+          this.loadQuizQuestionsCount();
+
+          if (this.selectedQuizTheory) {
+            this.loadExistingQuestions(this.selectedQuizTheory);
+          }
+        } else {
+          this.notificationService.warning(res.Message || 'Το Excel δεν εισήχθη');
+        }
+
+        input.value = '';
+      },
+      error: (err) => {
+        console.error('Import quiz excel error:', err);
+        this.notificationService.error('Σφάλμα εισαγωγής Excel');
+        input.value = '';
+      }
+    });
   }
   goBack(): void {
     this.router.navigate(['/mainpage']);
