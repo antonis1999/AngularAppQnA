@@ -206,6 +206,32 @@
             </div>
 
           </div>
+          <div class="quiz-settings-card difficulty-settings-card">
+
+            <small>
+              Επιλέξτε τη συνολική δυσκολία που θα έχει κάθε εκτέλεση του quiz.
+            </small>
+
+            <label>
+              Βαθμός δυσκολίας Quiz
+            </label>
+
+            <select class="quiz-difficulty-select"
+                    [(ngModel)]="quizDifficultyPercent">
+
+              <option [ngValue]="1">Εύκολο</option>
+              <option [ngValue]="2">Μεσαίο</option>
+              <option [ngValue]="3">Δύσκολο</option>
+
+            </select>
+
+            <button type="button"
+                    class="new-save"
+                    (click)="saveQuizDifficulty()">
+              Αποθήκευση
+            </button>
+
+          </div>
         </div>
 
         <div class="quiz-right-column">
@@ -287,7 +313,13 @@
                     <textarea [(ngModel)]="editingQuestionText"
                               placeholder="Γράψτε την ερώτηση...">
                     </textarea>
+                    <label>Βαθμός δυσκολίας</label>
 
+                    <select [(ngModel)]="editingQuestionDifficulty">
+                      <option [ngValue]="1">Εύκολη</option>
+                      <option [ngValue]="2">Μεσαία</option>
+                      <option [ngValue]="3">Δύσκολη</option>
+                    </select>
                     <div class="answers-header">
                       Απαντήσεις
                     </div>
@@ -349,6 +381,14 @@
                 <textarea [(ngModel)]="q.question"
                           placeholder="Γράψτε την ερώτηση...">
                 </textarea>
+
+                <label>Βαθμός δυσκολίας</label>
+
+                <select [(ngModel)]="q.Difficulty">
+                  <option [ngValue]="1">Εύκολη</option>
+                  <option [ngValue]="2">Μεσαία</option>
+                  <option [ngValue]="3">Δύσκολη</option>
+                </select>
 
                 <button type="button"
                         class="delete-small-btn"

@@ -311,17 +311,18 @@ namespace AngularAppQnA.Server.Controllers
                         DetId = q.DetId,
                         QId = q.QId,
                         Question = q.Question,
+                        Difficulty = q.Difficulty,
                         Username = q.Username,
                         CreateDate = q.CreateDate,
 
                         Answers = _context.Thematologia_Answers
                         .Where(a => a.Id == q.Id && a.DetId == q.DetId && a.QId == q.QId)
                         .Select(a => new
-                        { 
+                        {
                             AId = a.AId,
                             Answer = a.Answer,
-                            IsCorrect = a.IsCorrect                         
-                        })                       
+                            IsCorrect = a.IsCorrect
+                        })
                         .ToList()
                     })
                     .ToListAsync();
@@ -365,6 +366,7 @@ namespace AngularAppQnA.Server.Controllers
                         DetId = request.TheoriaDetId,
                         QId = nextQId,
                         Question = q.QuestionText,
+                        Difficulty = q.Difficulty <= 0 ? 1 : q.Difficulty,
                         Username = "admin",
                         CreateDate = DateTime.Now
                     };
@@ -438,6 +440,7 @@ namespace AngularAppQnA.Server.Controllers
                 }
 
                 question.Question = request.Question;
+                question.Difficulty = request.Difficulty <= 0 ? 1 : request.Difficulty;
 
                 var oldAnswers = await _context.Thematologia_Answers
                     .Where(a =>
@@ -536,18 +539,72 @@ namespace AngularAppQnA.Server.Controllers
                 var thematologia = await _context.Thematologia
                     .FirstOrDefaultAsync(x => x.Id == id);
 
-                int questionCount = thematologia?.QuizQuestionCount ?? 10;
+                if (thematologia == null)
+                {
+                    return NotFound(new
+                    {
+                        IsSuccess = false,
+                        Message = "Δεν βρέθηκε η θεματολογία."
+                    });
+                }
 
-                var questions = await _context.Thematologia_Question
-                    .Where(q => q.Id == id)
+                int questionCount = thematologia.QuizQuestionCount;
+                int quizDifficulty = thematologia.QuizDifficultyPercent;
+                int easyCount;
+                int mediumCount;
+                int hardCount;
+
+                if (quizDifficulty == 1)
+                {
+                    easyCount = (int)Math.Round(questionCount * 0.70);
+                    mediumCount = (int)Math.Round(questionCount * 0.20);
+                    hardCount = questionCount - easyCount - mediumCount;
+                }
+                else if (quizDifficulty == 3)
+                {
+                    easyCount = (int)Math.Round(questionCount * 0.10);
+                    mediumCount = (int)Math.Round(questionCount * 0.20);
+                    hardCount = questionCount - easyCount - mediumCount;
+                }
+                else
+                {
+                    easyCount = (int)Math.Round(questionCount * 0.20);
+                    mediumCount = (int)Math.Round(questionCount * 0.60);
+                    hardCount = questionCount - easyCount - mediumCount;
+                }
+
+                var easyQuestions = await _context.Thematologia_Question
+                    .Where(q => q.Id == id && q.Difficulty == 1)
                     .OrderBy(q => Guid.NewGuid())
-                    .Take(questionCount)
+                    .Take(easyCount)
+                    .ToListAsync();
+
+                var mediumQuestions = await _context.Thematologia_Question
+                    .Where(q => q.Id == id && q.Difficulty == 2)
+                    .OrderBy(q => Guid.NewGuid())
+                    .Take(mediumCount)
+                    .ToListAsync();
+
+                var hardQuestions = await _context.Thematologia_Question
+                    .Where(q => q.Id == id && q.Difficulty == 3)
+                    .OrderBy(q => Guid.NewGuid())
+                    .Take(hardCount)
+                    .ToListAsync();
+
+                var selectedQuestions = easyQuestions
+                    .Concat(mediumQuestions)
+                    .Concat(hardQuestions)
+                    .OrderBy(q => Guid.NewGuid())
+                    .ToList();
+
+                var questions = selectedQuestions
                     .Select(q => new
                     {
                         q.Id,
                         q.DetId,
                         q.QId,
                         q.Question,
+                        q.Difficulty,
 
                         Details = _context.Thematologia_Theoria
                             .Where(t => t.Id == q.Id && t.DetId == q.DetId)
@@ -567,13 +624,17 @@ namespace AngularAppQnA.Server.Controllers
                             })
                             .ToList()
                     })
-                    .ToListAsync();
+                    .ToList();
 
                 return Ok(questions);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
             }
         }
         [HttpPost("SaveQuizResult")]
@@ -609,31 +670,22 @@ namespace AngularAppQnA.Server.Controllers
         [HttpGet("GetRanking/{thematologiaId}")]
         public async Task<ActionResult<List<RankingDto>>> GetRanking(int thematologiaId)
         {
-            var ranking = await
-                (
-                from q in _context.Quiz_Results
-                join u in _context.Users
-                    on q.UserEmail equals u.Email
-                where u.RoleId != 99
-                select new RankingDto
+            try
+            {
+                var ranking = await _context.QuizRankingDto
+                    .FromSqlInterpolated($"EXEC GetQuizRanking {thematologiaId}")
+                    .ToListAsync();
+
+                return Ok(ranking);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
                 {
-                    Nickname = q.Nickname,
-                    CorrectAnswers = q.CorrectAnswers,
-                    TotalQuestions = q.TotalQuestions,
-                    Percentage = q.TotalQuestions == 0
-                        ? 0
-                        : Math.Round(
-                            (decimal)q.CorrectAnswers * 100 / q.TotalQuestions,
-                            2
-                        ),
-                    TotalSeconds = q.TotalTimeSeconds,
-                    CreateDate = q.CreateDate
-                }
-            )
-            .OrderByDescending(x => x.CorrectAnswers)
-            .ThenBy(x => x.TotalSeconds)
-            .ToListAsync();
-            return Ok(ranking);
+                    Message = ex.Message,
+                    InnerMessage = ex.InnerException?.Message
+                });
+            }
         }
         [HttpPost("UpdateQuizQuestionCount")]
         public async Task<IActionResult> UpdateQuizQuestionCount(UpdateQuizQuestionCountRequest request)
@@ -741,8 +793,9 @@ namespace AngularAppQnA.Server.Controllers
             ws.Cell(1, 3).Value = "ΕΡΩΤΗΣΗ";
             ws.Cell(1, 4).Value = "ΑΠΑΝΤΗΣΕΙΣ (Διαχωρισμός με ;)";
             ws.Cell(1, 5).Value = "ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ(Δήλωση με αριθμό)";
+            ws.Cell(1, 6).Value = "ΒΑΘΜΟΣ ΔΥΣΚΟΛΙΑΣ";
 
-            var header = ws.Range(1, 1, 1, 5);
+            var header = ws.Range(1, 1, 1, 6);
 
             header.Style.Font.Bold = true;
             header.Style.Font.FontSize = 12;
@@ -759,7 +812,7 @@ namespace AngularAppQnA.Server.Controllers
             ws.Column(3).Width = 45;
             ws.Column(4).Width = 70;
             ws.Column(5).Width = 40;
-
+            ws.Column(6).Width = 25;
             ws.Column(2).Style.Alignment.WrapText = true;
             ws.Column(3).Style.Alignment.WrapText = true;
             ws.Column(4).Style.Alignment.WrapText = true;
@@ -786,14 +839,15 @@ namespace AngularAppQnA.Server.Controllers
             guide.Cell(11, 3).Value = "ΕΡΩΤΗΣΗ";
             guide.Cell(11, 4).Value = "ΑΠΑΝΤΗΣΕΙΣ (Διαχωρισμός με ;)";
             guide.Cell(11, 5).Value = "ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ(Δήλωση με αριθμό)";
-
+            guide.Cell(11, 6).Value = "ΒΑΘΜΟΣ ΔΥΣΚΟΛΙΑΣ";
             guide.Cell(12, 1).Value = "Πρόληψη";
             guide.Cell(12, 2).Value = "Οι έξοδοι κινδύνου και οι διάδρομοι διαφυγής πρέπει να είναι πάντα ελεύθεροι.";
             guide.Cell(12, 3).Value = "Ποιος είναι ο βασικός στόχος της πρόληψης στον χώρο εργασίας;";
             guide.Cell(12, 4).Value = "Η αποφυγή ατυχημάτων;Η ταχύτερη ολοκλήρωση των εργασιών;Η μείωση των διαλειμμάτων";
             guide.Cell(12, 5).Value = "1";
+            guide.Cell(12, 6).Value = "1";
 
-            var guideHeader = guide.Range(11, 1, 11, 5);
+            var guideHeader = guide.Range(11, 1, 11, 6);
             guideHeader.Style.Font.Bold = true;
             guideHeader.Style.Fill.BackgroundColor = XLColor.FromHtml("#D9EAF7");
             guideHeader.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
@@ -809,7 +863,7 @@ namespace AngularAppQnA.Server.Controllers
             guide.Column(2).Width = 60;
             guide.Column(3).Width = 55;
             guide.Column(4).Width = 75;
-
+            guide.Column(6).Width = 25;
             using var stream = new MemoryStream();
             workbook.SaveAs(stream);
 
@@ -860,9 +914,9 @@ namespace AngularAppQnA.Server.Controllers
                     HeaderRow = true
                 };
 
-                List<QuizImportRow> rows = mapper
-                    .Fetch<QuizImportRow>("Quiz Template")
-                    .Where(x =>
+                var rows = mapper
+                     .Fetch<QuizImportRow>()
+                     .Where(x =>
                         !string.IsNullOrWhiteSpace(x.Theory) ||
                         !string.IsNullOrWhiteSpace(x.TheoryDetails) ||
                         !string.IsNullOrWhiteSpace(x.Question) ||
@@ -877,13 +931,13 @@ namespace AngularAppQnA.Server.Controllers
                     List<Thematologia_Theoria> theories = await _context.Thematologia_Theoria
                         .Where(x => x.Id == thematologiaId).ToListAsync();
 
-                    
+
 
                     //List<Thematologia_Answers> answers = await _context.Thematologia_Answers.Where(x => x.Id == thematologiaId).ToListAsync();
 
                     foreach (QuizImportRow row in rows)
                     {
-                        int detIdNew = 1;
+                        int detIdNew;
                         List<Thematologia_Answers> answersToAdd = new List<Thematologia_Answers>();
 
                         Thematologia_Theoria theoryFound = theories.Where(x => x.Header.Trim() == row.Theory.Trim()).FirstOrDefault();
@@ -893,17 +947,21 @@ namespace AngularAppQnA.Server.Controllers
                         }
                         else
                         {
+                            detIdNew = theories.Count > 0
+                                ? theories.Max(x => x.DetId) + 1
+                                : 1;
                             Thematologia_Theoria newRow = new Thematologia_Theoria()
                             {
                                 Id = thematologiaId,
-                                DetId = theories.Max(x => (x.DetId + 1)),
+                                DetId = detIdNew,
                                 CreateDate = DateTime.Now,
                                 Username = "admin",
                                 Header = row.Theory,
                                 Details = row.TheoryDetails
                             };
                             _context.Thematologia_Theoria.Add(newRow);
-                            detIdNew = newRow.DetId;
+                            theories.Add(newRow);
+
                             theoryFound = newRow;
                         }
                         // theoria done
@@ -929,15 +987,19 @@ namespace AngularAppQnA.Server.Controllers
                                 QId = qidNew,
                                 CreateDate = DateTime.Now,
                                 Username = "admin",
-                                Question = row.Question
+                                Question = row.Question,
+                                Difficulty =                                       
+                                row.Difficulty is >= 1 and <= 3
+                                ? row.Difficulty.Value                                
+                                : 2
                             };
                             _context.Thematologia_Question.Add(newRow);
-                            
+
 
                             var aa = row.Answers.Split(';', StringSplitOptions.RemoveEmptyEntries);
                             if (aa.Length < (row.CorrectAnswer))
                             {
-                                log += $"Correct answer for question No {rows.IndexOf(row) +1} is not available";
+                                log += $"Correct answer for question No {rows.IndexOf(row) + 1} is not available";
                                 continue;
                             }
                             else
@@ -963,7 +1025,7 @@ namespace AngularAppQnA.Server.Controllers
 
                         }
                         // Questions/Answers add --end
-                        if (answersToAdd.Count > 0 )
+                        if (answersToAdd.Count > 0)
                             await _context.Thematologia_Answers.AddRangeAsync(answersToAdd);
 
                         await _context.SaveChangesAsync();
@@ -1133,7 +1195,7 @@ namespace AngularAppQnA.Server.Controllers
                 //    $"Ερωτήσεις: {insertedQuestions}, " +
                 //    $"Απαντήσεις: {insertedAnswers}.";
 
-                ret.Message = string.IsNullOrEmpty(log) ? ret.Message : ret.Message += log; 
+                ret.Message = string.IsNullOrEmpty(log) ? ret.Message : ret.Message += log;
 
                 return ret;
             }
@@ -1143,6 +1205,21 @@ namespace AngularAppQnA.Server.Controllers
                 ret.Message = ex.InnerException?.Message ?? ex.Message;
                 return ret;
             }
+        }
+        [HttpPost("UpdateQuizDifficulty")]
+        public async Task<IActionResult> UpdateQuizDifficulty([FromBody] UpdateQuizDifficultyRequest request)
+        {
+            var thematologia = await _context.Thematologia
+                .FirstOrDefaultAsync(x => x.Id == request.ThematologiaId);
+
+            if (thematologia == null)
+                return NotFound(new { IsSuccess = false, Message = "Δεν βρέθηκε η θεματολογία." });
+
+            thematologia.QuizDifficultyPercent = request.QuizDifficultyPercent;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { IsSuccess = true, Message = "Η δυσκολία quiz αποθηκεύτηκε." });
         }
     }
 }

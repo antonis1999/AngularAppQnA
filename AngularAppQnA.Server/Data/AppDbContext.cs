@@ -25,7 +25,10 @@ namespace AngularAppQnA.Server.Data
 
         public DbSet<Quiz_Result> Quiz_Results { get; set; }
 
-        public virtual DbSet<DeleteTheoria_Result> DeleteTheoria_Results { get; set; }  
+        public virtual DbSet<DeleteTheoria_Result> DeleteTheoria_Results { get; set; }
+        public virtual DbSet<RankingDto> QuizRankingDto { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,9 +63,12 @@ namespace AngularAppQnA.Server.Data
             modelBuilder.Entity<DeleteTheoria_Result>()
                 .ToTable("DeleteTheoria_Result")
                 .HasKey(x => x.Result);
+
+            modelBuilder.Entity<RankingDto>()
+                .HasNoKey();
         }
 
-        public async Task<bool> DeleteTheoriaAsync(int id,int detid)
+        public async Task<bool> DeleteTheoriaAsync(int id, int detid)
         {
             var idParam = new SqlParameter("@id", id);
             var detIdParam = new SqlParameter("@detid", detid);

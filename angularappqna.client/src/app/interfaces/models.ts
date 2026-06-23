@@ -34,6 +34,8 @@ export interface Thematologia {
   ToDate: string;
   QuizQuestionCount?: number;
   quizQuestionCount?: number;
+  QuizDifficultyPercent?: number;
+  quizDifficultyPercent?: number;
 }
 
 export interface QuizTheory {
@@ -54,6 +56,7 @@ export interface QuizQuestionView {
   QId?: number;
   question: string;
   options: QuizOption[];
+  Difficulty: number;
 }
 
 export interface ExistingQuizAnswer {
@@ -69,6 +72,7 @@ export interface ExistingQuizQuestion {
   Question: string;
   Username: string;
   CreateDate: string;
+  Difficulty: number;
   Answers: ExistingQuizAnswer[];
 }
 
@@ -82,6 +86,7 @@ export interface UpdateQuizQuestionRequest {
   DetId: number;
   QId: number;
   Question: string;
+  Difficulty: number;
   Answers: UpdateQuizAnswerRequest[];
 }
 export interface QuizPreviewAnswer {

@@ -53,10 +53,11 @@ export class EditPageComponent implements OnInit {
 
   quizQuestionCount = 4;
   totalQuizQuestions = 0;
-
+  editingQuestionDifficulty = 1;
   editingQuestion: ExistingQuizQuestion | null = null;
   editingQuestionText = '';
   editingQuestionAnswers: ExistingQuizAnswer[] = [];
+  quizDifficultyPercent = 2;
   quillModules = {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
@@ -98,7 +99,10 @@ export class EditPageComponent implements OnInit {
               this.selectedThematologia.QuizQuestionCount ||
               this.selectedThematologia.quizQuestionCount ||
               4;
-
+            this.quizDifficultyPercent =
+              this.selectedThematologia.QuizDifficultyPercent ||
+              this.selectedThematologia.quizDifficultyPercent ||
+              2;
             this.selectThematologia(this.selectedThematologia);
           }
         },
@@ -195,7 +199,10 @@ export class EditPageComponent implements OnInit {
 
   startEditThematologia(item: Thematologia): void {
     if (this.editingThematologiaId === item.Id) {
-      this.resetThematologiaEdit();
+      this.editingThematologiaId = null;
+      this.editingThematologiaTitle = '';
+      this.editingFromDate = '';
+      this.editingToDate = '';
       return;
     }
 
@@ -475,6 +482,7 @@ export class EditPageComponent implements OnInit {
       .filter(q => q.question?.trim().length > 0)
       .map(q => ({
         questionText: q.question.trim(),
+        difficulty: q.Difficulty,
         answers: q.options
           .filter(a => a.answer?.trim().length > 0)
           .map(a => ({
@@ -533,6 +541,7 @@ export class EditPageComponent implements OnInit {
   private createEmptyQuizQuestion(): QuizQuestionView {
     return {
       question: '',
+      Difficulty: 1,
       options: [
         { answer: '', is_correct: false },
         { answer: '', is_correct: false },
@@ -543,7 +552,7 @@ export class EditPageComponent implements OnInit {
   editExistingQuestion(question: ExistingQuizQuestion): void {
     this.editingQuestion = question;
     this.editingQuestionText = question.Question;
-
+    this.editingQuestionDifficulty = question.Difficulty ?? 1;
     this.editingQuestionAnswers = question.Answers.map(a => ({
       AId: a.AId,
       Answer: a.Answer,
@@ -555,6 +564,7 @@ export class EditPageComponent implements OnInit {
     this.editingQuestion = null;
     this.editingQuestionText = '';
     this.editingQuestionAnswers = [];
+    this.editingQuestionDifficulty = 1;
   }
 
   addExistingAnswer(): void {
@@ -605,12 +615,12 @@ export class EditPageComponent implements OnInit {
       this.notificationService.warning('Επέλεξε έγκυρη σωστή απάντηση');
       return;
     }
-
     const body: UpdateQuizQuestionRequest = {
       Id: this.editingQuestion.Id,
       DetId: this.editingQuestion.DetId,
       QId: this.editingQuestion.QId,
       Question: this.editingQuestionText.trim(),
+      Difficulty: this.editingQuestionDifficulty,
       Answers: validAnswers
     };
 
@@ -747,6 +757,49 @@ export class EditPageComponent implements OnInit {
         input.value = '';
       }
     });
+  }
+  saveQuizDifficulty(): void {
+
+    if (this.totalQuizQuestions < 10) {
+      this.notificationService.warning(
+        'Απαιτούνται τουλάχιστον 10 ερωτήσεις για χρήση βαθμού δυσκολίας.'
+      );
+      return;
+    }
+
+    if (![1, 2, 3].includes(Number(this.quizDifficultyPercent))) {
+      this.notificationService.warning('Επίλεξε έγκυρη δυσκολία quiz.');
+      return;
+    }
+
+    const body = {
+      ThematologiaId: this.thematologiaId,
+      QuizDifficultyPercent: Number(this.quizDifficultyPercent)
+    };
+
+    this.http.post<ApiResponse>(
+      'api/Service/UpdateQuizDifficulty',
+      body
+    )
+      .subscribe({
+        next: (res) => {
+          if (res.IsSuccess) {
+            this.notificationService.success(
+              'Η δυσκολία quiz αποθηκεύτηκε.'
+            );
+          } else {
+            this.notificationService.warning(
+              res.Message || 'Κάτι πήγε λάθος.'
+            );
+          }
+        },
+        error: (err) => {
+          console.error('Save quiz difficulty error:', err);
+          this.notificationService.error(
+            'Σφάλμα αποθήκευσης δυσκολίας quiz.'
+          );
+        }
+      });
   }
   goBack(): void {
     this.router.navigate(['/mainpage']);

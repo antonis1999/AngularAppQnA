@@ -7,6 +7,7 @@
         public int QId { get; set; }
         public string Question { get; set; }
         public string? Username { get; set; }
+        public int? Difficulty { get; set; }
         public DateTime CreateDate { get; set; } = DateTime.Now;
     }
 }

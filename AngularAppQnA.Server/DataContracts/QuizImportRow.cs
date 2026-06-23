@@ -13,6 +13,9 @@ namespace AngularAppQnA.Server.DataContracts
         [Column("ΕΡΩΤΗΣΗ")]
         public string Question { get; set; } = "";
 
+        [Column("ΒΑΘΜΟΣ ΔΥΣΚΟΛΙΑΣ")]
+        public int? Difficulty { get; set; }
+
         [Column("ΑΠΑΝΤΗΣΕΙΣ (Διαχωρισμός με ;)")]
         public string Answers { get; set; } = "";
 

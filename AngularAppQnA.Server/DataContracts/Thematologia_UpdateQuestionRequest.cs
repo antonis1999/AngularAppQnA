@@ -7,7 +7,7 @@
         public int QId { get; set; }
 
         public string Question { get; set; } = "";
-
+        public int Difficulty { get; set; } = 1;
         public List<Thematologia_UpdateAnswerRequest> Answers { get; set; }
             = new();
     }

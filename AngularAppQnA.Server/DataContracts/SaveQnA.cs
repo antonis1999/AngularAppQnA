@@ -10,6 +10,7 @@
     {
         public string QuestionText { get; set; } = "";
         public List<SaveQnAAnswer> Answers { get; set; } = new();
+        public int Difficulty { get; set; } = 1;
     }
     public class SaveQnAAnswer
     {
