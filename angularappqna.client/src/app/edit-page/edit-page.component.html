@@ -198,11 +198,6 @@
 
                 <span>/ {{ totalQuizQuestions }} διαθέσιμες</span>
               </div>
-              <button type="button"
-                      (click)="saveQuizQuestionCount()">
-                Αποθήκευση
-              </button>
-
             </div>
 
           </div>
@@ -212,30 +207,49 @@
               Επιλέξτε τη συνολική δυσκολία που θα έχει κάθε εκτέλεση του quiz.
             </small>
 
-            <label>
-              Βαθμός δυσκολίας Quiz
-            </label>
+            <div class="difficulty-mode-switch">
 
-            <select class="quiz-difficulty-select"
-                    [(ngModel)]="quizDifficultyPercent">
+              <button type="button"
+                      [class.active]="!useQuizDifficulty"
+                      (click)="useQuizDifficulty = false">
+                Τυχαίος Βαθμός
+              </button>
 
-              <option [ngValue]="1">Εύκολο</option>
-              <option [ngValue]="2">Μεσαίο</option>
-              <option [ngValue]="3">Δύσκολο</option>
+              <button type="button"
+                      [class.active]="useQuizDifficulty"
+                      (click)="useQuizDifficulty = true">
+                Βαθμός Δυσκολίας
+              </button>
 
-            </select>
+            </div>
 
+            <div *ngIf="useQuizDifficulty">
+
+              <select class="quiz-difficulty-select"
+                      [(ngModel)]="quizDifficultyPercent">
+
+                <option [ngValue]="1">Εύκολο</option>
+                <option [ngValue]="2">Μεσαίο</option>
+                <option [ngValue]="3">Δύσκολο</option>
+
+              </select>
+
+            </div>
             <button type="button"
                     class="new-save"
-                    (click)="saveQuizDifficulty()">
-              Αποθήκευση
+                    (click)="saveQuizSettings()">
+              Αποθήκευση ρυθμίσεων Quiz
             </button>
-
           </div>
+          <button type="button"
+                  class="suggestions-btn"
+                  (click)="openQuizSuggestions()">
+            Προτεινόμενα Quiz
+          </button>
         </div>
 
         <div class="quiz-right-column">
-         
+
           <h3>Quiz Editor</h3>
 
           <div *ngIf="!selectedQuizTheory" class="empty-theory">
@@ -317,7 +331,7 @@
 
                     <select [(ngModel)]="editingQuestionDifficulty">
                       <option [ngValue]="1">Εύκολη</option>
-                      <option [ngValue]="2">Μεσαία</option>
+                      
                       <option [ngValue]="3">Δύσκολη</option>
                     </select>
                     <div class="answers-header">
@@ -386,7 +400,7 @@
 
                 <select [(ngModel)]="q.Difficulty">
                   <option [ngValue]="1">Εύκολη</option>
-                  <option [ngValue]="2">Μεσαία</option>
+                 
                   <option [ngValue]="3">Δύσκολη</option>
                 </select>
 
@@ -442,6 +456,71 @@
       </div>
 
     </div>
+    <div class="suggestions-overlay" *ngIf="showQuizSuggestionsPopup">
 
+      <div class="suggestions-popup">
+
+        <div class="suggestions-header">
+          <h3>Προτεινόμενα Quiz</h3>
+
+          <button type="button"
+                  class="suggestions-close"
+                  (click)="closeQuizSuggestions()">
+            ✕
+          </button>
+        </div>
+
+        <div class="suggestion-card"
+             *ngFor="let s of quizSuggestions; let i = index">
+
+          <div class="suggestion-main-line">
+
+            <div>
+              <h4>
+                Προτεινόμενο Quiz {{ i + 1 }}
+              </h4>
+
+              <p>
+                {{ s.DifficultyName || s.difficultyName }}
+                με {{ s.QuestionCount || s.questionCount }} ερωτήσεις
+              </p>
+            </div>
+
+            <div class="suggestion-actions">
+
+              <button type="button"
+                      class="suggestion-choose-btn"
+                      (click)="applyQuizSuggestion(s)">
+                Επιλογή
+              </button>
+
+              <button type="button"
+                      class="suggestion-show-btn"
+                      (click)="toggleSuggestionQuestions(i)">
+                Εμφάνιση ερωτήσεων
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="suggestion-questions"
+               *ngIf="expandedSuggestionIndex === i">
+
+            <div class="suggestion-question"
+                 *ngFor="let q of (s.Questions || s.questions); let qi = index">
+
+              <strong>{{ qi + 1 }}.</strong>
+              {{ q.Question || q.question }}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
   </div>
 </div>

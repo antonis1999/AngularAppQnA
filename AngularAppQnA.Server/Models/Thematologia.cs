@@ -13,5 +13,6 @@ namespace AngularAppQnA.Server.Models
         public DateTime? ToDate { get; set; }
         public int QuizQuestionCount { get; set; }
         public int QuizDifficultyPercent { get; set; }
+        public bool UseQuizDifficulty { get; set; }
     }
 }

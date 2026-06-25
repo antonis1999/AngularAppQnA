@@ -550,27 +550,60 @@ namespace AngularAppQnA.Server.Controllers
 
                 int questionCount = thematologia.QuizQuestionCount;
                 int quizDifficulty = thematologia.QuizDifficultyPercent;
+
                 int easyCount;
-                int mediumCount;
                 int hardCount;
+
+                if (!thematologia.UseQuizDifficulty)
+                {
+                    var randomQuestions = await _context.Thematologia_Question
+                        .Where(q => q.Id == id)
+                        .OrderBy(q => Guid.NewGuid())
+                        .Take(questionCount)
+                        .ToListAsync();
+
+                    return Ok(randomQuestions.Select(q => new
+                    {
+                        q.Id,
+                        q.DetId,
+                        q.QId,
+                        q.Question,
+                        q.Difficulty,
+
+                        Details = _context.Thematologia_Theoria
+                            .Where(t => t.Id == q.Id && t.DetId == q.DetId)
+                            .Select(t => t.Details)
+                            .FirstOrDefault(),
+
+                        Answers = _context.Thematologia_Answers
+                            .Where(a =>
+                                a.Id == q.Id &&
+                                a.DetId == q.DetId &&
+                                a.QId == q.QId)
+                            .Select(a => new
+                            {
+                                a.AId,
+                                a.Answer,
+                                a.IsCorrect
+                            })
+                            .ToList()
+                    }).ToList());
+                }
 
                 if (quizDifficulty == 1)
                 {
-                    easyCount = (int)Math.Round(questionCount * 0.70);
-                    mediumCount = (int)Math.Round(questionCount * 0.20);
-                    hardCount = questionCount - easyCount - mediumCount;
+                    easyCount = (int)Math.Floor(questionCount * 0.80);
+                    hardCount = questionCount - easyCount;
                 }
                 else if (quizDifficulty == 3)
                 {
-                    easyCount = (int)Math.Round(questionCount * 0.10);
-                    mediumCount = (int)Math.Round(questionCount * 0.20);
-                    hardCount = questionCount - easyCount - mediumCount;
+                    easyCount = (int)Math.Floor(questionCount * 0.20);
+                    hardCount = questionCount - easyCount;
                 }
                 else
                 {
-                    easyCount = (int)Math.Round(questionCount * 0.20);
-                    mediumCount = (int)Math.Round(questionCount * 0.60);
-                    hardCount = questionCount - easyCount - mediumCount;
+                    easyCount = (int)Math.Floor(questionCount * 0.50);
+                    hardCount = questionCount - easyCount;
                 }
 
                 var easyQuestions = await _context.Thematologia_Question
@@ -579,20 +612,13 @@ namespace AngularAppQnA.Server.Controllers
                     .Take(easyCount)
                     .ToListAsync();
 
-                var mediumQuestions = await _context.Thematologia_Question
-                    .Where(q => q.Id == id && q.Difficulty == 2)
-                    .OrderBy(q => Guid.NewGuid())
-                    .Take(mediumCount)
-                    .ToListAsync();
-
                 var hardQuestions = await _context.Thematologia_Question
-                    .Where(q => q.Id == id && q.Difficulty == 3)
+                    .Where(q => q.Id == id && q.Difficulty == 2)
                     .OrderBy(q => Guid.NewGuid())
                     .Take(hardCount)
                     .ToListAsync();
 
                 var selectedQuestions = easyQuestions
-                    .Concat(mediumQuestions)
                     .Concat(hardQuestions)
                     .OrderBy(q => Guid.NewGuid())
                     .ToList();
@@ -637,6 +663,7 @@ namespace AngularAppQnA.Server.Controllers
                 });
             }
         }
+
         [HttpPost("SaveQuizResult")]
         public async Task<ActionResult> SaveQuizResult(
             [FromBody] SaveQuizResultRequest request)
@@ -793,7 +820,7 @@ namespace AngularAppQnA.Server.Controllers
             ws.Cell(1, 3).Value = "ΕΡΩΤΗΣΗ";
             ws.Cell(1, 4).Value = "ΑΠΑΝΤΗΣΕΙΣ (Διαχωρισμός με ;)";
             ws.Cell(1, 5).Value = "ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ(Δήλωση με αριθμό)";
-            ws.Cell(1, 6).Value = "ΒΑΘΜΟΣ ΔΥΣΚΟΛΙΑΣ";
+            ws.Cell(1, 6).Value = "ΒΑΘΜΟΣ ΔΥΣΚΟΛΙΑΣ(1 ή 2)";
 
             var header = ws.Range(1, 1, 1, 6);
 
@@ -980,6 +1007,11 @@ namespace AngularAppQnA.Server.Controllers
                         else
                         {
                             int qidNew = questions.Count > 0 ? questions.Max(x => x.QId + 1) : 1;
+                            int difficulty = 1;
+                            if (row.Difficulty == 1 || row.Difficulty == 2)
+                            {
+                                difficulty = row.Difficulty.Value;
+                            }
                             Thematologia_Question newRow = new Thematologia_Question()
                             {
                                 Id = thematologiaId,
@@ -988,10 +1020,7 @@ namespace AngularAppQnA.Server.Controllers
                                 CreateDate = DateTime.Now,
                                 Username = "admin",
                                 Question = row.Question,
-                                Difficulty =                                       
-                                row.Difficulty is >= 1 and <= 3
-                                ? row.Difficulty.Value                                
-                                : 2
+                                Difficulty = difficulty
                             };
                             _context.Thematologia_Question.Add(newRow);
 
@@ -1213,13 +1242,330 @@ namespace AngularAppQnA.Server.Controllers
                 .FirstOrDefaultAsync(x => x.Id == request.ThematologiaId);
 
             if (thematologia == null)
-                return NotFound(new { IsSuccess = false, Message = "Δεν βρέθηκε η θεματολογία." });
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = "Δεν βρέθηκε η θεματολογία."
+                });
+            }
+            if (!request.UseQuizDifficulty)
+            {
+                thematologia.UseQuizDifficulty = false;
+                thematologia.QuizDifficultyPercent = 2;
 
-            thematologia.QuizDifficultyPercent = request.QuizDifficultyPercent;
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    IsSuccess = true,
+                    Message = "Το quiz θα εμφανίζει τυχαίες ερωτήσεις χωρίς βαθμό δυσκολίας."
+                });
+            }
+            int questionCount = thematologia.QuizQuestionCount;
+            int quizDifficulty = request.QuizDifficultyPercent;
+
+            int easyCount;
+            int mediumCount;
+            int hardCount;
+
+            if (quizDifficulty == 1)
+            {
+                easyCount = (int)Math.Round(questionCount * 0.70);
+                mediumCount = (int)Math.Round(questionCount * 0.20);
+                hardCount = questionCount - easyCount - mediumCount;
+            }
+            else if (quizDifficulty == 3)
+            {
+                easyCount = (int)Math.Round(questionCount * 0.10);
+                mediumCount = (int)Math.Round(questionCount * 0.20);
+                hardCount = questionCount - easyCount - mediumCount;
+            }
+            else
+            {
+                easyCount = (int)Math.Round(questionCount * 0.20);
+                mediumCount = (int)Math.Round(questionCount * 0.60);
+                hardCount = questionCount - easyCount - mediumCount;
+            }
+
+            int availableEasy = await _context.Thematologia_Question
+                .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 1);
+
+            int availableMedium = await _context.Thematologia_Question
+                .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 2);
+
+            int availableHard = await _context.Thematologia_Question
+                .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 3);
+
+            if (availableEasy < easyCount)
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = $"Δεν υπάρχουν αρκετές εύκολες ερωτήσεις. Χρειάζονται {easyCount}, υπάρχουν {availableEasy}."
+                });
+            }
+
+            if (availableMedium < mediumCount)
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = $"Δεν υπάρχουν αρκετές μεσαίες ερωτήσεις. Χρειάζονται {mediumCount}, υπάρχουν {availableMedium}."
+                });
+            }
+
+            if (availableHard < hardCount)
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = $"Δεν υπάρχουν αρκετές δύσκολες ερωτήσεις. Χρειάζονται {hardCount}, υπάρχουν {availableHard}."
+                });
+            }
+
+            thematologia.QuizDifficultyPercent = quizDifficulty;
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { IsSuccess = true, Message = "Η δυσκολία quiz αποθηκεύτηκε." });
+            return Ok(new
+            {
+                IsSuccess = true,
+                Message = "Η δυσκολία quiz αποθηκεύτηκε."
+            });
+        }
+        [HttpGet("GetQuizSuggestions/{thematologiaId}")]
+        public async Task<ActionResult> GetQuizSuggestions(int thematologiaId)
+        {
+            var allQuestions = await _context.Thematologia_Question
+                .Where(q => q.Id == thematologiaId)
+                .ToListAsync();
+
+            if (!allQuestions.Any())
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = "Δεν υπάρχουν ερωτήσεις για αυτή τη θεματολογία."
+                });
+            }
+
+            var suggestions = new List<object>();
+
+            suggestions.Add(CreateSuggestion(allQuestions, 1, "Εύκολο"));
+            suggestions.Add(CreateSuggestion(allQuestions, 2, "Μεσαίο"));
+            suggestions.Add(CreateSuggestion(allQuestions, 3, "Δύσκολο"));
+
+            return Ok(new
+            {
+                IsSuccess = true,
+                Suggestions = suggestions
+            });
+        }
+        [HttpPost("UpdateQuizSettings")]
+        public async Task<IActionResult> UpdateQuizSettings([FromBody] UpdateQuizSettingsRequest request)
+        {
+            var thematologia = await _context.Thematologia
+                .FirstOrDefaultAsync(x => x.Id == request.ThematologiaId);
+
+            if (thematologia == null)
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = "Δεν βρέθηκε η θεματολογία."
+                });
+            }
+
+            int totalQuestions = await _context.Thematologia_Question
+                .CountAsync(q => q.Id == request.ThematologiaId);
+
+            if (request.QuizQuestionCount <= 0)
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = "Ο αριθμός ερωτήσεων πρέπει να είναι μεγαλύτερος από 0."
+                });
+            }
+
+            if (request.QuizQuestionCount > totalQuestions)
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = $"Υπάρχουν μόνο {totalQuestions} διαθέσιμες ερωτήσεις."
+                });
+            }
+
+            if (!request.UseQuizDifficulty)
+            {
+                thematologia.QuizQuestionCount = request.QuizQuestionCount;
+                thematologia.UseQuizDifficulty = false;
+                thematologia.QuizDifficultyPercent = 2;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    IsSuccess = true,
+                    Message = "Οι ρυθμίσεις quiz αποθηκεύτηκαν."
+                });
+            }
+
+            int quizDifficulty = request.QuizDifficultyPercent;
+
+            if (quizDifficulty < 1 || quizDifficulty > 3)
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = "Επίλεξε έγκυρη δυσκολία quiz."
+                });
+            }
+            int easyCount;
+            int hardCount;
+
+            if (quizDifficulty == 1)
+            {
+                easyCount = (int)Math.Floor(request.QuizQuestionCount * 0.80);
+                hardCount = request.QuizQuestionCount - easyCount;
+            }
+            else if (quizDifficulty == 3)
+            {
+                easyCount = (int)Math.Floor(request.QuizQuestionCount * 0.20);
+                hardCount = request.QuizQuestionCount - easyCount;
+            }
+            else
+            {
+                easyCount = (int)Math.Floor(request.QuizQuestionCount * 0.50);
+                hardCount = request.QuizQuestionCount - easyCount;
+            }
+
+            int availableEasy = await _context.Thematologia_Question
+                .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 1);
+
+            int availableHard = await _context.Thematologia_Question
+                .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 2);
+
+            if (availableEasy < easyCount)
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = $"Δεν υπάρχουν αρκετές εύκολες ερωτήσεις. Χρειάζονται {easyCount}, υπάρχουν {availableEasy}."
+                });
+            }
+
+            if (availableHard < hardCount)
+            {
+                return Ok(new
+                {
+                    IsSuccess = false,
+                    Message = $"Δεν υπάρχουν αρκετές δύσκολες ερωτήσεις. Χρειάζονται {hardCount}, υπάρχουν {availableHard}."
+                });
+            }
+
+            thematologia.QuizQuestionCount = request.QuizQuestionCount;
+            thematologia.UseQuizDifficulty = true;
+            thematologia.QuizDifficultyPercent = quizDifficulty;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                IsSuccess = true,
+                Message = "Οι ρυθμίσεις quiz αποθηκεύτηκαν."
+            });
+        }
+        private object CreateSuggestion(
+    List<Thematologia_Question> allQuestions,
+    int difficulty,
+    string difficultyName)
+        {
+            double easyPercent;
+
+            if (difficulty == 1)
+            {
+                easyPercent = 0.80;
+            }
+            else if (difficulty == 3)
+            {
+                easyPercent = 0.20;
+            }
+            else
+            {
+                easyPercent = 0.50;
+            }
+
+            double hardPercent = 1 - easyPercent;
+
+            int availableEasy = allQuestions.Count(q => q.Difficulty == 1);
+            int availableHard = allQuestions.Count(q => q.Difficulty == 2);
+
+            int maxByEasy = easyPercent > 0
+                ? (int)Math.Floor(availableEasy / easyPercent)
+                : 0;
+
+            int maxByHard = hardPercent > 0
+                ? (int)Math.Floor(availableHard / hardPercent)
+                : 0;
+
+            int questionCount = Math.Min(maxByEasy, maxByHard);
+
+            if (questionCount > 20)
+                questionCount = 20;
+
+            if (questionCount <= 0)
+            {
+                return new
+                {
+                    Difficulty = difficulty,
+                    DifficultyName = difficultyName,
+                    QuestionCount = 0,
+                    CanCreate = false,
+                    Message = $"Δεν υπάρχουν αρκετές ερωτήσεις για {difficultyName.ToLower()} quiz.",
+                    Questions = new List<object>()
+                };
+            }
+
+            int easyCount = (int)Math.Floor(questionCount * easyPercent);
+            int hardCount = questionCount - easyCount;
+
+            var easyQuestions = allQuestions
+                .Where(q => q.Difficulty == 1)
+                .OrderBy(q => Guid.NewGuid())
+                .Take(easyCount)
+                .ToList();
+
+            var hardQuestions = allQuestions
+                .Where(q => q.Difficulty == 2)
+                .OrderBy(q => Guid.NewGuid())
+                .Take(hardCount)
+                .ToList();
+
+            var selectedQuestions = easyQuestions
+                .Concat(hardQuestions)
+                .OrderBy(q => Guid.NewGuid())
+                .Select(q => new
+                {
+                    q.Id,
+                    q.DetId,
+                    q.QId,
+                    q.Question,
+                    q.Difficulty
+                })
+                .ToList();
+
+            return new
+            {
+                Difficulty = difficulty,
+                DifficultyName = difficultyName,
+                QuestionCount = selectedQuestions.Count,
+                CanCreate = selectedQuestions.Count > 0,
+                Message = $"{difficultyName} quiz με {selectedQuestions.Count} ερωτήσεις.",
+                Questions = selectedQuestions
+            };
         }
     }
 }

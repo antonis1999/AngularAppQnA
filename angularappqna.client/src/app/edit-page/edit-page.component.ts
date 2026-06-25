@@ -58,6 +58,11 @@ export class EditPageComponent implements OnInit {
   editingQuestionText = '';
   editingQuestionAnswers: ExistingQuizAnswer[] = [];
   quizDifficultyPercent = 2;
+  useQuizDifficulty = false;
+  showQuizSuggestionsPopup = false;
+  quizSuggestions: any[] = [];
+  expandedSuggestionIndex: number | null = null;
+
   quillModules = {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
@@ -409,36 +414,6 @@ export class EditPageComponent implements OnInit {
     this.editingTheoryDetails = '';
   }
 
-  saveQuizQuestionCount(): void {
-    if (this.quizQuestionCount <= 0) {
-      this.notificationService.warning('Ο αριθμός ερωτήσεων πρέπει να είναι μεγαλύτερος από 0.');
-      return;
-    }
-
-    if (this.quizQuestionCount > this.totalQuizQuestions) {
-      this.notificationService.warning(
-        `Υπάρχουν μόνο ${this.totalQuizQuestions} διαθέσιμες ερωτήσεις`
-      );
-      return;
-    }
-
-    const body = {
-      ThematologiaId: this.thematologiaId,
-      QuizQuestionCount: this.quizQuestionCount
-    };
-
-    this.http.post<ApiResponse>('api/Service/UpdateQuizQuestionCount', body)
-      .subscribe({
-        next: () => {
-          this.notificationService.success('Η ρύθμιση αποθηκεύτηκε.');
-        },
-        error: (err) => {
-          console.error('Save quiz question count error:', err);
-          this.notificationService.error('Σφάλμα αποθήκευσης ρύθμισης.');
-        }
-      });
-  }
-
   selectQuizTheory(theory: QuizTheory): void {
     this.selectedQuizTheory = theory;
     this.loadExistingQuestions(theory);
@@ -666,6 +641,46 @@ export class EditPageComponent implements OnInit {
         }
       });
   }
+  saveQuizSettings(): void {
+    if (this.quizQuestionCount <= 0) {
+      this.notificationService.warning('Ο αριθμός ερωτήσεων πρέπει να είναι μεγαλύτερος από 0.');
+      return;
+    }
+
+    if (this.quizQuestionCount > this.totalQuizQuestions) {
+      this.notificationService.warning(`Υπάρχουν μόνο ${this.totalQuizQuestions} διαθέσιμες ερωτήσεις.`);
+      return;
+    }
+
+    if (this.useQuizDifficulty && ![1, 2, 3].includes(Number(this.quizDifficultyPercent))) {
+      this.notificationService.warning('Επίλεξε έγκυρη δυσκολία quiz.');
+      return;
+    }
+
+    const body = {
+      ThematologiaId: this.thematologiaId,
+      QuizQuestionCount: Number(this.quizQuestionCount),
+      UseQuizDifficulty: this.useQuizDifficulty,
+      QuizDifficultyPercent: Number(this.quizDifficultyPercent)
+    };
+
+    this.http.post<ApiResponse>('api/Service/UpdateQuizSettings', body)
+      .subscribe({
+        next: (res) => {
+          if (res.IsSuccess) {
+            this.notificationService.success(res.Message || 'Οι ρυθμίσεις quiz αποθηκεύτηκαν.');
+            this.loadThematologies();
+            this.loadQuizQuestionsCount();
+          } else {
+            this.notificationService.warning(res.Message || 'Κάτι πήγε λάθος.');
+          }
+        },
+        error: (err) => {
+          console.error('Save quiz settings error:', err);
+          this.notificationService.error('Σφάλμα αποθήκευσης ρυθμίσεων quiz.');
+        }
+      });
+  }
   downloadQuizExcelTemplate(): void {
 
     this.http.get(
@@ -758,48 +773,42 @@ export class EditPageComponent implements OnInit {
       }
     });
   }
-  saveQuizDifficulty(): void {
-
-    if (this.totalQuizQuestions < 10) {
-      this.notificationService.warning(
-        'Απαιτούνται τουλάχιστον 10 ερωτήσεις για χρήση βαθμού δυσκολίας.'
-      );
-      return;
-    }
-
-    if (![1, 2, 3].includes(Number(this.quizDifficultyPercent))) {
-      this.notificationService.warning('Επίλεξε έγκυρη δυσκολία quiz.');
-      return;
-    }
-
-    const body = {
-      ThematologiaId: this.thematologiaId,
-      QuizDifficultyPercent: Number(this.quizDifficultyPercent)
-    };
-
-    this.http.post<ApiResponse>(
-      'api/Service/UpdateQuizDifficulty',
-      body
-    )
-      .subscribe({
-        next: (res) => {
-          if (res.IsSuccess) {
-            this.notificationService.success(
-              'Η δυσκολία quiz αποθηκεύτηκε.'
-            );
-          } else {
-            this.notificationService.warning(
-              res.Message || 'Κάτι πήγε λάθος.'
-            );
-          }
-        },
-        error: (err) => {
-          console.error('Save quiz difficulty error:', err);
-          this.notificationService.error(
-            'Σφάλμα αποθήκευσης δυσκολίας quiz.'
-          );
+ 
+  openQuizSuggestions(): void {
+    this.http.get<any>(
+      `api/Service/GetQuizSuggestions/${this.thematologiaId}`
+    ).subscribe({
+      next: (res) => {
+        if (res.IsSuccess || res.isSuccess) {
+          this.quizSuggestions = res.Suggestions || res.suggestions || [];
+          this.showQuizSuggestionsPopup = true;
+        } else {
+          this.notificationService.warning(res.Message || res.message);
         }
-      });
+      },
+      error: (err) => {
+        console.error('Quiz suggestions error:', err);
+        this.notificationService.error('Σφάλμα φόρτωσης προτεινόμενων quiz.');
+      }
+    });
+  }
+
+  closeQuizSuggestions(): void {
+    this.showQuizSuggestionsPopup = false;
+  }
+  toggleSuggestionQuestions(index: number): void {
+    this.expandedSuggestionIndex =
+      this.expandedSuggestionIndex === index ? null : index;
+  }
+
+  applyQuizSuggestion(s: any): void {
+    this.quizQuestionCount = s.QuestionCount || s.questionCount;
+    this.quizDifficultyPercent = s.Difficulty || s.difficulty;
+    this.useQuizDifficulty = true;
+
+    this.showQuizSuggestionsPopup = false;
+
+    this.notificationService.success('Η πρόταση εφαρμόστηκε. Πάτησε αποθήκευση για να αποθηκευτεί.');
   }
   goBack(): void {
     this.router.navigate(['/mainpage']);
