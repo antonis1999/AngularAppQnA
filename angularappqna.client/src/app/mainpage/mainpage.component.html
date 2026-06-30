@@ -26,14 +26,12 @@
 
       <button [class.active]="activeSection === 'theory'"
               (click)="setSection('theory')">
-        Θεωρία
+        Αρχική
       </button>
-
       <button [class.active]="activeSection === 'quiz'"
               (click)="setSection('quiz')">
-        Quiz
+        {{ isAdmin ? 'Demo-Quiz' : 'Quiz' }}
       </button>
-
       <button [class.active]="activeSection === 'ranking'"
               (click)="setSection('ranking')">
         Κατάταξη
@@ -195,6 +193,19 @@
                    class="ranking-input"
                    [(ngModel)]="rankingDate">
 
+            <select class="ranking-input"
+                    [(ngModel)]="selectedRankingDifficulty"
+                    (change)="loadRanking()">
+
+              <option [ngValue]="null">Όλες οι δυσκολίες</option>
+              <option [ngValue]="0">Τυχαίο</option>
+              <option [ngValue]="1">Εύκολο</option>
+              <option [ngValue]="2">Μεσαίο</option>
+              <option [ngValue]="3">Δύσκολο</option>
+
+
+            </select>
+
             <button *ngIf="showOnlyBestPerUser || rankingSearch || rankingDate"
                     class="ranking-clear-btn"
                     type="button"
@@ -219,6 +230,7 @@
               <span>Χρόνος</span>
               <span>Ημερομηνία</span>
               <span>Ποσοστό</span>
+              <span>Πόντοι</span>
             </div>
 
             <div class="ranking-row"
@@ -233,6 +245,7 @@
               <span>{{ formatTime(r.TotalSeconds) }}</span>
               <span>{{ formatDate(r.CreateDate) }}</span>
               <span>{{ r.Percentage }}%</span>
+              <span>{{ r.Points || r.points }}</span>
 
             </div>
 

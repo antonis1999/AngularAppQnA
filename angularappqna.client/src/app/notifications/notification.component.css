@@ -111,7 +111,7 @@
   height: 3px;
   width: 100%;
   background: linear-gradient( 90deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15) );
-  animation: progressLine 3s linear forwards;
+  animation: progressLine 1.6s linear forwards;
 }
 .notification:hover::after {
   animation-play-state: paused;

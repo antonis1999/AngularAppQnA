@@ -666,10 +666,62 @@ namespace AngularAppQnA.Server.Controllers
 
         [HttpPost("SaveQuizResult")]
         public async Task<ActionResult> SaveQuizResult(
-            [FromBody] SaveQuizResultRequest request)
+     [FromBody] SaveQuizResultRequest request)
         {
             try
             {
+                var thematologia = await _context.Thematologia
+                    .FirstOrDefaultAsync(x => x.Id == request.ThematologiaId);
+
+                decimal multiplier = 1m;
+                byte quizDifficulty = 0;
+
+                if (thematologia?.UseQuizDifficulty == true)
+                {
+                    quizDifficulty = (byte)thematologia.QuizDifficultyPercent;
+
+                    multiplier = quizDifficulty switch
+                    {
+                        1 => 1m,
+                        2 => 1.5m,
+                        3 => 2m,
+                        //compile error apo switch (?)
+                        _ => throw new NotImplementedException(),
+                    };
+                }
+                else
+                {
+                    var answers = JsonConvert.DeserializeObject<List<QuizAnswerJsonDto>>(
+                        request.AnswersJson
+                    ) ?? new List<QuizAnswerJsonDto>();
+
+                    int total = answers.Count;
+                    int hard = answers.Count(x => x.Difficulty == 2);
+
+                    decimal hardRatio = total == 0 ? 0 : (decimal)hard / total;
+
+                    if (hardRatio <= 0.30m)
+                    {
+                        multiplier = 1m;
+                    }
+                    else if (hardRatio <= 0.60m)
+                    {
+                        multiplier = 1.5m;
+                    }
+                    else
+                    {
+                        multiplier = 2m;
+                    }
+
+                    quizDifficulty = 0;
+                }
+
+                decimal points = request.CorrectAnswers * multiplier;
+
+                if (thematologia?.UseQuizDifficulty == true)
+                {
+                    quizDifficulty = (byte)thematologia.QuizDifficultyPercent;
+                }
                 var result = new Quiz_Result
                 {
                     ThematologiaId = request.ThematologiaId,
@@ -680,6 +732,8 @@ namespace AngularAppQnA.Server.Controllers
                     WrongAnswers = request.WrongAnswers,
                     TotalTimeSeconds = request.TotalTimeSeconds,
                     AnswersJson = request.AnswersJson,
+                    Points = points,
+                    QuizDifficulty = quizDifficulty,
                     CreateDate = DateTime.Now
                 };
 
@@ -695,12 +749,12 @@ namespace AngularAppQnA.Server.Controllers
             }
         }
         [HttpGet("GetRanking/{thematologiaId}")]
-        public async Task<ActionResult<List<RankingDto>>> GetRanking(int thematologiaId)
+        public async Task<ActionResult<List<RankingDto>>> GetRanking(int thematologiaId, int? quizDifficulty)
         {
             try
             {
                 var ranking = await _context.QuizRankingDto
-                    .FromSqlInterpolated($"EXEC GetQuizRanking {thematologiaId}")
+                    .FromSqlInterpolated($"EXEC GetQuizRanking {thematologiaId},{quizDifficulty}")
                     .ToListAsync();
 
                 return Ok(ranking);
@@ -714,7 +768,7 @@ namespace AngularAppQnA.Server.Controllers
                 });
             }
         }
-        [HttpPost("UpdateQuizQuestionCount")]
+        /*[HttpPost("UpdateQuizQuestionCount")]
         public async Task<IActionResult> UpdateQuizQuestionCount(UpdateQuizQuestionCountRequest request)
         {
             if (request.QuizQuestionCount <= 0)
@@ -739,7 +793,7 @@ namespace AngularAppQnA.Server.Controllers
                 isSuccess = true,
                 message = "Η ρύθμιση αποθηκεύτηκε."
             });
-        }
+        }*/
         [HttpGet("GetQuizQuestionsCount/{id}")]
         public async Task<ActionResult<int>> GetQuizQuestionsCount(int id)
         {
@@ -1235,106 +1289,8 @@ namespace AngularAppQnA.Server.Controllers
                 return ret;
             }
         }
-        [HttpPost("UpdateQuizDifficulty")]
-        public async Task<IActionResult> UpdateQuizDifficulty([FromBody] UpdateQuizDifficultyRequest request)
-        {
-            var thematologia = await _context.Thematologia
-                .FirstOrDefaultAsync(x => x.Id == request.ThematologiaId);
-
-            if (thematologia == null)
-            {
-                return Ok(new
-                {
-                    IsSuccess = false,
-                    Message = "Δεν βρέθηκε η θεματολογία."
-                });
-            }
-            if (!request.UseQuizDifficulty)
-            {
-                thematologia.UseQuizDifficulty = false;
-                thematologia.QuizDifficultyPercent = 2;
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    IsSuccess = true,
-                    Message = "Το quiz θα εμφανίζει τυχαίες ερωτήσεις χωρίς βαθμό δυσκολίας."
-                });
-            }
-            int questionCount = thematologia.QuizQuestionCount;
-            int quizDifficulty = request.QuizDifficultyPercent;
-
-            int easyCount;
-            int mediumCount;
-            int hardCount;
-
-            if (quizDifficulty == 1)
-            {
-                easyCount = (int)Math.Round(questionCount * 0.70);
-                mediumCount = (int)Math.Round(questionCount * 0.20);
-                hardCount = questionCount - easyCount - mediumCount;
-            }
-            else if (quizDifficulty == 3)
-            {
-                easyCount = (int)Math.Round(questionCount * 0.10);
-                mediumCount = (int)Math.Round(questionCount * 0.20);
-                hardCount = questionCount - easyCount - mediumCount;
-            }
-            else
-            {
-                easyCount = (int)Math.Round(questionCount * 0.20);
-                mediumCount = (int)Math.Round(questionCount * 0.60);
-                hardCount = questionCount - easyCount - mediumCount;
-            }
-
-            int availableEasy = await _context.Thematologia_Question
-                .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 1);
-
-            int availableMedium = await _context.Thematologia_Question
-                .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 2);
-
-            int availableHard = await _context.Thematologia_Question
-                .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 3);
-
-            if (availableEasy < easyCount)
-            {
-                return Ok(new
-                {
-                    IsSuccess = false,
-                    Message = $"Δεν υπάρχουν αρκετές εύκολες ερωτήσεις. Χρειάζονται {easyCount}, υπάρχουν {availableEasy}."
-                });
-            }
-
-            if (availableMedium < mediumCount)
-            {
-                return Ok(new
-                {
-                    IsSuccess = false,
-                    Message = $"Δεν υπάρχουν αρκετές μεσαίες ερωτήσεις. Χρειάζονται {mediumCount}, υπάρχουν {availableMedium}."
-                });
-            }
-
-            if (availableHard < hardCount)
-            {
-                return Ok(new
-                {
-                    IsSuccess = false,
-                    Message = $"Δεν υπάρχουν αρκετές δύσκολες ερωτήσεις. Χρειάζονται {hardCount}, υπάρχουν {availableHard}."
-                });
-            }
-
-            thematologia.QuizDifficultyPercent = quizDifficulty;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                IsSuccess = true,
-                Message = "Η δυσκολία quiz αποθηκεύτηκε."
-            });
-        }
-        [HttpGet("GetQuizSuggestions/{thematologiaId}")]
+  
+       /* [HttpGet("GetQuizSuggestions/{thematologiaId}")]
         public async Task<ActionResult> GetQuizSuggestions(int thematologiaId)
         {
             var allQuestions = await _context.Thematologia_Question
@@ -1361,7 +1317,7 @@ namespace AngularAppQnA.Server.Controllers
                 IsSuccess = true,
                 Suggestions = suggestions
             });
-        }
+        }*/
         [HttpPost("UpdateQuizSettings")]
         public async Task<IActionResult> UpdateQuizSettings([FromBody] UpdateQuizSettingsRequest request)
         {

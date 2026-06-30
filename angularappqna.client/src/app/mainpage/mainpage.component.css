@@ -1255,7 +1255,7 @@ quill-editor {
 
 .ranking-row {
   display: grid;
-  grid-template-columns: 80px 2fr 1fr 1fr 1fr 1.5fr 1fr;
+  grid-template-columns: 80px 2fr 1fr 1fr 1fr 1.5fr 1fr 1.5fr;
   align-items: center;
   padding: 17px 20px;
   border-radius: 18px;

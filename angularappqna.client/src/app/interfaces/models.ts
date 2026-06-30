@@ -101,6 +101,7 @@ export interface QuizPreviewQuestion {
   QId: number;
   Question: string;
   Answers: QuizPreviewAnswer[];
+  Difficulty: number;
 }
 export interface Ranking {
   Nickname: string;
@@ -109,6 +110,8 @@ export interface Ranking {
   Percentage: number;
   TotalSeconds: number;
   CreateDate: string;
+  Points?: number;
+  points?: number;
 }
 export interface QuizAttemptDetail {
   Nickname: string;

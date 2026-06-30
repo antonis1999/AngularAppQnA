@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
 import { Router } from '@angular/router';
 import { Ranking, Thematologia, User } from '../interfaces/models';
@@ -53,7 +53,7 @@ export class MainpageComponent {
   rankingSearch = '';
   rankingDate = '';
   showOnlyBestPerUser = false;
-
+  selectedRankingDifficulty: number | null = null;
   showUserDetailsPopup = false;
   selectedUserId: number | null = null;
   userSearchText = '';
@@ -228,12 +228,10 @@ export class MainpageComponent {
       return;
     }
 
-    this.router.navigate([
-      '/quiz-page',
-      this.selectedQuizThematologiaId
-    ]);
-
-    this.notificationService.success('Το QUIZ ξεκίνησε');
+    this.router.navigate(['/quiz-page', this.selectedQuizThematologiaId])
+      .then(() => {
+        this.notificationService.success('Το QUIZ ξεκίνησε');
+      });
   }
 
   formatTime(seconds: number): string {
@@ -264,6 +262,7 @@ export class MainpageComponent {
   }
 
   loadRanking() {
+
     if (!this.selectedRankingThematologiaId) {
       this.rankings = [];
       return;
@@ -271,8 +270,18 @@ export class MainpageComponent {
 
     this.rankingLoading = true;
 
+    let params = new HttpParams();
+
+    if (this.selectedRankingDifficulty !== null) {
+      params = params.set(
+        'quizDifficulty',
+        this.selectedRankingDifficulty
+      );
+    }
+
     this.http.get<Ranking[]>(
-      `api/Service/GetRanking/${this.selectedRankingThematologiaId}`
+      `api/Service/GetRanking/${this.selectedRankingThematologiaId}`,
+      { params }
     )
       .subscribe({
         next: (res) => {

@@ -17,4 +17,6 @@
     public int TotalSeconds { get; set; }
 
     public DateTime CreateDate { get; set; }
+    public decimal Points { get; set; }
+    public int QuizDifficulty { get; set; }
 }

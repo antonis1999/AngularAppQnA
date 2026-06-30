@@ -26,34 +26,51 @@ export class HomeComponent {
   constructor(private http: HttpClient, private router: Router, private notificationService: NotificationService) { }
 
   login() {
+    if (!this.email.trim()) {
+      this.notificationService.warning('Συμπλήρωσε το email σου.');
+      return;
+    }
+
+    if (!this.pin.trim()) {
+      this.notificationService.warning('Συμπλήρωσε το PIN σου.');
+      return;
+    }
+
+    if (!this.nickname.trim()) {
+      this.notificationService.warning('Συμπλήρωσε το nickname σου.');
+      return;
+    }
+
+    if (!this.selectedStore) {
+      this.notificationService.warning('Επίλεξε κατάστημα / γραφεία / logistics.');
+      return;
+    }
+
     const storeId = this.getStoreId();
 
     const body: LoginRequest = {
-      Email: this.email,
-      Pin: this.pin,
-      Nickname: this.nickname,
+      Email: this.email.trim(),
+      Pin: this.pin.trim(),
+      Nickname: this.nickname.trim(),
       StoreId: storeId
     };
 
     this.http.post<LoginResponse>('api/Auth/login', body).subscribe({
       next: (res: any) => {
-        console.log('LOGIN RESPONSE:', res);
-
         const isSuccess = res.isSuccess ?? res.IsSuccess;
         const message = res.message ?? res.Message;
         const user = res.user ?? res.User;
 
         if (isSuccess && user) {
           localStorage.setItem('currentUser', JSON.stringify(user));
-
+          this.notificationService.success('Επιτυχία σύνδεσης');
           this.router.navigate(['/mainpage']);
-          this.notificationService.success('Επιτυχία Σύνδεσης');
         } else {
-          this.notificationService.error(message || 'Αποτυχία σύνδεσης');
+          this.notificationService.error(message || 'Λάθος email ή PIN.');
         }
       },
-      error: (err) => {
-        this.notificationService.warning(err.error?.Message || 'Κάτι πήγε στραβά.');
+      error: () => {
+        this.notificationService.error('Λάθος email ή PIN.');
       }
     });
   }

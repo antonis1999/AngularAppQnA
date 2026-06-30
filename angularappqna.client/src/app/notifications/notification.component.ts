@@ -11,7 +11,7 @@ import { NotificationService } from '../services/notification.service';
 })
 export class NotificationComponent {
   timeoutId: any;
-  remainingTime = 5000;
+  remainingTime = 1600;
   startTime = 0;
 
   constructor(public notificationService: NotificationService) {
@@ -19,7 +19,7 @@ export class NotificationComponent {
       const notification = this.notificationService.notification();
 
       if (notification) {
-        this.remainingTime = 5000;
+        this.remainingTime = 1600;
         this.startTimer();
       }
     });

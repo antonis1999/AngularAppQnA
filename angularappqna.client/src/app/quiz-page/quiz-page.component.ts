@@ -49,7 +49,7 @@ export class QuizPageComponent implements OnInit, OnDestroy {
 
     this.loadQuestions();
 
-    this.startTimer();
+   
   }
 
   ngOnDestroy() {
@@ -57,6 +57,7 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   }
 
   startTimer() {
+
 
     this.questionStartTime = Date.now();
 
@@ -88,30 +89,27 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   }
 
   loadQuestions() {
-
     this.http.get<QuizPreviewQuestion[]>(
       `api/Service/GetRandomQuizQuestions/${this.thematologiaId}`
     )
       .subscribe({
-
         next: (res) => {
-
           this.questions = res || [];
 
           if (this.questions.length > 0) {
-            this.startTimer();
+            this.currentQuestionIndex = 0;
+            this.selectedAnswerId = null;
+            this.quizStartTime = Date.now();
+
+            setTimeout(() => {
+              this.startTimer();
+            }, 0);
           }
-
         },
-
         error: (err) => {
-
           console.error(err);
-         
         }
-
       });
-
   }
   selectAnswer(answerId: number) {
     if (this.timeLeft <= 0) {
@@ -231,7 +229,7 @@ export class QuizPageComponent implements OnInit, OnDestroy {
         DetId: q.DetId,
         QId: q.QId,
         Question: q.Question,
-
+        Difficulty: q.Difficulty,
         SelectedAId: selectedAId,
         SelectedAnswer: selectedAnswer?.Answer || 'Δεν απαντήθηκε',
 

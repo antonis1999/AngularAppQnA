@@ -1,8 +1,0 @@
-﻿public class UpdateQuizDifficultyRequest
-{
-    public int ThematologiaId { get; set; }
-
-    public bool UseQuizDifficulty { get; set; }
-
-    public int QuizDifficultyPercent { get; set; }
-}

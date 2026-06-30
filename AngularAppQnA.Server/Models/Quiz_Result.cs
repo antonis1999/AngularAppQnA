@@ -25,5 +25,7 @@ namespace AngularAppQnA.Server.Models
         public string AnswersJson { get; set; } = "";
 
         public DateTime CreateDate { get; set; }
+        public decimal Points { get; set; }
+        public byte QuizDifficulty { get; set; }
     }
 }
