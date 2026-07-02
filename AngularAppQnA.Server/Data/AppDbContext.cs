@@ -77,10 +77,14 @@ namespace AngularAppQnA.Server.Data
         {
             var idParam = new SqlParameter("@id", id);
             var detIdParam = new SqlParameter("@detid", detid);
-            var answer = await this.DeleteTheoria_Results
+
+            var results = await this.DeleteTheoria_Results
                 .FromSqlRaw("EXEC dbo.DeleteTheoria @id, @detid", idParam, detIdParam)
-                .FirstOrDefaultAsync();
-            return answer.Result;
+                .ToListAsync();
+
+            var answer = results.FirstOrDefault();
+
+            return answer?.Result ?? false;
         }
     }
 }
