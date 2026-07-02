@@ -125,12 +125,20 @@ export class MainpageComponent {
     this.http.get<any[]>('api/Service/GetThematologies')
       .subscribe({
         next: (res) => {
-          this.thematologies = res;
+          const availableThematologies = this.isAdmin
+            ? res
+            : res.filter(x => !this.isExpiredThematologia({
+              toDate: x.ToDate ?? x.toDate
+            }));
 
-          this.topics = res.map(x => ({
+          this.thematologies = availableThematologies;
+
+          this.topics = availableThematologies.map(x => ({
             id: x.id ?? x.Id,
             title: x.title ?? x.Title,
-            content: ''
+            content: '',
+            fromDate: x.fromDate ?? x.FromDate,
+            toDate: x.toDate ?? x.ToDate
           }));
         },
         error: (err) => {
@@ -138,7 +146,20 @@ export class MainpageComponent {
         }
       });
   }
+  isExpiredThematologia(topic: any): boolean {
 
+    if (!topic.toDate) {
+      return false;
+    }
+
+    const expireDate = new Date(topic.toDate);
+    expireDate.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return expireDate < today;
+  }
   saveThematologia() {
     if (!this.thematologiaTitle.trim()) {
       this.notificationService.warning('Συμπλήρωσε Header Θεματολογίας');

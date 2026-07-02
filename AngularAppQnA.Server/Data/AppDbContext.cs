@@ -27,6 +27,7 @@ namespace AngularAppQnA.Server.Data
 
         public virtual DbSet<DeleteTheoria_Result> DeleteTheoria_Results { get; set; }
         public virtual DbSet<RankingDto> QuizRankingDto { get; set; }
+        public virtual DbSet<QuizQuestionFlatDto> QuizQuestionFlatDto { get; set; }
 
 
 
@@ -66,7 +67,11 @@ namespace AngularAppQnA.Server.Data
 
             modelBuilder.Entity<RankingDto>()
                 .HasNoKey();
+
+            modelBuilder.Entity<QuizQuestionFlatDto>()
+                .HasNoKey();
         }
+
 
         public async Task<bool> DeleteTheoriaAsync(int id, int detid)
         {

@@ -60,9 +60,12 @@ export class HomeComponent {
         const isSuccess = res.isSuccess ?? res.IsSuccess;
         const message = res.message ?? res.Message;
         const user = res.user ?? res.User;
+        const token = res.token ?? res.Token;
 
-        if (isSuccess && user) {
+        if (isSuccess && user && token) {
           localStorage.setItem('currentUser', JSON.stringify(user));
+          localStorage.setItem('token', token);
+
           this.notificationService.success('Επιτυχία σύνδεσης');
           this.router.navigate(['/mainpage']);
         } else {
@@ -86,28 +89,42 @@ export class HomeComponent {
   }
 
   adminLogin() {
-
-    if (this.adminPin !== '1234') {
-      this.notificationService.error('Λάθος PIN διαχειριστή.');
+    if (!this.adminPin.trim()) {
+      this.notificationService.warning('Συμπλήρωσε το PIN διαχειριστή.');
       return;
     }
 
-    const adminUser = {
-      id: 999,
-      email: 'admin@masoutis.gr',
-      nickname: 'Admin',
-      storeId: 2,
-      roleId: 99
+    const body: LoginRequest = {
+      Email: 'admin@masoutis.gr',
+      Pin: this.adminPin.trim(),
+      Nickname: 'Admin',
+      StoreId: 2
     };
 
-    localStorage.setItem(
-      'currentUser',
-      JSON.stringify(adminUser)
-    );
+    this.http.post<LoginResponse>('api/Auth/login', body).subscribe({
+      next: (res: any) => {
+        const isSuccess = res.isSuccess ?? res.IsSuccess;
+        const message = res.message ?? res.Message;
+        const user = res.user ?? res.User;
+        const token = res.token ?? res.Token;
 
-    this.closeAdminPopup();
-    this.notificationService.success('Επιτυχία Σύνδεσης');
-    this.router.navigate(['/mainpage']);
+        if (isSuccess && user && token) {
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          localStorage.setItem('token', token);
+
+          this.closeAdminPopup();
+          this.notificationService.success('Επιτυχία Σύνδεσης');
+          this.router.navigate(['/mainpage']);
+        } else {
+          this.notificationService.error(message || 'Λάθος PIN διαχειριστή.');
+        }
+      },
+      error: (err) => {
+        console.log(err);
+        this.notificationService.error(err.error?.Message || err.error?.message || 'Σφάλμα');
+      }
+      
+    });
   }
 
   getStoreId(): number {

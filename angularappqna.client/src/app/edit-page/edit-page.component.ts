@@ -104,11 +104,13 @@ export class EditPageComponent implements OnInit {
               this.selectedThematologia.QuizQuestionCount ||
               this.selectedThematologia.quizQuestionCount ||
               4;
+
             this.quizDifficultyPercent =
               this.selectedThematologia.QuizDifficultyPercent ||
               this.selectedThematologia.quizDifficultyPercent ||
               2;
-            this.selectThematologia(this.selectedThematologia);
+
+            this.startEditThematologia(this.selectedThematologia);
           }
         },
         error: (err) => {
@@ -117,7 +119,7 @@ export class EditPageComponent implements OnInit {
         }
       });
   }
-
+  
   loadQuizQuestionsCount(): void {
     this.http.get<number>(
       `api/Service/GetQuizQuestionsCount/${this.thematologiaId}`

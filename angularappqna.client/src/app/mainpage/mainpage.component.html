@@ -74,6 +74,7 @@
 
           <div class="theory-card clickable-theory-card"
                *ngFor="let topic of topics; let i = index"
+               [class.expired-theory-card]="isAdmin && isExpiredThematologia(topic)"
                (click)="openEditPage(topic)">
 
             <div class="theory-number">
@@ -83,6 +84,11 @@
             <div class="theory-content">
 
               <h2>{{ topic.title || 'Χωρίς τίτλο' }}</h2>
+             
+              <div class="expired-badge"
+                   *ngIf="isAdmin && isExpiredThematologia(topic)">
+                Μη διαθέσιμη για χρήστες
+              </div>
 
               <small>
                 {{ isAdmin ? 'Πατήστε για επεξεργασία' : 'Πατήστε για προβολή θεωριών' }}

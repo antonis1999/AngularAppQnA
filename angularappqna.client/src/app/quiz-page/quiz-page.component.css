@@ -140,6 +140,21 @@
   background: linear-gradient(90deg, #c59a4a, #e6c879);
   transition: width 1s linear;
 }
+.quiz-next-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.quiz-skip-btn {
+  border: none;
+  padding: 12px 22px;
+  border-radius: 14px;
+  background: #f1f1f1;
+  color: #444;
+  font-weight: 600;
+  cursor: pointer;
+}
 
 /* QUESTION */
 

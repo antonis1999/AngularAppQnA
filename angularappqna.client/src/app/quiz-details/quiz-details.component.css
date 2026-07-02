@@ -81,7 +81,7 @@
 
 .details-row {
   display: grid;
-  grid-template-columns: 70px 2fr 1fr 1fr 1fr 1.5fr 1fr;
+  grid-template-columns: 70px 2fr 1fr 1fr 1fr 1.5fr 1fr 1fr 1fr;
   align-items: center;
   padding: 17px 20px;
   border-radius: 18px;

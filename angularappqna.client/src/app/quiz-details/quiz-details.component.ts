@@ -78,6 +78,21 @@ export class QuizDetailsComponent {
       }
     });
   }
+  getQuizDifficultyLabel(value: number | null | undefined): string {
+    if (value === 1) {
+      return 'Εύκολο';
+    }
+
+    if (value === 2) {
+      return 'Μεσαίο';
+    }
+
+    if (value === 3) {
+      return 'Δύσκολο';
+    }
+
+    return 'Τυχαίο';
+  }
   goBack() {
     this.router.navigate(['/mainpage'], {
       queryParams: {

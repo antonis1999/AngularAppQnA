@@ -49,9 +49,20 @@
     </div>
 
     <div class="quiz-actions">
-      <button type="button" class="quiz-next-btn" (click)="nextQuestion()">
+
+      <button type="button"
+              class="quiz-skip-btn"
+              (click)="skipQuestion()">
+        Skip
+      </button>
+
+      <button type="button"
+              class="quiz-next-btn"
+              [disabled]="selectedAnswerId === null"
+              (click)="nextQuestion()">
         {{ currentQuestionIndex === questions.length - 1 ? 'Έλεγχος απαντήσεων' : 'Επόμενη' }}
       </button>
+
     </div>
 
   </div>

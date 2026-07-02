@@ -308,6 +308,33 @@ export class QuizPageComponent implements OnInit, OnDestroy {
 
     return answer?.IsCorrect === true;
   }
+  skipQuestion() {
+    this.clearTimer();
+
+    const currentQuestion = this.questions[this.currentQuestionIndex];
+
+    const secondsSpent = Math.round(
+      (Date.now() - this.questionStartTime) / 1000
+    );
+
+    this.questionTimes[this.currentQuestionIndex] = secondsSpent;
+
+    if (currentQuestion) {
+      this.answers[this.currentQuestionIndex] = {
+        questionId: currentQuestion.QId,
+        answerId: null
+      };
+    }
+
+    this.selectedAnswerId = null;
+
+    if (this.currentQuestionIndex < this.questions.length - 1) {
+      this.currentQuestionIndex++;
+      this.startTimer();
+    } else {
+      this.showReview = true;
+    }
+  }
   GoBack() {
     this.location.back();
   }

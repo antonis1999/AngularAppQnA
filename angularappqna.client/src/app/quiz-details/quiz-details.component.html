@@ -25,9 +25,12 @@
           <span>Nickname</span>
           <span>Σωστές</span>
           <span>Σύνολο</span>
+
           <span>Χρόνος</span>
           <span>Ημερομηνία</span>
           <span>Ποσοστό</span>
+          <span>Πόντοι</span>
+          <span>Επίπεδο</span>
         </div>
 
         <div class="details-row"
@@ -37,10 +40,12 @@
           <span>{{ a.Nickname }}</span>
           <span>{{ a.CorrectAnswers }}</span>
           <span>{{ a.TotalQuestions }}</span>
+
           <span>{{ formatTime(a.TotalTimeSeconds) }}</span>
           <span>{{ formatDate(a.CreateDate) }}</span>
           <span>{{ a.Percentage }}%</span>
-
+          <span>{{ a.Points }}</span>
+          <span>{{ getQuizDifficultyLabel(a.QuizDifficulty) }}</span> 
         </div>
 
       </div>

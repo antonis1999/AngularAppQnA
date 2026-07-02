@@ -1,6 +1,8 @@
 using AngularAppQnA.Server.Data;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 internal class Program
 {
     private static void Main(string[] args)
@@ -38,6 +40,25 @@ internal class Program
             );
             //options.UseSqlServer(builder.Configuration.GetConnectionString("MasoutisConnection"));
         });
+        var jwtKey = builder.Configuration["Jwt:Key"];
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtKey!)
+                    )
+                };
+            });
+
+        builder.Services.AddAuthorization();
+
 
         var app = builder.Build();
 
@@ -51,8 +72,9 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
-
         app.UseCors("AllowAngularClient");
+
+        app.UseAuthentication();
 
         app.UseAuthorization();
 

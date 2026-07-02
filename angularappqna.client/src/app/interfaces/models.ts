@@ -9,6 +9,7 @@ export interface LoginResponse {
   IsSuccess: boolean;
   Message: string;
   IsNewUser: boolean;
+  Token: string;
   User: User;
 }
 
@@ -117,6 +118,9 @@ export interface QuizAttemptDetail {
   Nickname: string;
   CorrectAnswers: number;
   TotalQuestions: number;
+  Points: number;
+  QuizDifficulty: number;
+  QuizDifficultyLabel: string;
   Percentage: number;
   TotalTimeSeconds: number;
   CreateDate: string;

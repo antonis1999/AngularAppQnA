@@ -2,14 +2,16 @@
 using AngularAppQnA.Server.DataContracts;
 using AngularAppQnA.Server.Models;
 using ClosedXML.Excel;
+using Ganss.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Ganss.Excel;
-using System.Text.Json.Serialization;
-using System.Text.Json;
 using Newtonsoft.Json;
-using Org.BouncyCastle.Crypto.Signers;
 using NPOI.OpenXmlFormats.Dml.Diagram;
+using Org.BouncyCastle.Crypto.Signers;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AngularAppQnA.Server.Controllers
 {
@@ -25,6 +27,7 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpGet("GetThematologies")]
+        [Authorize]
         public async Task<List<Thematologia>> GetThematologies()
         {
             List<Thematologia> ret = new List<Thematologia>();
@@ -43,6 +46,7 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpPost("AddThematologia")]
+        [Authorize(Roles = "99")]
         public async Task<BasicResponse> AddThematologia([FromBody] ThematologiaRequest newContract)
         {
             BasicResponse ret = new BasicResponse();
@@ -77,6 +81,7 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpPost("UpdateThematologia")]
+        [Authorize(Roles = "99")]
         public async Task<BasicResponse> UpdateThematologia([FromBody] Thematologia updatedContract)
         {
             BasicResponse ret = new BasicResponse();
@@ -112,6 +117,7 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpDelete("DeleteThematologia/{id}")]
+        [Authorize(Roles = "99")]
         public async Task<BasicResponse> DeleteThematologia(int id)
         {
             BasicResponse ret = new BasicResponse();
@@ -150,6 +156,7 @@ namespace AngularAppQnA.Server.Controllers
 
 
         [HttpGet("GetTheoriaByThematologia")]
+        [Authorize(Roles = "99")]
         public async Task<List<Thematologia_Theoria>> GetTheoriaByThematologia(int thematologiaId)
         {
             try
@@ -168,6 +175,7 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpPost("AddTheoria")]
+        [Authorize(Roles = "99")]
         public async Task<BasicResponse> AddTheoria([FromBody] Thematologia_TheoriaRequest newContract)
         {
             BasicResponse ret = new BasicResponse();
@@ -217,6 +225,7 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpPost("UpdateTheoria")]
+        [Authorize(Roles = "99")]
         public async Task<BasicResponse> UpdateTheoria([FromBody] Thematologia_TheoriaRequest updatedContract)
         {
 
@@ -257,6 +266,7 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpDelete("DeleteTheoria/{id}/{detId}")]
+        [Authorize(Roles = "99")]
         public async Task<BasicResponse> DeleteTheoria(int id, int detId)
         {
             BasicResponse ret = new BasicResponse();
@@ -299,6 +309,7 @@ namespace AngularAppQnA.Server.Controllers
             return ret;
         }
         [HttpGet("GetQuestionsByTheoria/{id}/{detId}")]
+        [Authorize(Roles = "99")]
         public async Task<ActionResult<List<object>>> GetQuestionsByTheoria(int id, int detId)
         {
             try
@@ -340,6 +351,7 @@ namespace AngularAppQnA.Server.Controllers
         }
         [HttpPost]
         [Route("SaveQnA")]
+        [Authorize(Roles = "99")]
         public async Task<IActionResult> SaveQuiz(SaveQnA request)
         {
             try
@@ -421,6 +433,7 @@ namespace AngularAppQnA.Server.Controllers
             }
         }
         [HttpPost("UpdateQuestion")]
+        [Authorize(Roles = "99")]
         public async Task<ActionResult> UpdateQuestion([FromBody] Thematologia_UpdateQuestionRequest request)
         {
             try
@@ -486,6 +499,7 @@ namespace AngularAppQnA.Server.Controllers
             }
         }
         [HttpDelete("DeleteQuestion/{id}/{detId}/{qId}")]
+        [Authorize(Roles = "99")]
         public async Task<ActionResult> DeleteQuestion(int id, int detId, int qId)
         {
             try
@@ -532,123 +546,49 @@ namespace AngularAppQnA.Server.Controllers
             }
         }
         [HttpGet("GetRandomQuizQuestions/{id}")]
+      
         public async Task<ActionResult> GetRandomQuizQuestions(int id)
         {
             try
             {
-                var thematologia = await _context.Thematologia
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                var data = await _context.Set<QuizQuestionFlatDto>()
+                    .FromSqlInterpolated($"EXEC dbo.GetRandomQuizQuestions @ThematologiaId = {id}")
+                    .ToListAsync();
 
-                if (thematologia == null)
+                if (data == null || !data.Any())
                 {
                     return NotFound(new
                     {
                         IsSuccess = false,
-                        Message = "Δεν βρέθηκε η θεματολογία."
+                        Message = "Δεν βρέθηκαν ερωτήσεις για τη θεματολογία."
                     });
                 }
 
-                int questionCount = thematologia.QuizQuestionCount;
-                int quizDifficulty = thematologia.QuizDifficultyPercent;
-
-                int easyCount;
-                int hardCount;
-
-                if (!thematologia.UseQuizDifficulty)
-                {
-                    var randomQuestions = await _context.Thematologia_Question
-                        .Where(q => q.Id == id)
-                        .OrderBy(q => Guid.NewGuid())
-                        .Take(questionCount)
-                        .ToListAsync();
-
-                    return Ok(randomQuestions.Select(q => new
+                var questions = data
+                    .GroupBy(x => new
                     {
-                        q.Id,
-                        q.DetId,
-                        q.QId,
-                        q.Question,
-                        q.Difficulty,
-
-                        Details = _context.Thematologia_Theoria
-                            .Where(t => t.Id == q.Id && t.DetId == q.DetId)
-                            .Select(t => t.Details)
-                            .FirstOrDefault(),
-
-                        Answers = _context.Thematologia_Answers
-                            .Where(a =>
-                                a.Id == q.Id &&
-                                a.DetId == q.DetId &&
-                                a.QId == q.QId)
-                            .Select(a => new
-                            {
-                                a.AId,
-                                a.Answer,
-                                a.IsCorrect
-                            })
-                            .ToList()
-                    }).ToList());
-                }
-
-                if (quizDifficulty == 1)
-                {
-                    easyCount = (int)Math.Floor(questionCount * 0.80);
-                    hardCount = questionCount - easyCount;
-                }
-                else if (quizDifficulty == 3)
-                {
-                    easyCount = (int)Math.Floor(questionCount * 0.20);
-                    hardCount = questionCount - easyCount;
-                }
-                else
-                {
-                    easyCount = (int)Math.Floor(questionCount * 0.50);
-                    hardCount = questionCount - easyCount;
-                }
-
-                var easyQuestions = await _context.Thematologia_Question
-                    .Where(q => q.Id == id && q.Difficulty == 1)
-                    .OrderBy(q => Guid.NewGuid())
-                    .Take(easyCount)
-                    .ToListAsync();
-
-                var hardQuestions = await _context.Thematologia_Question
-                    .Where(q => q.Id == id && q.Difficulty == 2)
-                    .OrderBy(q => Guid.NewGuid())
-                    .Take(hardCount)
-                    .ToListAsync();
-
-                var selectedQuestions = easyQuestions
-                    .Concat(hardQuestions)
-                    .OrderBy(q => Guid.NewGuid())
-                    .ToList();
-
-                var questions = selectedQuestions
-                    .Select(q => new
+                        x.Id,
+                        x.DetId,
+                        x.QId,
+                        x.Question,
+                        x.Difficulty,
+                        x.Details
+                    })
+                    .Select(g => new
                     {
-                        q.Id,
-                        q.DetId,
-                        q.QId,
-                        q.Question,
-                        q.Difficulty,
+                        g.Key.Id,
+                        g.Key.DetId,
+                        g.Key.QId,
+                        g.Key.Question,
+                        g.Key.Difficulty,
+                        g.Key.Details,
 
-                        Details = _context.Thematologia_Theoria
-                            .Where(t => t.Id == q.Id && t.DetId == q.DetId)
-                            .Select(t => t.Details)
-                            .FirstOrDefault(),
-
-                        Answers = _context.Thematologia_Answers
-                            .Where(a =>
-                                a.Id == q.Id &&
-                                a.DetId == q.DetId &&
-                                a.QId == q.QId)
-                            .Select(a => new
-                            {
-                                a.AId,
-                                a.Answer,
-                                a.IsCorrect
-                            })
-                            .ToList()
+                        Answers = g.Select(a => new
+                        {
+                            a.AId,
+                            a.Answer,
+                            a.IsCorrect
+                        }).ToList()
                     })
                     .ToList();
 
@@ -665,8 +605,9 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpPost("SaveQuizResult")]
+        
         public async Task<ActionResult> SaveQuizResult(
-     [FromBody] SaveQuizResultRequest request)
+            [FromBody] SaveQuizResultRequest request)
         {
             try
             {
@@ -795,6 +736,7 @@ namespace AngularAppQnA.Server.Controllers
             });
         }*/
         [HttpGet("GetQuizQuestionsCount/{id}")]
+        [Authorize(Roles = "99")]
         public async Task<ActionResult<int>> GetQuizQuestionsCount(int id)
         {
             try
@@ -810,6 +752,7 @@ namespace AngularAppQnA.Server.Controllers
             }
         }
         [HttpGet("GetUserQuizAttempts/{thematologiaId}/{nickname}")]
+        [Authorize(Roles = "99")]
         public async Task<IActionResult> GetUserQuizAttempts(int thematologiaId, string nickname)
         {
             try
@@ -836,12 +779,21 @@ namespace AngularAppQnA.Server.Controllers
                         x.Nickname,
                         x.CorrectAnswers,
                         x.TotalQuestions,
+
+                        x.Points,
+                        x.QuizDifficulty,
+
+                        QuizDifficultyLabel =
+                            x.QuizDifficulty == 1 ? "Εύκολο" :
+                            x.QuizDifficulty == 2 ? "Μεσαίο" :
+                            x.QuizDifficulty == 3 ? "Δύσκολο" :
+                            "Τυχαίο",
+
                         Percentage = x.TotalQuestions == 0
-                        ? 0
-                        : Math.Round((decimal)x.CorrectAnswers * 100 / x.TotalQuestions, 2),
+                            ? 0
+                            : Math.Round((decimal)x.CorrectAnswers * 100 / x.TotalQuestions, 2),
 
                         x.TotalTimeSeconds,
-
                         x.CreateDate
                     })
                     .ToListAsync();
@@ -863,6 +815,7 @@ namespace AngularAppQnA.Server.Controllers
             }
         }
         [HttpGet("DownloadQuizTemplate")]
+        [Authorize(Roles = "99")]
         public IActionResult DownloadQuizTemplate()
         {
             using var workbook = new XLWorkbook();
@@ -955,6 +908,7 @@ namespace AngularAppQnA.Server.Controllers
             );
         }
         [HttpPost("ImportQuizExcel/{thematologiaId}")]
+        [Authorize(Roles = "99")]
         public async Task<BasicResponse> ImportQuizExcel(
             int thematologiaId,
             IFormFile file)
@@ -1319,6 +1273,7 @@ namespace AngularAppQnA.Server.Controllers
             });
         }*/
         [HttpPost("UpdateQuizSettings")]
+        [Authorize(Roles = "99")]
         public async Task<IActionResult> UpdateQuizSettings([FromBody] UpdateQuizSettingsRequest request)
         {
             var thematologia = await _context.Thematologia

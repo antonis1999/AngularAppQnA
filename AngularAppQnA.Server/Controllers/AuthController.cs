@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AngularAppQnA.Server.Controllers;
 
@@ -14,10 +18,12 @@ namespace AngularAppQnA.Server.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(AppDbContext context)
+    public AuthController(AppDbContext context, IConfiguration configuration)
     {
         _context = context;
+        _configuration = configuration;
     }
 
     [HttpPost("login")]
@@ -77,6 +83,7 @@ public class AuthController : ControllerBase
             ret.IsSuccess = true;
             ret.Message = "OK login";
             ret.User = userFound;
+            ret.Token = CreateJwtToken(userFound);
             return ret;
         }
 
@@ -85,6 +92,7 @@ public class AuthController : ControllerBase
             ret.IsSuccess = true;
             ret.Message = "OK login";
             ret.User = userFound;
+            ret.Token = CreateJwtToken(userFound);
             return ret;
         }
 
@@ -187,6 +195,35 @@ public class AuthController : ControllerBase
                 IsSuccess = false,
                 Message = ex.Message
             });
-        }
+        } 
+    }
+        private string CreateJwtToken(User user)
+    {
+        var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Email, user.Email ?? ""),
+        new Claim(ClaimTypes.Name, user.Nickname ?? ""),
+        new Claim(ClaimTypes.Role, user.RoleId.ToString())
+    };
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)
+        );
+
+        var credentials = new SigningCredentials(
+            key,
+            SecurityAlgorithms.HmacSha256
+        );
+
+        var token = new JwtSecurityToken(
+                 issuer: _configuration["Jwt:Issuer"],
+                 audience: _configuration["Jwt:Audience"],
+                 claims: claims,
+                 expires: DateTime.Now.AddHours(8),
+                 signingCredentials: credentials
+ );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
+
