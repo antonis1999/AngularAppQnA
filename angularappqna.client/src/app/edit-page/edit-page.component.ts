@@ -267,6 +267,7 @@ export class EditPageComponent implements OnInit {
 
           this.loadThematologies();
           this.notificationService.success('Διαγράφηκε Επιτυχώς');
+          this.router.navigate(['/mainpage']);
         },
         error: (err) => {
           console.error('Delete thematologia error:', err);

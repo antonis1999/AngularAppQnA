@@ -40,21 +40,30 @@
   margin-bottom: 22px;
 }
 
-.back-btn {
-  height: 40px;
-  padding: 0 18px;
-  border: none;
+.quiz-back-btn {
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid #e6eaf0;
   border-radius: 999px;
-  background: #172033;
-  color: #ffffff;
-  font-size: 13px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 12px;
   font-weight: 850;
   cursor: pointer;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
 }
 
-  .back-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.13);
+  .quiz-back-btn:hover {
+    background: #fff8e8;
+    border-color: #e6c98f;
+    color: #8b6420;
+    transform: translateX(-3px);
+    box-shadow: 0 10px 22px rgba(154, 106, 22, 0.09);
+  }
+
+  .quiz-back-btn:active {
+    transform: translateX(-2px) scale(0.98);
   }
 
 .quiz-details-section h1 {

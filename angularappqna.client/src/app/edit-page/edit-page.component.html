@@ -400,7 +400,7 @@
 
                 <select [(ngModel)]="q.Difficulty">
                   <option [ngValue]="1">Εύκολη</option>
-                 
+
                   <option [ngValue]="3">Δύσκολη</option>
                 </select>
 
@@ -438,14 +438,12 @@
                         (click)="addAnswer(q)">
                   + Προσθήκη απάντησης
                 </button>
-
+                <button type="button"
+                        class="save-quiz-btn"
+                        (click)="saveQuizQuestions()">
+                  Αποθήκευση
+                </button>
               </div>
-
-              <button type="button"
-                      class="save-quiz-btn"
-                      (click)="saveQuizQuestions()">
-                Αποθήκευση
-              </button>
 
             </div>
 

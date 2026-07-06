@@ -84,7 +84,12 @@
             <div class="theory-content">
 
               <h2>{{ topic.title || 'Χωρίς τίτλο' }}</h2>
-             
+
+              <div class="topic-period">
+                <span>Από: {{ topic.fromDate | date:'dd/MM/yyyy' }}</span>
+                <span>Έως: {{ topic.toDate | date:'dd/MM/yyyy' }}</span>
+              </div>
+
               <div class="expired-badge"
                    *ngIf="isAdmin && isExpiredThematologia(topic)">
                 Μη διαθέσιμη για χρήστες
@@ -224,7 +229,6 @@
           <div *ngIf="rankingLoading" class="ranking-empty">
             Φόρτωση κατάταξης...
           </div>
-
           <div class="ranking-table"
                *ngIf="!rankingLoading && filteredRankings.length > 0">
 
@@ -236,7 +240,18 @@
               <span>Χρόνος</span>
               <span>Ημερομηνία</span>
               <span>Ποσοστό</span>
-              <span>Πόντοι</span>
+
+              <span class="points-tooltip">
+                ΠΟΝΤΟΙ 
+
+                <span class="tooltip-text">
+                  <strong>Υπολογισμός πόντων</strong><br>
+                  Σωστές απαντήσεις × δυσκολία<br><br>
+                  Εύκολο: ×1<br>
+                  Μεσαίο: ×1.5<br>
+                  Δύσκολο: ×2
+                </span>
+              </span>
             </div>
 
             <div class="ranking-row"
@@ -252,19 +267,11 @@
               <span>{{ formatDate(r.CreateDate) }}</span>
               <span>{{ r.Percentage }}%</span>
               <span>{{ r.Points || r.points }}</span>
-
             </div>
 
           </div>
-
-          <div *ngIf="!rankingLoading && filteredRankings.length === 0"
-               class="ranking-empty">
-            Δεν βρέθηκαν αποτελέσματα.
-          </div>
-
-        </div>
-
       </div>
+        </div>
       <div *ngIf="activeSection === 'settings'" class="settings-section">
 
         <h1>Ρυθμίσεις</h1>
