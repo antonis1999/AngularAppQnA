@@ -1847,3 +1847,18 @@ quill-editor {
     transform: translateY(0);
   }
 }
+.topic-period {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px; /* κενό ανάμεσα στις ημερομηνίες */
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+
+  .topic-period span {
+    color: #6b7280;
+    font-size: 13px; /* μικρότερες ημερομηνίες */
+    font-weight: 600;
+    line-height: 1.2;
+  }
