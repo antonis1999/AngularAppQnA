@@ -59,7 +59,7 @@ export class MainpageComponent {
   userSearchText = '';
   newPin = '';
   confirmPin = '';
-
+  showPointsPopover = false;
 
   quillModules = {
     toolbar: [
@@ -475,6 +475,10 @@ export class MainpageComponent {
           this.notificationService.error('Σφάλμα αλλαγής PIN.');
         }
       });
+  }
+  togglePointsPopover(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showPointsPopover = !this.showPointsPopover;
   }
   getStoreName(storeId: number | undefined): string {
     switch (storeId) {

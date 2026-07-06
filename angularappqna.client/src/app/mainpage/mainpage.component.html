@@ -241,16 +241,52 @@
               <span>Ημερομηνία</span>
               <span>Ποσοστό</span>
 
-              <span class="points-tooltip">
-                ΠΟΝΤΟΙ 
+              <span class="points-popover-wrap">
+                <button type="button"
+                        class="points-info-btn"
+                        (click)="togglePointsPopover($event)">
+                  ΠΟΝΤΟΙ ⓘ
+                </button>
 
-                <span class="tooltip-text">
-                  <strong>Υπολογισμός πόντων</strong><br>
-                  Σωστές απαντήσεις × δυσκολία<br><br>
-                  Εύκολο: ×1<br>
-                  Μεσαίο: ×1.5<br>
-                  Δύσκολο: ×2
-                </span>
+                <div class="points-card" *ngIf="showPointsPopover">
+                  <div class="points-card-header">
+                    <button type="button"
+                            class="points-card-close"
+                            (click)="showPointsPopover = false">
+                      ×
+                    </button>
+                  </div>
+
+                  <div class="points-card-body">
+                    <div class="points-card-section">
+                      <h4 class="points-card-section-title">Κανονικό Quiz</h4>
+
+                      <div class="points-card-line">
+                        <span>Εύκολο</span>
+                        <b>×1</b>
+                      </div>
+
+                      <div class="points-card-line">
+                        <span>Μεσαίο</span>
+                        <b>×1.5</b>
+                      </div>
+
+                      <div class="points-card-line">
+                        <span>Δύσκολο</span>
+                        <b>×2</b>
+                      </div>
+                    </div>
+
+                    <div class="points-card-section">
+                      <h4 class="points-card-section-title">Τυχαίο Quiz</h4>
+
+                      <p class="points-card-text">
+                        Η δυσκολία καθορίζεται από τις ρυθμίσεις του διαχειριστή.
+                        Οι πόντοι υπολογίζονται με τον ίδιο τύπο.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </span>
             </div>
 

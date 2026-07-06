@@ -1720,122 +1720,130 @@ quill-editor {
   font-size: 12px;
   font-weight: 700;
 }
-.points-tooltip {
-  position: relative;
-  display: inline-block;
-  cursor: help;
-}
-
-.tooltip-text {
-  visibility: hidden;
-  opacity: 0;
-  width: 260px;
-  background: #2b2b2b;
-  color: #fff;
-  text-align: left;
-  border-radius: 10px;
-  padding: 12px;
-  position: absolute;
-  z-index: 1000;
-  bottom: 140%;
-  left: 50%;
-  transform: translateX(-50%);
-  transition: opacity .2s ease;
-  font-size: 13px;
-  line-height: 1.5;
-  box-shadow: 0 10px 25px rgba(0,0,0,.25);
-}
-
-  .tooltip-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -6px;
-    border-width: 6px;
-    border-style: solid;
-    border-color: #2b2b2b transparent transparent transparent;
-  }
-
-.points-tooltip:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
-.points-tooltip {
+.points-popover-wrap {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: help;
 }
-.ranking-head .points-tooltip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  overflow: visible;
+
+.points-info-btn {
+  border: none;
+  background: transparent;
   color: #0f766e;
+  font-size: 13px;
   font-weight: 900;
-  cursor: help;
+  cursor: pointer;
+  padding: 0;
 }
 
-  .ranking-head .points-tooltip .tooltip-text {
-    position: absolute;
-    bottom: 34px;
-    right: 0;
-    left: auto;
-    transform: none;
-    width: 310px;
-    padding: 14px 16px;
-    border-radius: 14px;
-    background: #172033;
-    color: #ffffff;
-    font-size: 12px;
-    line-height: 1.55;
-    font-weight: 700;
-    text-transform: none;
-    letter-spacing: 0;
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.28);
-    visibility: hidden;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 99999;
-  }
+.points-card {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 440px;
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+  overflow: hidden;
+  z-index: 99999;
+  animation: pointsCardIn .18s ease;
+}
 
-    .ranking-head .points-tooltip .tooltip-text::after {
-      content: "";
-      position: absolute;
-      top: 100%;
-      right: 28px;
-      border-width: 7px;
-      border-style: solid;
-      border-color: #172033 transparent transparent transparent;
-    }
-
-  .ranking-head .points-tooltip:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
-  }
-  .ranking-head .points-tooltip .tooltip-text {
-    bottom: 30px;
-    right: -88px;
-    width: 300px;
-    padding: 47px 49px;
-    font-size: 11px;
-    line-height: 1.05;
-  }
-.topic-period {
-  margin-top: 6px;
+.points-card-header {
   display: flex;
-  justify-content: center;
-  gap: 14px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #8b95a7;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eef2f7;
 }
 
-  .topic-period span {
-    background: #f3f6fb;
-    padding: 5px 12px;
-    border-radius: 999px;
+.points-card-header-title {
+  color: #0f766e;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.points-card-close {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #6b7280 !important;
+  font-size: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+  .points-card-close:hover {
+    color: #111827 !important;
   }
+
+.points-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 22px;
+  padding: 18px;
+}
+
+.points-card-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.points-card-section-title {
+  margin: 0 0 12px;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.points-card-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #1f2937 !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+  .points-card-line span,
+  .points-card-line b {
+    color: #1f2937 !important;
+    font-weight: 600;
+  }
+
+.points-card-text {
+  margin: 0;
+  color: #374151;
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+.points-card .points-card-line span:first-child {
+  width: auto !important;
+  height: auto !important;
+  display: inline !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+}
+
+@keyframes pointsCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
