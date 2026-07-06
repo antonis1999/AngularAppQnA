@@ -37,4 +37,25 @@
     </ProjectReference>
   </ItemGroup>
 
+
+	<Target Name="BuildAngular" BeforeTargets="Build">
+		<Exec Command="npm install" WorkingDirectory="$(SpaRoot)" />
+		<Exec Command="npm run build" WorkingDirectory="$(SpaRoot)" />
+	</Target>
+
+	<ItemGroup>
+		<AngularDistFiles Include="$(SpaRoot)\dist\angularappqna.client\**\*" />
+	</ItemGroup>
+
+
+
+	<Target Name="CopyAngularBrowser" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+		<RemoveDir Directories="wwwroot" />
+		<MakeDir Directories="wwwroot" />
+		<ItemGroup>
+			<AngularBrowserFiles Include="$(SpaRoot)\dist\angularappqna.client\browser\**\*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(AngularBrowserFiles)" DestinationFolder="wwwroot\%(RecursiveDir)" />
+	</Target>
+
 </Project>
