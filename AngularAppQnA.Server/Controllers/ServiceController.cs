@@ -156,7 +156,7 @@ namespace AngularAppQnA.Server.Controllers
 
 
         [HttpGet("GetTheoriaByThematologia")]
-       
+      
         public async Task<List<Thematologia_Theoria>> GetTheoriaByThematologia(int thematologiaId)
         {
             try

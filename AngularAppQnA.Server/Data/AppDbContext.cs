@@ -38,7 +38,7 @@ namespace AngularAppQnA.Server.Data
                 .HasKey(x => x.Id);
 
             modelBuilder.Entity<Role>()
-                .ToTable("roless")
+                .ToTable("roles")
                 .HasKey(x => x.Id);
 
             modelBuilder.Entity<TrainingStore>()
