@@ -2,7 +2,7 @@
 
 namespace AngularAppQnA.Server.Models
 {
-    public class Thematologia
+    public class msc_Thematologia
     {
         [Key]
         public int Id { get; set; }

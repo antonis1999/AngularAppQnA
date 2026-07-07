@@ -13,7 +13,7 @@ namespace AngularAppQnA.Server.Data
         }
 
 
-        public DbSet<Thematologia> Thematologia { get; set; }
+        public DbSet<msc_Thematologia> msc_Thematologia { get; set; }
         public DbSet<Thematologia_Theoria> Thematologia_Theoria { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
@@ -45,9 +45,7 @@ namespace AngularAppQnA.Server.Data
                 .ToTable("storess")
                 .HasKey(x => x.Id);
 
-            modelBuilder.Entity<Thematologia>()
-                .ToTable("Thematologia")
-                .HasKey(x => x.Id);
+            modelBuilder.Entity<msc_Thematologia>().ToTable("msc_Thematologia").HasKey(x => x.Id);
 
             modelBuilder.Entity<Thematologia_Theoria>()
                 .ToTable("Thematologia_Theoria")

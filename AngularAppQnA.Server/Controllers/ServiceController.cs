@@ -28,9 +28,9 @@ namespace AngularAppQnA.Server.Controllers
 
         [HttpGet("GetThematologies")]
         [Authorize]
-        public async Task<List<Thematologia>> GetThematologies()
+        public async Task<List<msc_Thematologia>> GetThematologies()
         {
-            List<Thematologia> ret = new List<Thematologia>();
+            List<msc_Thematologia> ret = new List<msc_Thematologia>();
 
             DateTime dt = DateTime.Now;
             try
@@ -59,7 +59,7 @@ namespace AngularAppQnA.Server.Controllers
                     return ret;
                 }
 
-                Thematologia newRow = new Thematologia();
+                msc_Thematologia newRow = new msc_Thematologia();
                 newRow.Title = newContract.Title;
                 newRow.FromDate = newContract.FromDate;
                 newRow.ToDate = newContract.ToDate;
@@ -82,7 +82,7 @@ namespace AngularAppQnA.Server.Controllers
 
         [HttpPost("UpdateThematologia")]
         [Authorize(Roles = "99")]
-        public async Task<BasicResponse> UpdateThematologia([FromBody] Thematologia updatedContract)
+        public async Task<BasicResponse> UpdateThematologia([FromBody] msc_Thematologia updatedContract)
         {
             BasicResponse ret = new BasicResponse();
             try
