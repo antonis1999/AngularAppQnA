@@ -1,6 +1,6 @@
 ﻿namespace AngularAppQnA.Server.Models
 {
-    public class TrainingStore
+    public class msc_Stores
     {
         public int Id { get; set; }
         public string StoreName { get; set; } = "";

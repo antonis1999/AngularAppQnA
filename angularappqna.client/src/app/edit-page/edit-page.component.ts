@@ -101,13 +101,11 @@ export class EditPageComponent implements OnInit {
 
           if (this.selectedThematologia) {
             this.quizQuestionCount =
-              this.selectedThematologia.QuizQuestionCount ||
-              this.selectedThematologia.quizQuestionCount ||
+              this.selectedThematologia.QuizQuestionCount ??
               4;
 
             this.quizDifficultyPercent =
-              this.selectedThematologia.QuizDifficultyPercent ||
-              this.selectedThematologia.quizDifficultyPercent ||
+              this.selectedThematologia.QuizDifficultyPercent ??
               2;
 
             this.startEditThematologia(this.selectedThematologia);
@@ -432,22 +430,22 @@ export class EditPageComponent implements OnInit {
   }
 
   addAnswer(question: QuizQuestionView): void {
-    question.options.push({
-      answer: '',
-      is_correct: false
+    question.Options.push({
+      Answer: '',
+      IsCorrect: false
     });
   }
 
   removeAnswer(question: QuizQuestionView, answerIndex: number): void {
-    question.options.splice(answerIndex, 1);
+    question.Options.splice(answerIndex, 1);
   }
 
   selectCorrectAnswer(question: QuizQuestionView, selectedAnswer: QuizOption): void {
-    question.options.forEach(a => {
-      a.is_correct = false;
+    question.Options.forEach(a => {
+      a.IsCorrect = false;
     });
 
-    selectedAnswer.is_correct = true;
+    selectedAnswer.IsCorrect = true;
   }
 
   saveQuizQuestions(): void {
@@ -457,15 +455,15 @@ export class EditPageComponent implements OnInit {
     }
 
     const validQuestions = this.quizQuestions
-      .filter(q => q.question?.trim().length > 0)
+      .filter(q => q.Question?.trim().length > 0)
       .map(q => ({
-        questionText: q.question.trim(),
+        questionText: q.Question.trim(),
         difficulty: q.Difficulty,
-        answers: q.options
-          .filter(a => a.answer?.trim().length > 0)
+        answers: q.Options
+          .filter(a => a.Answer?.trim().length > 0)
           .map(a => ({
-            text: a.answer.trim(),
-            isCorrect: a.is_correct
+            text: a.Answer.trim(),
+            isCorrect: a.IsCorrect
           }))
       }));
 
@@ -515,15 +513,14 @@ export class EditPageComponent implements OnInit {
       this.createEmptyQuizQuestion()
     ];
   }
-
   private createEmptyQuizQuestion(): QuizQuestionView {
     return {
-      question: '',
+      Question: '',
       Difficulty: 1,
-      options: [
-        { answer: '', is_correct: false },
-        { answer: '', is_correct: false },
-        { answer: '', is_correct: false }
+      Options: [
+        { Answer: '', IsCorrect: false },
+        { Answer: '', IsCorrect: false },
+        { Answer: '', IsCorrect: false }
       ]
     };
   }

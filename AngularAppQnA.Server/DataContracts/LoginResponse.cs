@@ -6,6 +6,6 @@
         public string Message { get; set; } = "";
         public bool IsNewUser { get; set; }
         public string Token { get; set; } = "";
-        public User? User { get; set; }
+        public msc_Users? User { get; set; }
     }
 }

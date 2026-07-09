@@ -6,4 +6,6 @@ public class LoginRequest
     public string Pin { get; set; } = "";
     public string Nickname { get; set; } = "";
     public int StoreId { get; set; }
+
+    public bool IsFirstLogin { get; set; }
 }

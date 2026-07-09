@@ -35,7 +35,7 @@ namespace AngularAppQnA.Server.Controllers
             DateTime dt = DateTime.Now;
             try
             {
-                ret = await _context.Thematologia/*.Where(x => x.FromDate <= dt && x.ToDate >= dt)*/.ToListAsync();
+                ret = await _context.msc_Thematologia/*.Where(x => x.FromDate <= dt && x.ToDate >= dt)*/.ToListAsync();
             }
             catch (Exception ex)
             {
@@ -66,7 +66,7 @@ namespace AngularAppQnA.Server.Controllers
                 newRow.Username = "Admin";
                 newRow.CreateDate = DateTime.Now;
 
-                _context.Thematologia.Add(newRow);
+                _context.msc_Thematologia.Add(newRow);
                 await _context.SaveChangesAsync();
 
                 ret.IsSuccess = true;
@@ -93,7 +93,7 @@ namespace AngularAppQnA.Server.Controllers
                     ret.Message = "Invalid request data.";
                     return ret;
                 }
-                var existingRow = await _context.Thematologia.FindAsync(updatedContract.Id);
+                var existingRow = await _context.msc_Thematologia.FindAsync(updatedContract.Id);
                 if (existingRow == null)
                 {
                     ret.IsSuccess = false;
@@ -103,7 +103,7 @@ namespace AngularAppQnA.Server.Controllers
                 existingRow.Title = updatedContract.Title;
                 existingRow.FromDate = updatedContract.FromDate;
                 existingRow.ToDate = updatedContract.ToDate;
-                _context.Thematologia.Update(existingRow);
+                _context.msc_Thematologia.Update(existingRow);
                 await _context.SaveChangesAsync();
                 ret.IsSuccess = true;
                 ret.Message = $"Thematologia with ID: {existingRow.Id} updated successfully.";
@@ -124,7 +124,7 @@ namespace AngularAppQnA.Server.Controllers
 
             try
             {
-                var row = await _context.Thematologia.FindAsync(id);
+                var row = await _context.msc_Thematologia.FindAsync(id);
 
                 if (row == null)
                 {
@@ -133,12 +133,12 @@ namespace AngularAppQnA.Server.Controllers
                     return ret;
                 }
 
-                var theories = await _context.Thematologia_Theoria
+                var theories = await _context.msc_Thematologia_Theoria
                     .Where(x => x.DetId == id)
                     .ToListAsync();
 
-                _context.Thematologia_Theoria.RemoveRange(theories);
-                _context.Thematologia.Remove(row);
+                _context.msc_Thematologia_Theoria.RemoveRange(theories);
+                _context.msc_Thematologia.Remove(row);
 
                 await _context.SaveChangesAsync();
 
@@ -157,11 +157,11 @@ namespace AngularAppQnA.Server.Controllers
 
         [HttpGet("GetTheoriaByThematologia")]
       
-        public async Task<List<Thematologia_Theoria>> GetTheoriaByThematologia(int thematologiaId)
+        public async Task<List<msc_Thematologia_Theoria>> GetTheoriaByThematologia(int thematologiaId)
         {
             try
             {
-                var theoria = await _context.Thematologia_Theoria
+                var theoria = await _context.msc_Thematologia_Theoria
                     .Where(x => x.Id == thematologiaId)
                     .OrderBy(x => x.DetId)
                     .ToListAsync();
@@ -170,7 +170,7 @@ namespace AngularAppQnA.Server.Controllers
             }
             catch (Exception)
             {
-                return new List<Thematologia_Theoria>();
+                return new List<msc_Thematologia_Theoria>();
             }
         }
 
@@ -190,7 +190,7 @@ namespace AngularAppQnA.Server.Controllers
                 }
 
                 // filtering για να δω αν υπαρχει ήδη η θεωρια με αυτό το Id και το DetId
-                var existingRow = await _context.Thematologia_Theoria
+                var existingRow = await _context.msc_Thematologia_Theoria
                     .FirstOrDefaultAsync(x => x.Id == newContract.Id && x.DetId == newContract.DetId);
 
                 if (existingRow != null)
@@ -200,7 +200,7 @@ namespace AngularAppQnA.Server.Controllers
                     return ret;
                 }
 
-                Thematologia_Theoria newRow = new Thematologia_Theoria();
+                msc_Thematologia_Theoria newRow = new msc_Thematologia_Theoria();
 
                 newRow.Id = newContract.Id;
                 newRow.DetId = newContract.DetId;
@@ -209,7 +209,7 @@ namespace AngularAppQnA.Server.Controllers
                 newRow.Username = "Admin";
                 newRow.CreateDate = DateTime.Now;
 
-                _context.Thematologia_Theoria.Add(newRow);
+                _context.msc_Thematologia_Theoria.Add(newRow);
                 await _context.SaveChangesAsync();
 
                 ret.IsSuccess = true;
@@ -239,7 +239,7 @@ namespace AngularAppQnA.Server.Controllers
                     return ret;
                 }
 
-                var existingRow = await _context.Thematologia_Theoria.FirstOrDefaultAsync
+                var existingRow = await _context.msc_Thematologia_Theoria.FirstOrDefaultAsync
                                   (x => x.Id == updatedContract.Id && x.DetId == updatedContract.DetId);
 
                 if (existingRow == null)
@@ -252,7 +252,7 @@ namespace AngularAppQnA.Server.Controllers
                 existingRow.Details = updatedContract.Details;
                 existingRow.CreateDate = updatedContract.CreateDate ?? existingRow.CreateDate;
 
-                _context.Thematologia_Theoria.Update(existingRow);
+                _context.msc_Thematologia_Theoria.Update(existingRow);
                 await _context.SaveChangesAsync();
                 ret.IsSuccess = true;
                 ret.Message = $"Thematologia with ID: {existingRow.Id} updated successfully.";
@@ -273,7 +273,7 @@ namespace AngularAppQnA.Server.Controllers
 
             try
             {
-                var theory = await _context.Thematologia_Theoria
+                var theory = await _context.msc_Thematologia_Theoria
                   .FirstOrDefaultAsync(x => x.Id == id && x.DetId == detId);
 
                 if (theory == null)
@@ -314,7 +314,7 @@ namespace AngularAppQnA.Server.Controllers
         {
             try
             {
-                var questions = await _context.Thematologia_Question
+                var questions = await _context.msc_Thematologia_Question
                     .Where(q => q.Id == id && q.DetId == detId)
                     .Select(q => new
                     {
@@ -326,7 +326,7 @@ namespace AngularAppQnA.Server.Controllers
                         Username = q.Username,
                         CreateDate = q.CreateDate,
 
-                        Answers = _context.Thematologia_Answers
+                        Answers = _context.msc_Thematologia_Answers
                         .Where(a => a.Id == q.Id && a.DetId == q.DetId && a.QId == q.QId)
                         .Select(a => new
                         {
@@ -366,13 +366,13 @@ namespace AngularAppQnA.Server.Controllers
                         continue;
 
                     int nextQId =
-                        (_context.Thematologia_Question
+                        (_context.msc_Thematologia_Question
                             .Where(x =>
                                 x.Id == request.ThematologiaId &&
                                 x.DetId == request.TheoriaDetId)
                             .Max(x => (int?)x.QId) ?? 0) + 1;
 
-                    var question = new Thematologia_Question
+                    var question = new msc_Thematologia_Question
                     {
                         Id = request.ThematologiaId,
                         DetId = request.TheoriaDetId,
@@ -383,11 +383,11 @@ namespace AngularAppQnA.Server.Controllers
                         CreateDate = DateTime.Now
                     };
 
-                    _context.Thematologia_Question.Add(question);
+                    _context.msc_Thematologia_Question.Add(question);
                     await _context.SaveChangesAsync();
 
                     int nextAId =
-                        (_context.Thematologia_Answers
+                        (_context.msc_Thematologia_Answers
                             .Where(x =>
                                 x.Id == request.ThematologiaId &&
                                 x.DetId == request.TheoriaDetId &&
@@ -396,7 +396,7 @@ namespace AngularAppQnA.Server.Controllers
 
                     foreach (var a in validAnswers)
                     {
-                        var answer = new Thematologia_Answers
+                        var answer = new msc_Thematologia_Answers
                         {
                             Id = request.ThematologiaId,
                             DetId = request.TheoriaDetId,
@@ -408,7 +408,7 @@ namespace AngularAppQnA.Server.Controllers
                             CreateDate = DateTime.Now
                         };
 
-                        _context.Thematologia_Answers.Add(answer);
+                        _context.msc_Thematologia_Answers.Add(answer);
                         nextAId++;
                     }
 
@@ -438,7 +438,7 @@ namespace AngularAppQnA.Server.Controllers
         {
             try
             {
-                var question = await _context.Thematologia_Question
+                var question = await _context.msc_Thematologia_Question
                     .FirstOrDefaultAsync(q =>
                         q.Id == request.Id &&
                         q.DetId == request.DetId &&
@@ -455,20 +455,20 @@ namespace AngularAppQnA.Server.Controllers
                 question.Question = request.Question;
                 question.Difficulty = request.Difficulty <= 0 ? 1 : request.Difficulty;
 
-                var oldAnswers = await _context.Thematologia_Answers
+                var oldAnswers = await _context.msc_Thematologia_Answers
                     .Where(a =>
                         a.Id == request.Id &&
                         a.DetId == request.DetId &&
                         a.QId == request.QId)
                     .ToListAsync();
 
-                _context.Thematologia_Answers.RemoveRange(oldAnswers);
+                _context.msc_Thematologia_Answers.RemoveRange(oldAnswers);
 
                 int nextAId = 1;
 
                 foreach (var answer in request.Answers)
                 {
-                    _context.Thematologia_Answers.Add(new Thematologia_Answers
+                    _context.msc_Thematologia_Answers.Add(new msc_Thematologia_Answers
                     {
                         Id = request.Id,
                         DetId = request.DetId,
@@ -504,7 +504,7 @@ namespace AngularAppQnA.Server.Controllers
         {
             try
             {
-                var question = await _context.Thematologia_Question
+                var question = await _context.msc_Thematologia_Question
                     .FirstOrDefaultAsync(q =>
                         q.Id == id &&
                         q.DetId == detId &&
@@ -518,15 +518,15 @@ namespace AngularAppQnA.Server.Controllers
                     });
                 }
 
-                var answers = await _context.Thematologia_Answers
+                var answers = await _context.msc_Thematologia_Answers
                     .Where(a =>
                         a.Id == id &&
                         a.DetId == detId &&
                         a.QId == qId)
                     .ToListAsync();
 
-                _context.Thematologia_Answers.RemoveRange(answers);
-                _context.Thematologia_Question.Remove(question);
+                _context.msc_Thematologia_Answers.RemoveRange(answers);
+                _context.msc_Thematologia_Question.Remove(question);
 
                 await _context.SaveChangesAsync();
 
@@ -552,7 +552,7 @@ namespace AngularAppQnA.Server.Controllers
             try
             {
                 var data = await _context.Set<QuizQuestionFlatDto>()
-                    .FromSqlInterpolated($"EXEC dbo.GetRandomQuizQuestions @ThematologiaId = {id}")
+                    .FromSqlInterpolated($"EXEC msc_GetRandomQuizQuestions @ThematologiaId = {id}")
                     .ToListAsync();
 
                 if (data == null || !data.Any())
@@ -599,19 +599,17 @@ namespace AngularAppQnA.Server.Controllers
                 return StatusCode(500, new
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Message = ex.ToString()
                 });
             }
         }
 
         [HttpPost("SaveQuizResult")]
-        
-        public async Task<ActionResult> SaveQuizResult(
-            [FromBody] SaveQuizResultRequest request)
+        public async Task<ActionResult> SaveQuizResult([FromBody] SaveQuizResultRequest request)
         {
             try
             {
-                var thematologia = await _context.Thematologia
+                var thematologia = await _context.msc_Thematologia
                     .FirstOrDefaultAsync(x => x.Id == request.ThematologiaId);
 
                 decimal multiplier = 1m;
@@ -626,8 +624,7 @@ namespace AngularAppQnA.Server.Controllers
                         1 => 1m,
                         2 => 1.5m,
                         3 => 2m,
-                        //compile error apo switch (?)
-                        _ => throw new NotImplementedException(),
+                        _ => 1m
                     };
                 }
                 else
@@ -659,11 +656,7 @@ namespace AngularAppQnA.Server.Controllers
 
                 decimal points = request.CorrectAnswers * multiplier;
 
-                if (thematologia?.UseQuizDifficulty == true)
-                {
-                    quizDifficulty = (byte)thematologia.QuizDifficultyPercent;
-                }
-                var result = new Quiz_Result
+                var result = new msc_Quiz_Results
                 {
                     ThematologiaId = request.ThematologiaId,
                     UserEmail = request.UserEmail,
@@ -678,15 +671,23 @@ namespace AngularAppQnA.Server.Controllers
                     CreateDate = DateTime.Now
                 };
 
-                _context.Quiz_Results.Add(result);
+                _context.msc_Quiz_Results.Add(result);
 
                 await _context.SaveChangesAsync();
 
-                return Ok();
+                return Ok(new
+                {
+                    IsSuccess = true,
+                    Message = "Quiz result saved successfully"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new
+                {
+                    Message = ex.Message,
+                    InnerMessage = ex.InnerException?.Message
+                });
             }
         }
         [HttpGet("GetRanking/{thematologiaId}")]
@@ -694,8 +695,14 @@ namespace AngularAppQnA.Server.Controllers
         {
             try
             {
+                bool isAdmin = User.IsInRole("99");
+
                 var ranking = await _context.QuizRankingDto
-                    .FromSqlInterpolated($"EXEC GetQuizRanking {thematologiaId},{quizDifficulty}")
+                    .FromSqlInterpolated($@"
+                EXEC msc_GetQuizRanking 
+                    @ThematologiaId = {thematologiaId},
+                    @QuizDifficulty = {quizDifficulty},
+                    @IsAdmin = {isAdmin}")
                     .ToListAsync();
 
                 return Ok(ranking);
@@ -741,7 +748,7 @@ namespace AngularAppQnA.Server.Controllers
         {
             try
             {
-                int count = await _context.Thematologia_Question
+                int count = await _context.msc_Thematologia_Question
                     .CountAsync(x => x.Id == id);
 
                 return Ok(count);
@@ -757,7 +764,7 @@ namespace AngularAppQnA.Server.Controllers
         {
             try
             {
-                var thematologia = await _context.Thematologia
+                var thematologia = await _context.msc_Thematologia
                     .FirstOrDefaultAsync(x => x.Id == thematologiaId);
 
                 if (thematologia == null)
@@ -769,7 +776,7 @@ namespace AngularAppQnA.Server.Controllers
                     });
                 }
 
-                var attempts = await _context.Quiz_Results
+                var attempts = await _context.msc_Quiz_Results
                     .Where(x =>
                         x.ThematologiaId == thematologiaId &&
                         x.Nickname == nickname)
@@ -932,7 +939,7 @@ namespace AngularAppQnA.Server.Controllers
                     return ret;
                 }
 
-                var thematologiaExists = await _context.Thematologia
+                var thematologiaExists = await _context.msc_Thematologia
                     .AnyAsync(x => x.Id == thematologiaId);
 
                 if (!thematologiaExists)
@@ -963,7 +970,7 @@ namespace AngularAppQnA.Server.Controllers
                 if (rows.Count > 0)
                 {
                     // OK
-                    List<Thematologia_Theoria> theories = await _context.Thematologia_Theoria
+                    List<msc_Thematologia_Theoria> theories = await _context.msc_Thematologia_Theoria
                         .Where(x => x.Id == thematologiaId).ToListAsync();
 
 
@@ -973,9 +980,9 @@ namespace AngularAppQnA.Server.Controllers
                     foreach (QuizImportRow row in rows)
                     {
                         int detIdNew;
-                        List<Thematologia_Answers> answersToAdd = new List<Thematologia_Answers>();
+                        List<msc_Thematologia_Answers> answersToAdd = new List<msc_Thematologia_Answers>();
 
-                        Thematologia_Theoria theoryFound = theories.Where(x => x.Header.Trim() == row.Theory.Trim()).FirstOrDefault();
+                        msc_Thematologia_Theoria theoryFound = theories.Where(x => x.Header.Trim() == row.Theory.Trim()).FirstOrDefault();
                         if (theoryFound != null)
                         {
                             detIdNew = theoryFound.DetId;
@@ -985,7 +992,7 @@ namespace AngularAppQnA.Server.Controllers
                             detIdNew = theories.Count > 0
                                 ? theories.Max(x => x.DetId) + 1
                                 : 1;
-                            Thematologia_Theoria newRow = new Thematologia_Theoria()
+                            msc_Thematologia_Theoria newRow = new msc_Thematologia_Theoria()
                             {
                                 Id = thematologiaId,
                                 DetId = detIdNew,
@@ -994,7 +1001,7 @@ namespace AngularAppQnA.Server.Controllers
                                 Header = row.Theory,
                                 Details = row.TheoryDetails
                             };
-                            _context.Thematologia_Theoria.Add(newRow);
+                            _context.msc_Thematologia_Theoria.Add(newRow);
                             theories.Add(newRow);
 
                             theoryFound = newRow;
@@ -1003,10 +1010,10 @@ namespace AngularAppQnA.Server.Controllers
 
                         // Questions/Answers add --start
 
-                        List<Thematologia_Question> questions = await _context.Thematologia_Question
+                        List<msc_Thematologia_Question> questions = await _context.msc_Thematologia_Question
                             .Where(x => x.Id == thematologiaId && x.DetId == detIdNew).ToListAsync();
 
-                        Thematologia_Question questionFound = questions.Where(x => x.DetId == theoryFound.DetId && x.Question == row.Question).FirstOrDefault();
+                        msc_Thematologia_Question questionFound = questions.Where(x => x.DetId == theoryFound.DetId && x.Question == row.Question).FirstOrDefault();
                         if (questionFound != null)
                         {
                             log += $"question No {rows.IndexOf(row) + 1} already exists";
@@ -1020,7 +1027,7 @@ namespace AngularAppQnA.Server.Controllers
                             {
                                 difficulty = row.Difficulty.Value;
                             }
-                            Thematologia_Question newRow = new Thematologia_Question()
+                            msc_Thematologia_Question newRow = new msc_Thematologia_Question()
                             {
                                 Id = thematologiaId,
                                 DetId = detIdNew,
@@ -1030,7 +1037,7 @@ namespace AngularAppQnA.Server.Controllers
                                 Question = row.Question,
                                 Difficulty = difficulty
                             };
-                            _context.Thematologia_Question.Add(newRow);
+                            _context.msc_Thematologia_Question.Add(newRow);
 
 
                             var aa = row.Answers.Split(';', StringSplitOptions.RemoveEmptyEntries);
@@ -1044,7 +1051,7 @@ namespace AngularAppQnA.Server.Controllers
                                 int cc = 1;
                                 foreach (var answer in aa)
                                 {
-                                    Thematologia_Answers newAnswer = new Thematologia_Answers
+                                    msc_Thematologia_Answers newAnswer = new msc_Thematologia_Answers
                                     {
                                         Id = thematologiaId,
                                         DetId = detIdNew,
@@ -1063,7 +1070,7 @@ namespace AngularAppQnA.Server.Controllers
                         }
                         // Questions/Answers add --end
                         if (answersToAdd.Count > 0)
-                            await _context.Thematologia_Answers.AddRangeAsync(answersToAdd);
+                            await _context.msc_Thematologia_Answers.AddRangeAsync(answersToAdd);
 
                         await _context.SaveChangesAsync();
                     }
@@ -1276,7 +1283,7 @@ namespace AngularAppQnA.Server.Controllers
         [Authorize(Roles = "99")]
         public async Task<IActionResult> UpdateQuizSettings([FromBody] UpdateQuizSettingsRequest request)
         {
-            var thematologia = await _context.Thematologia
+            var thematologia = await _context.msc_Thematologia
                 .FirstOrDefaultAsync(x => x.Id == request.ThematologiaId);
 
             if (thematologia == null)
@@ -1288,7 +1295,7 @@ namespace AngularAppQnA.Server.Controllers
                 });
             }
 
-            int totalQuestions = await _context.Thematologia_Question
+            int totalQuestions = await _context.msc_Thematologia_Question
                 .CountAsync(q => q.Id == request.ThematologiaId);
 
             if (request.QuizQuestionCount <= 0)
@@ -1353,10 +1360,10 @@ namespace AngularAppQnA.Server.Controllers
                 hardCount = request.QuizQuestionCount - easyCount;
             }
 
-            int availableEasy = await _context.Thematologia_Question
+            int availableEasy = await _context.msc_Thematologia_Question
                 .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 1);
 
-            int availableHard = await _context.Thematologia_Question
+            int availableHard = await _context.msc_Thematologia_Question
                 .CountAsync(q => q.Id == request.ThematologiaId && q.Difficulty == 2);
 
             if (availableEasy < easyCount)
@@ -1389,8 +1396,176 @@ namespace AngularAppQnA.Server.Controllers
                 Message = "Οι ρυθμίσεις quiz αποθηκεύτηκαν."
             });
         }
+        [HttpPost("AddUser")]
+        [Authorize(Roles = "99")]
+        public async Task<IActionResult> AddUser(AddUserRequest request)
+        {
+            BasicResponse ret = new();
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.Email))
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Το email είναι υποχρεωτικό.";
+                    return Ok(ret);
+                }
+
+                request.Email = request.Email.Trim().ToLower();
+
+                bool exists = await _context.msc_Users
+                    .AnyAsync(x => x.Email == request.Email);
+
+                if (exists)
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Υπάρχει ήδη χρήστης με αυτό το email.";
+                    return Ok(ret);
+                }
+
+                msc_Users user = new()
+                {
+                    Email = request.Email,
+                    RoleId = 1,
+                    IsActive = true,
+                    PasswordSha256 = null,
+                    Nickname = null,
+                    StoreId = null,
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.msc_Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                ret.IsSuccess = true;
+                ret.Message = "Ο χρήστης δημιουργήθηκε.";
+
+                return Ok(ret);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
+        [HttpPost("ChangeUserStatus")]
+        [Authorize(Roles = "99")]
+        public async Task<IActionResult> ChangeUserStatus(ChangeUserStatusRequest request)
+        {
+            BasicResponse ret = new BasicResponse();
+
+            msc_Users? user = await _context.msc_Users
+                .FirstOrDefaultAsync(x => x.Id == request.UserId);
+
+            if (user == null)
+            {
+                ret.IsSuccess = false;
+                ret.Message = "Ο χρήστης δεν βρέθηκε.";
+                return Ok(ret);
+            }
+
+            user.IsActive = request.IsActive;
+
+            await _context.SaveChangesAsync();
+
+            ret.IsSuccess = true;
+            ret.Message = request.IsActive
+                ? "Ο χρήστης ενεργοποιήθηκε."
+                : "Ο χρήστης απενεργοποιήθηκε.";
+
+            return Ok(ret);
+        }
+        [HttpGet("DownloadUsersExcelTemplate")]
+        [Authorize(Roles = "99")]
+        public IActionResult DownloadUsersExcelTemplate()
+        {
+            using XLWorkbook workbook = new XLWorkbook();
+
+            var worksheet = workbook.Worksheets.Add("Users");
+
+            worksheet.Cell(1, 1).Value = "Email";
+            worksheet.Cell(2, 1).Value = "user@masoutis.gr";
+
+            worksheet.Column(1).Width = 35;
+
+            worksheet.Cell(1, 1).Style.Font.Bold = true;
+            worksheet.Cell(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+
+            using MemoryStream stream = new MemoryStream();
+
+            workbook.SaveAs(stream);
+
+            byte[] content = stream.ToArray();
+
+            return File(
+                content,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "UsersImportTemplate.xlsx"
+            );
+        }
+        [HttpPost("ImportUsersExcel")]
+        [Authorize(Roles = "99")]
+        public async Task<IActionResult> ImportUsersExcel(IFormFile file)
+        {
+            BasicResponse ret = new BasicResponse();
+
+            if (file == null || file.Length == 0)
+            {
+                ret.IsSuccess = false;
+                ret.Message = "Δεν επιλέχθηκε αρχείο.";
+                return Ok(ret);
+            }
+
+            int inserted = 0;
+            int skipped = 0;
+
+            using var stream = file.OpenReadStream();
+            using var workbook = new XLWorkbook(stream);
+
+            var worksheet = workbook.Worksheet(1);
+            var rows = worksheet.RowsUsed().Skip(1);
+
+            foreach (var row in rows)
+            {
+                string email = row.Cell(1).GetString().Trim().ToLower();
+
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    continue;
+                }
+
+                bool exists = await _context.msc_Users
+                    .AnyAsync(x => x.Email == email);
+
+                if (exists)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                msc_Users user = new msc_Users
+                {
+                    Email = email,
+                    RoleId = 1,
+                    IsActive = true,
+                    PasswordSha256 = null,
+                    Nickname = null,
+                    StoreId = null,
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.msc_Users.Add(user);
+                inserted++;
+            }
+
+            await _context.SaveChangesAsync();
+
+            ret.IsSuccess = true;
+            ret.Message = $"Η εισαγωγή ολοκληρώθηκε. Νέοι χρήστες: {inserted}, Υπάρχοντες που αγνοήθηκαν: {skipped}.";
+
+            return Ok(ret);
+        }
         private object CreateSuggestion(
-    List<Thematologia_Question> allQuestions,
+    List<msc_Thematologia_Question> allQuestions,
     int difficulty,
     string difficultyName)
         {

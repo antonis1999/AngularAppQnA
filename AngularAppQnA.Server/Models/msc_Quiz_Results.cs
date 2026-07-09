@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AngularAppQnA.Server.Models
 {
     [Table("Quiz_Results")]
-    public class Quiz_Result
+    public class msc_Quiz_Results
     {
         [Key]
         public int ResultId { get; set; }

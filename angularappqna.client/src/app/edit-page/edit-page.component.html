@@ -12,17 +12,14 @@
       </button>
 
       <button [class.active]="adminEditTab === 'quiz'" (click)="setAdminEditTab('quiz')">
-       Επεξεργασία Quiz
+        Επεξεργασία Quiz
       </button>
-      <button type="button"
-              class="excel-action-btn"
-              (click)="downloadQuizExcelTemplate()">
+
+      <button type="button" class="excel-action-btn" (click)="downloadQuizExcelTemplate()">
         Λήψη Excel Template
       </button>
 
-      <button type="button"
-              class="excel-action-btn import-btn"
-              (click)="openQuizExcelImport()">
+      <button type="button" class="excel-action-btn import-btn" (click)="openQuizExcelImport()">
         Εισαγωγή Excel
       </button>
 
@@ -31,7 +28,6 @@
              accept=".xlsx"
              hidden
              (change)="onQuizExcelSelected($event)" />
-
     </div>
 
     <div class="section-card">
@@ -112,10 +108,13 @@
 
             <div class="theory-list-inside" *ngIf="selectedTheories.length > 0">
 
-              <div class="inner-theory-card" *ngFor="let theory of selectedTheories">
+              <div class="inner-theory-card"*ngFor="let theory of selectedTheories; let i = index">
 
                 <div class="topic-top">
-                  <h4>{{ theory.Header }}</h4>
+                  <h4>
+                    <span class="theory-number">{{ i + 1 }}.</span>
+                    {{ theory.Header }}
+                  </h4>
 
                   <div class="theory-actions">
                     <button class="edit-topic-btn theory-icon-btn"
@@ -133,8 +132,7 @@
                 <div [innerHTML]="theory.Details"></div>
 
                 <div class="edit-theory-row"
-                     *ngIf="editingTheoryId === theory.Id &&
-                            editingTheoryDetId === theory.DetId">
+                     *ngIf="editingTheoryId === theory.Id && editingTheoryDetId === theory.DetId">
 
                   <input type="text"
                          [(ngModel)]="editingTheoryHeader"
@@ -165,26 +163,27 @@
 
         <div class="quiz-left-column">
 
-          <h3>
-            {{ selectedThematologia?.Title }}
-          </h3>
+          <h3>{{ selectedThematologia?.Title }}</h3>
 
           <div class="empty-theory" *ngIf="selectedTheories.length === 0">
             Δεν υπάρχουν θεωρίες.
           </div>
 
           <div class="quiz-theory-item clickable-theory"
-               *ngFor="let theory of selectedTheories"
+               *ngFor="let theory of selectedTheories; let i = index"
                (click)="selectQuizTheory(theory)"
                [class.active]="selectedQuizTheory === theory">
 
+            <span class="theory-number">{{ i + 1 }}.</span>
             {{ theory.Header }}
 
           </div>
+
           <div class="quiz-settings-card">
             <p class="quiz-settings-info">
               Επιλέξτε πόσες τυχαίες ερωτήσεις θα εμφανίζονται σε κάθε εκτέλεση του quiz.
             </p>
+
             <label>
               Αριθμός ερωτήσεων Quiz
             </label>
@@ -199,8 +198,8 @@
                 <span>/ {{ totalQuizQuestions }} διαθέσιμες</span>
               </div>
             </div>
-
           </div>
+
           <div class="quiz-settings-card difficulty-settings-card">
 
             <small>
@@ -224,7 +223,6 @@
             </div>
 
             <div *ngIf="useQuizDifficulty">
-
               <select class="quiz-difficulty-select"
                       [(ngModel)]="quizDifficultyPercent">
 
@@ -233,19 +231,15 @@
                 <option [ngValue]="3">Δύσκολο</option>
 
               </select>
-
             </div>
+
             <button type="button"
                     class="new-save"
                     (click)="saveQuizSettings()">
               Αποθήκευση ρυθμίσεων Quiz
             </button>
           </div>
-          <!-- <button type="button"
-           class="suggestions-btn"
-           (click)="openQuizSuggestions()">
-     Προτεινόμενα Quiz
-   </button>-->
+
         </div>
 
         <div class="quiz-right-column">
@@ -277,7 +271,6 @@
                   <div class="existing-question-top">
 
                     <div class="question-content">
-
                       <label>
                         Ερώτηση {{ qi + 1 }}
                       </label>
@@ -285,7 +278,6 @@
                       <p class="existing-question-title">
                         {{ q.Question }}
                       </p>
-
                     </div>
 
                     <div class="question-actions">
@@ -327,13 +319,15 @@
                     <textarea [(ngModel)]="editingQuestionText"
                               placeholder="Γράψτε την ερώτηση...">
                     </textarea>
+
                     <label>Βαθμός δυσκολίας</label>
 
                     <select [(ngModel)]="editingQuestionDifficulty">
                       <option [ngValue]="1">Εύκολη</option>
-                      
+                      <option [ngValue]="2">Μεσαία</option>
                       <option [ngValue]="3">Δύσκολη</option>
                     </select>
+
                     <div class="answers-header">
                       Απαντήσεις
                     </div>
@@ -392,7 +386,7 @@
 
                 <label>Ερώτηση {{ qi + 1 }}</label>
 
-                <textarea [(ngModel)]="q.question"
+                <textarea [(ngModel)]="q.Question"
                           placeholder="Γράψτε την ερώτηση...">
                 </textarea>
 
@@ -400,7 +394,7 @@
 
                 <select [(ngModel)]="q.Difficulty">
                   <option [ngValue]="1">Εύκολη</option>
-
+                  <option [ngValue]="2">Μεσαία</option>
                   <option [ngValue]="3">Δύσκολη</option>
                 </select>
 
@@ -415,14 +409,14 @@
                 </div>
 
                 <div class="answer-row"
-                     *ngFor="let option of q.options; let ai = index">
+                     *ngFor="let option of q.Options; let ai = index">
 
                   <input type="radio"
-                         [checked]="option.is_correct"
+                         [checked]="option.IsCorrect"
                          (change)="selectCorrectAnswer(q, option)">
 
                   <input type="text"
-                         [(ngModel)]="option.answer"
+                         [(ngModel)]="option.Answer"
                          placeholder="Απάντηση {{ ai + 1 }}">
 
                   <button type="button"
@@ -438,11 +432,13 @@
                         (click)="addAnswer(q)">
                   + Προσθήκη απάντησης
                 </button>
+
                 <button type="button"
                         class="save-quiz-btn"
                         (click)="saveQuizQuestions()">
                   Αποθήκευση
                 </button>
+
               </div>
 
             </div>
@@ -454,6 +450,7 @@
       </div>
 
     </div>
+
     <div class="suggestions-overlay" *ngIf="showQuizSuggestionsPopup">
 
       <div class="suggestions-popup">
@@ -520,5 +517,6 @@
       </div>
 
     </div>
+
   </div>
 </div>

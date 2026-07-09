@@ -14,16 +14,16 @@ namespace AngularAppQnA.Server.Data
 
 
         public DbSet<msc_Thematologia> msc_Thematologia { get; set; }
-        public DbSet<Thematologia_Theoria> Thematologia_Theoria { get; set; }
-        public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
-        public DbSet<TrainingStore> Stores { get; set; }
+        public DbSet<msc_Thematologia_Theoria> msc_Thematologia_Theoria { get; set; }
+        public DbSet<msc_Users> msc_Users { get; set; }
+        public DbSet<msc_Roles> msc_Roles { get; set; }
+        public DbSet<msc_Stores> msc_Stores { get; set; }
 
-        public DbSet<Thematologia_Question> Thematologia_Question { get; set; }
+        public DbSet<msc_Thematologia_Question> msc_Thematologia_Question { get; set; }
 
-        public DbSet<Thematologia_Answers> Thematologia_Answers { get; set; }
+        public DbSet<msc_Thematologia_Answers> msc_Thematologia_Answers { get; set; }
 
-        public DbSet<Quiz_Result> Quiz_Results { get; set; }
+        public DbSet<msc_Quiz_Results> msc_Quiz_Results { get; set; }
 
         public virtual DbSet<DeleteTheoria_Result> DeleteTheoria_Results { get; set; }
         public virtual DbSet<RankingDto> QuizRankingDto { get; set; }
@@ -33,30 +33,30 @@ namespace AngularAppQnA.Server.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .ToTable("users")
+            modelBuilder.Entity<msc_Users>()
+                .ToTable("msc_Users")
                 .HasKey(x => x.Id);
 
-            modelBuilder.Entity<Role>()
-                .ToTable("roles")
+            modelBuilder.Entity<msc_Roles>()
+                .ToTable("msc_Roles")
                 .HasKey(x => x.Id);
 
-            modelBuilder.Entity<TrainingStore>()
-                .ToTable("storess")
+            modelBuilder.Entity<msc_Stores>()
+                .ToTable("msc_stores")
                 .HasKey(x => x.Id);
 
             modelBuilder.Entity<msc_Thematologia>().ToTable("msc_Thematologia").HasKey(x => x.Id);
 
-            modelBuilder.Entity<Thematologia_Theoria>()
-                .ToTable("Thematologia_Theoria")
+            modelBuilder.Entity<msc_Thematologia_Theoria>()
+                .ToTable("msc_Thematologia_Theoria")
                 .HasKey(x => new { x.Id, x.DetId });
 
-            modelBuilder.Entity<Thematologia_Question>()
-                .ToTable("Thematologia_Question")
+            modelBuilder.Entity<msc_Thematologia_Question>()
+                .ToTable("msc_Thematologia_question")
                 .HasKey(x => new { x.Id, x.DetId, x.QId });
 
-            modelBuilder.Entity<Thematologia_Answers>()
-                .ToTable("Thematologia_answer")
+            modelBuilder.Entity<msc_Thematologia_Answers>()
+                .ToTable("msc_Thematologia_answer")
                 .HasKey(x => new { x.Id, x.DetId, x.QId, x.AId });
 
             modelBuilder.Entity<DeleteTheoria_Result>()
@@ -68,6 +68,9 @@ namespace AngularAppQnA.Server.Data
 
             modelBuilder.Entity<QuizQuestionFlatDto>()
                 .HasNoKey();
+
+            modelBuilder.Entity<msc_Quiz_Results>()
+                .ToTable("msc_Quiz_Results");
         }
 
 
@@ -77,7 +80,7 @@ namespace AngularAppQnA.Server.Data
             var detIdParam = new SqlParameter("@detid", detid);
 
             var results = await this.DeleteTheoria_Results
-                .FromSqlRaw("EXEC dbo.DeleteTheoria @id, @detid", idParam, detIdParam)
+                .FromSqlRaw("EXEC msc_DeleteTheoria @id, @detid", idParam, detIdParam)
                 .ToListAsync();
 
             var answer = results.FirstOrDefault();

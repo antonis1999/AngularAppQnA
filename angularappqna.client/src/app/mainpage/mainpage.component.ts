@@ -4,17 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Ranking, Thematologia, User } from '../interfaces/models';
-import { ActivatedRoute } from '@angular/router';
-
-type AppUser = User & {
-  id?: number;
-  email?: string;
-  nickname?: string;
-  roleId?: number;
-  storeId?: number;
-};
 
 @Component({
   selector: 'app-mainpage',
@@ -32,8 +23,8 @@ export class MainpageComponent {
     private router: Router
   ) { }
 
-  user: AppUser | null = null;
-  users: AppUser[] = [];
+  user: User | null = null;
+  users: User[] = [];
 
   isAdmin = false;
   activeSection = 'theory';
@@ -54,12 +45,16 @@ export class MainpageComponent {
   rankingDate = '';
   showOnlyBestPerUser = false;
   selectedRankingDifficulty: number | null = null;
+
   showUserDetailsPopup = false;
   selectedUserId: number | null = null;
   userSearchText = '';
   newPin = '';
   confirmPin = '';
+
   showPointsPopover = false;
+  showAddUser = false;
+  newUserEmail = '';
 
   quillModules = {
     toolbar: [
@@ -73,15 +68,12 @@ export class MainpageComponent {
     ]
   };
 
-  ngOnInit() {
+  ngOnInit(): void {
     const data = localStorage.getItem('currentUser');
 
     if (data) {
-      this.user = JSON.parse(data) as AppUser;
-
-      this.isAdmin =
-        this.user.RoleId === 99 ||
-        this.user.roleId === 99;
+      this.user = JSON.parse(data) as User;
+      this.isAdmin = this.user.RoleId === 99;
 
       if (this.isAdmin) {
         this.loadUsers();
@@ -89,28 +81,23 @@ export class MainpageComponent {
     }
 
     this.loadThematologies();
+
     this.route.queryParams.subscribe(params => {
-
       if (params['section'] === 'ranking') {
-
         this.activeSection = 'ranking';
-
-        this.selectedRankingThematologiaId =
-          Number(params['thematologiaId']);
-
+        this.selectedRankingThematologiaId = Number(params['thematologiaId']);
         this.loadRanking();
       }
-
     });
   }
 
-  logout() {
+  logout(): void {
     localStorage.removeItem('currentUser');
     window.location.href = '/';
   }
 
-  loadUsers() {
-    this.http.get<AppUser[]>('api/Auth/GetUsers')
+  loadUsers(): void {
+    this.http.get<User[]>('api/Auth/GetUsers')
       .subscribe({
         next: (res) => {
           this.users = res;
@@ -121,24 +108,24 @@ export class MainpageComponent {
       });
   }
 
-  loadThematologies() {
-    this.http.get<any[]>('api/Service/GetThematologies')
+  loadThematologies(): void {
+    this.http.get<Thematologia[]>('api/Service/GetThematologies')
       .subscribe({
         next: (res) => {
           const availableThematologies = this.isAdmin
             ? res
             : res.filter(x => !this.isExpiredThematologia({
-              toDate: x.ToDate ?? x.toDate
+              toDate: x.ToDate
             }));
 
           this.thematologies = availableThematologies;
 
           this.topics = availableThematologies.map(x => ({
-            id: x.id ?? x.Id,
-            title: x.title ?? x.Title,
+            id: x.Id,
+            title: x.Title,
             content: '',
-            fromDate: x.fromDate ?? x.FromDate,
-            toDate: x.toDate ?? x.ToDate
+            fromDate: x.FromDate,
+            toDate: x.ToDate
           }));
         },
         error: (err) => {
@@ -146,8 +133,8 @@ export class MainpageComponent {
         }
       });
   }
-  isExpiredThematologia(topic: any): boolean {
 
+  isExpiredThematologia(topic: any): boolean {
     if (!topic.toDate) {
       return false;
     }
@@ -160,7 +147,8 @@ export class MainpageComponent {
 
     return expireDate < today;
   }
-  saveThematologia() {
+
+  saveThematologia(): void {
     if (!this.thematologiaTitle.trim()) {
       this.notificationService.warning('Συμπλήρωσε Header Θεματολογίας');
       return;
@@ -179,7 +167,7 @@ export class MainpageComponent {
     this.http.post<any>('api/Service/AddThematologia', body)
       .subscribe({
         next: (res) => {
-          if (res.isSuccess || res.IsSuccess) {
+          if (res.IsSuccess) {
             this.thematologiaTitle = '';
             this.loadThematologies();
             this.notificationService.success('Η θεματολογία αποθηκεύτηκε επιτυχώς');
@@ -194,8 +182,8 @@ export class MainpageComponent {
       });
   }
 
-  togglePreviewThematologia(topic: any) {
-    const id = topic.id ?? topic.Id;
+  togglePreviewThematologia(topic: any): void {
+    const id = topic.id;
 
     if (this.openedPreviewThematologiaId === id) {
       this.openedPreviewThematologiaId = null;
@@ -217,7 +205,7 @@ export class MainpageComponent {
       });
   }
 
-  setSection(section: string) {
+  setSection(section: string): void {
     this.activeSection = section;
 
     if (section === 'ranking') {
@@ -225,14 +213,13 @@ export class MainpageComponent {
     }
   }
 
-  openEditPage(topic: any) {
+  openEditPage(topic: any): void {
     if (!this.isAdmin) {
       this.togglePreviewThematologia(topic);
       return;
     }
 
-    const id = topic.id ?? topic.Id;
-    this.router.navigate(['/edit', id]);
+    this.router.navigate(['/edit', topic.id]);
   }
 
   get selectedQuizThematologiaTitle(): string {
@@ -243,7 +230,7 @@ export class MainpageComponent {
     return selected?.Title ?? 'Καμία επιλογή';
   }
 
-  startQuiz() {
+  startQuiz(): void {
     if (!this.selectedQuizThematologiaId) {
       this.notificationService.warning('Επέλεξε Θεματολογία');
       return;
@@ -282,8 +269,7 @@ export class MainpageComponent {
     });
   }
 
-  loadRanking() {
-
+  loadRanking(): void {
     if (!this.selectedRankingThematologiaId) {
       this.rankings = [];
       return;
@@ -294,10 +280,7 @@ export class MainpageComponent {
     let params = new HttpParams();
 
     if (this.selectedRankingDifficulty !== null) {
-      params = params.set(
-        'quizDifficulty',
-        this.selectedRankingDifficulty
-      );
+      params = params.set('quizDifficulty', this.selectedRankingDifficulty);
     }
 
     this.http.get<Ranking[]>(
@@ -317,7 +300,7 @@ export class MainpageComponent {
       });
   }
 
-  openQuizDetails(r: Ranking) {
+  openQuizDetails(r: Ranking): void {
     if (!this.selectedRankingThematologiaId || !r.Nickname) {
       return;
     }
@@ -386,7 +369,7 @@ export class MainpageComponent {
     this.rankingDate = '';
   }
 
-  openUserDetailsPopup() {
+  openUserDetailsPopup(): void {
     this.showUserDetailsPopup = true;
 
     if (this.users.length === 0) {
@@ -394,19 +377,19 @@ export class MainpageComponent {
     }
   }
 
-  closeUserDetailsPopup() {
+  closeUserDetailsPopup(): void {
     this.showUserDetailsPopup = false;
     this.selectedUserId = null;
     this.userSearchText = '';
   }
 
-  onPickerUserChange() {
+  onPickerUserChange(): void {
     this.userSearchText = '';
     this.newPin = '';
     this.confirmPin = '';
   }
 
-  get filteredUsers(): AppUser[] {
+  get filteredUsers(): User[] {
     if (!this.userSearchText.trim()) {
       return [];
     }
@@ -414,29 +397,27 @@ export class MainpageComponent {
     const search = this.userSearchText.toLowerCase().trim();
 
     return this.users.filter(u =>
-      (u.Nickname || u.nickname || '').toLowerCase().includes(search) ||
-      (u.Email || u.email || '').toLowerCase().includes(search)
+      (u.Nickname ?? '').toLowerCase().includes(search) ||
+      (u.Email ?? '').toLowerCase().includes(search)
     );
   }
-  get selectedPopupUser(): AppUser | null {
-    console.log(this.selectedUserId ?? '-');
 
+  get selectedPopupUser(): User | null {
     if (!this.selectedUserId) {
       return null;
     }
 
-    return this.users.find(u =>
-      (u.Id ?? u.id) === this.selectedUserId
-    ) ?? null;
+    return this.users.find(u => u.Id === this.selectedUserId) ?? null;
   }
-  selectUserFromPopup(user: AppUser) {
-    this.selectedUserId = user.Id ?? user.id ?? null;
+
+  selectUserFromPopup(user: User): void {
+    this.selectedUserId = user.Id;
     this.userSearchText = '';
     this.newPin = '';
     this.confirmPin = '';
   }
-  changeUserPin() {
 
+  changeUserPin(): void {
     const userId = this.isAdmin
       ? this.selectedUserId
       : this.user?.Id;
@@ -450,6 +431,7 @@ export class MainpageComponent {
       this.notificationService.warning('Τα PIN δεν ταιριάζουν.');
       return;
     }
+
     if (this.newPin.length < 4) {
       this.notificationService.warning(
         'Το PIN πρέπει να αποτελείται από τουλάχιστον 4 χαρακτήρες.'
@@ -465,9 +447,7 @@ export class MainpageComponent {
     this.http.post('api/Auth/ChangeUserPin', body)
       .subscribe({
         next: () => {
-
           this.notificationService.success('Το PIN άλλαξε επιτυχώς.');
-
           this.newPin = '';
           this.confirmPin = '';
         },
@@ -476,10 +456,124 @@ export class MainpageComponent {
         }
       });
   }
+
   togglePointsPopover(event: MouseEvent): void {
     event.stopPropagation();
     this.showPointsPopover = !this.showPointsPopover;
   }
+
+  openAddUserForm(): void {
+    this.showAddUser = !this.showAddUser;
+  }
+
+  saveNewUser(): void {
+    if (!this.newUserEmail.trim()) {
+      this.notificationService.warning('Συμπληρώστε email.');
+      return;
+    }
+
+    this.http.post<any>('api/Service/AddUser', {
+      Email: this.newUserEmail
+    })
+      .subscribe({
+        next: (res) => {
+          if (res.IsSuccess) {
+            this.notificationService.success(res.Message);
+            this.newUserEmail = '';
+            this.showAddUser = false;
+            this.loadUsers();
+          } else {
+            this.notificationService.warning(res.Message);
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.notificationService.error('Σφάλμα δημιουργίας χρήστη.');
+        }
+      });
+  }
+
+  cancelAddUser(): void {
+    this.newUserEmail = '';
+    this.showAddUser = false;
+  }
+
+  toggleUserActive(user: User): void {
+
+    if (!user || user.RoleId === 99) {
+      return;
+    }
+    const isActive = !user.IsActive;
+
+    this.http.post<any>('api/Service/ChangeUserStatus', {
+      UserId: user.Id,
+      IsActive: isActive
+    })
+      .subscribe({
+        next: (res) => {
+          if (!res.IsSuccess) {
+            this.notificationService.warning(res.Message);
+            return;
+          }
+
+          user.IsActive = isActive;
+
+          this.notificationService.success(res.Message);
+        },
+        error: () => {
+          this.notificationService.error('Σφάλμα αλλαγής κατάστασης.');
+        }
+      });
+  }
+
+  importUsersExcel(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.http.post<any>('api/Service/ImportUsersExcel', formData)
+      .subscribe({
+        next: (res) => {
+          if (res.IsSuccess) {
+            this.notificationService.success(res.Message);
+            this.loadUsers();
+          } else {
+            this.notificationService.warning(res.Message);
+          }
+        },
+        error: () => {
+          this.notificationService.error('Σφάλμα εισαγωγής Excel.');
+        }
+      });
+  }
+
+  downloadUsersExcelTemplate(): void {
+    this.http.get('api/Service/DownloadUsersExcelTemplate', {
+      responseType: 'blob'
+    })
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'UsersImportTemplate.xlsx';
+          a.click();
+
+          window.URL.revokeObjectURL(url);
+        },
+        error: () => {
+          this.notificationService.error('Σφάλμα λήψης Excel.');
+        }
+      });
+  }
+
   getStoreName(storeId: number | undefined): string {
     switch (storeId) {
       case 1:

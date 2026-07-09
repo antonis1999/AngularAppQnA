@@ -1,10 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { QuizPreviewQuestion, QuizPreviewAnswer} from '../interfaces/models';
+import { QuizPreviewQuestion } from '../interfaces/models';
 import { HttpClient } from '@angular/common/http';
-import { NotificationService } from '../services/notification.service';
 import { Location } from '@angular/common';
-
 
 @Component({
   selector: 'app-quiz-page',
@@ -19,18 +17,18 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   questions: QuizPreviewQuestion[] = [];
   currentQuestionIndex = 0;
   selectedAnswerId: number | null = null;
+
   showReview = false;
+  quizFinished = false;
+
   answers: { questionId: number; answerId: number | null }[] = [];
+
   timeLeft = 15;
   timer: any;
-  Details?: string;
-  details?: string;
+
   score = 0;
-  quizFinished = false;
   quizStartTime = 0;
-
   questionStartTime = 0;
-
   questionTimes: number[] = [];
 
   constructor(
@@ -39,8 +37,7 @@ export class QuizPageComponent implements OnInit, OnDestroy {
     private location: Location
   ) { }
 
-  ngOnInit() {
-
+  ngOnInit(): void {
     this.quizStartTime = Date.now();
 
     this.thematologiaId = Number(
@@ -48,17 +45,38 @@ export class QuizPageComponent implements OnInit, OnDestroy {
     );
 
     this.loadQuestions();
-
-   
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.clearTimer();
   }
 
-  startTimer() {
+  loadQuestions(): void {
+    this.http.get<QuizPreviewQuestion[]>(
+      `api/Service/GetRandomQuizQuestions/${this.thematologiaId}`
+    ).subscribe({
+      next: (res) => {
+        this.questions = res || [];
 
+        if (this.questions.length > 0) {
+          this.currentQuestionIndex = 0;
+          this.selectedAnswerId = null;
+          this.quizStartTime = Date.now();
+          this.answers = [];
+          this.questionTimes = [];
 
+          setTimeout(() => {
+            this.startTimer();
+          }, 0);
+        }
+      },
+      error: (err) => {
+        console.error('Load quiz questions error:', err);
+      }
+    });
+  }
+
+  startTimer(): void {
     this.questionStartTime = Date.now();
 
     this.clearTimer();
@@ -66,52 +84,24 @@ export class QuizPageComponent implements OnInit, OnDestroy {
     this.timeLeft = 15;
 
     this.timer = setInterval(() => {
-
       this.timeLeft--;
 
       if (this.timeLeft <= 0) {
-
         this.timeLeft = 0;
-
         this.clearTimer();
-
         this.selectedAnswerId = null;
       }
-
     }, 1000);
   }
 
-  clearTimer() {
+  clearTimer(): void {
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = null;
     }
   }
 
-  loadQuestions() {
-    this.http.get<QuizPreviewQuestion[]>(
-      `api/Service/GetRandomQuizQuestions/${this.thematologiaId}`
-    )
-      .subscribe({
-        next: (res) => {
-          this.questions = res || [];
-
-          if (this.questions.length > 0) {
-            this.currentQuestionIndex = 0;
-            this.selectedAnswerId = null;
-            this.quizStartTime = Date.now();
-
-            setTimeout(() => {
-              this.startTimer();
-            }, 0);
-          }
-        },
-        error: (err) => {
-          console.error(err);
-        }
-      });
-  }
-  selectAnswer(answerId: number) {
+  selectAnswer(answerId: number): void {
     if (this.timeLeft <= 0) {
       return;
     }
@@ -119,18 +109,33 @@ export class QuizPageComponent implements OnInit, OnDestroy {
     this.selectedAnswerId = answerId;
   }
 
-  nextQuestion() {
+  nextQuestion(): void {
+    this.saveCurrentQuestionAnswer();
+
+    if (this.currentQuestionIndex < this.questions.length - 1) {
+      this.currentQuestionIndex++;
+      this.selectedAnswerId = null;
+      this.startTimer();
+    } else {
+      this.showReview = true;
+    }
+  }
+
+  skipQuestion(): void {
+    this.selectedAnswerId = null;
+    this.nextQuestion();
+  }
+
+  private saveCurrentQuestionAnswer(): void {
     this.clearTimer();
 
     const currentQuestion = this.questions[this.currentQuestionIndex];
 
-    const secondsSpent =
-      Math.round(
-        (Date.now() - this.questionStartTime) / 1000
-      );
+    const secondsSpent = Math.round(
+      (Date.now() - this.questionStartTime) / 1000
+    );
 
-    this.questionTimes[this.currentQuestionIndex] =
-      secondsSpent;
+    this.questionTimes[this.currentQuestionIndex] = secondsSpent;
 
     if (currentQuestion) {
       this.answers[this.currentQuestionIndex] = {
@@ -138,88 +143,23 @@ export class QuizPageComponent implements OnInit, OnDestroy {
         answerId: this.selectedAnswerId
       };
     }
-
-    this.selectedAnswerId = null;
-
-    if (this.currentQuestionIndex < this.questions.length - 1) {
-      this.currentQuestionIndex++;
-      this.startTimer();
-    } else {
-      this.showReview = true;
-    }
-  }
-  getCurrentUserEmail(): string {
-    const data = localStorage.getItem('currentUser');
-
-    if (!data) {
-      return '';
-    }
-
-    const user = JSON.parse(data);
-
-    return user.email || user.Email || '';
-  }
-  getTotalQuizTimeSeconds(): number {
-
-    return Math.round(
-      (Date.now() - this.quizStartTime) / 1000
-    );
-
-  }
-  getCorrectAnswersCount(): number {
-
-    return this.questions.filter((q, index) => {
-
-      const answerId =
-        this.answers[index]?.answerId;
-
-      const selectedAnswer =
-        q.Answers.find(
-          a => a.AId === answerId
-        );
-
-      return selectedAnswer?.IsCorrect === true;
-
-    }).length;
-
-  }
-  get currentQuestion() {
-    return this.questions[this.currentQuestionIndex];
   }
 
-  get progressPercent() {
-    if (this.questions.length === 0) {
-      return 0;
-    }
-
-    return ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
-  }
-  submitAnswers() {
+  submitAnswers(): void {
     this.clearTimer();
 
-    const lastQuestionTime = Math.round(
-      (Date.now() - this.questionStartTime) / 1000
-    );
+    const totalQuestions = this.questions.length;
 
-    if (this.questionTimes[this.currentQuestionIndex] == null) {
-      this.questionTimes[this.currentQuestionIndex] = lastQuestionTime;
-    }
+    this.score = this.getCorrectAnswersCount();
 
-     this.score = this.questions.filter((q, index) => {
-      const answerId = this.answers[index]?.answerId;
-      const selectedAnswer = q.Answers.find(a => a.AId === answerId);
-      return selectedAnswer?.IsCorrect === true;
-    }).length;
+    const correctAnswers = this.score;
+    const wrongAnswers = totalQuestions - correctAnswers;
 
-     const totalQuestions = this.questions.length;
-     const correctAnswers = this.score;
-     const wrongAnswers = totalQuestions - correctAnswers;
-
-     const totalTimeSeconds = Math.round(
+    const totalTimeSeconds = Math.round(
       (Date.now() - this.quizStartTime) / 1000
     );
 
-      const answersDetails = this.questions.map((q, index) => {
+    const answersDetails = this.questions.map((q, index) => {
       const selectedAId = this.answers[index]?.answerId ?? null;
 
       const selectedAnswer = q.Answers.find(a => a.AId === selectedAId);
@@ -230,6 +170,7 @@ export class QuizPageComponent implements OnInit, OnDestroy {
         QId: q.QId,
         Question: q.Question,
         Difficulty: q.Difficulty,
+
         SelectedAId: selectedAId,
         SelectedAnswer: selectedAnswer?.Answer || 'Δεν απαντήθηκε',
 
@@ -262,23 +203,25 @@ export class QuizPageComponent implements OnInit, OnDestroy {
           this.showReview = false;
         },
         error: (err) => {
-          console.error(err);
+          console.error('Save quiz result error:', err);
           this.quizFinished = true;
           this.showReview = false;
         }
       });
   }
-  getCurrentUserNickname(): string {
-    const data = localStorage.getItem('currentUser');
 
-    if (!data) {
-      return 'Χρήστης';
-    }
+  getCorrectAnswersCount(): number {
+    return this.questions.filter((q, index) => {
+      const answerId = this.answers[index]?.answerId;
 
-    const user = JSON.parse(data);
+      const selectedAnswer = q.Answers.find(
+        a => a.AId === answerId
+      );
 
-    return user.nickname || user.Nickname || 'Χρήστης';
+      return selectedAnswer?.IsCorrect === true;
+    }).length;
   }
+
   getSelectedAnswerText(question: QuizPreviewQuestion): string {
     const index = this.questions.indexOf(question);
     const answerId = this.answers[index]?.answerId;
@@ -292,14 +235,16 @@ export class QuizPageComponent implements OnInit, OnDestroy {
     const answer = question.Answers.find(a => a.IsCorrect);
     return answer?.Answer || '-';
   }
+
   getTheoryDetails(question: QuizPreviewQuestion): string {
-    return (question as any).Details || '';
+    return question.Details || '';
   }
 
   shouldShowDetails(question: QuizPreviewQuestion): boolean {
     return !this.isQuestionCorrect(question) &&
       this.getTheoryDetails(question).trim() !== '';
   }
+
   isQuestionCorrect(question: QuizPreviewQuestion): boolean {
     const index = this.questions.indexOf(question);
     const answerId = this.answers[index]?.answerId;
@@ -308,34 +253,50 @@ export class QuizPageComponent implements OnInit, OnDestroy {
 
     return answer?.IsCorrect === true;
   }
-  skipQuestion() {
-    this.clearTimer();
 
-    const currentQuestion = this.questions[this.currentQuestionIndex];
+  getCurrentUserEmail(): string {
+    const data = localStorage.getItem('currentUser');
 
-    const secondsSpent = Math.round(
-      (Date.now() - this.questionStartTime) / 1000
-    );
-
-    this.questionTimes[this.currentQuestionIndex] = secondsSpent;
-
-    if (currentQuestion) {
-      this.answers[this.currentQuestionIndex] = {
-        questionId: currentQuestion.QId,
-        answerId: null
-      };
+    if (!data) {
+      return '';
     }
 
-    this.selectedAnswerId = null;
+    const user = JSON.parse(data);
 
-    if (this.currentQuestionIndex < this.questions.length - 1) {
-      this.currentQuestionIndex++;
-      this.startTimer();
-    } else {
-      this.showReview = true;
-    }
+    return user.Email || user.email || '';
   }
-  GoBack() {
+
+  getCurrentUserNickname(): string {
+    const data = localStorage.getItem('currentUser');
+
+    if (!data) {
+      return 'Χρήστης';
+    }
+
+    const user = JSON.parse(data);
+
+    return user.Nickname || user.nickname || 'Χρήστης';
+  }
+
+  getTotalQuizTimeSeconds(): number {
+    return Math.round(
+      (Date.now() - this.quizStartTime) / 1000
+    );
+  }
+
+  get currentQuestion(): QuizPreviewQuestion {
+    return this.questions[this.currentQuestionIndex];
+  }
+
+  get progressPercent(): number {
+    if (this.questions.length === 0) {
+      return 0;
+    }
+
+    return ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+  }
+
+  GoBack(): void {
     this.location.back();
   }
 }

@@ -3,6 +3,7 @@ export interface LoginRequest {
   Pin?: string;
   Nickname?: string;
   StoreId?: number;
+  IsFirstLogin?: boolean;
 }
 
 export interface LoginResponse {
@@ -17,9 +18,10 @@ export interface User {
   Id: number;
   Email: string;
   PasswordSha256?: string;
-  Nickname: string;
-  StoreId: number;
+  Nickname?: string;
+  StoreId?: number;
   RoleId: number;
+  IsActive: boolean;
   CreatedAt: Date;
 }
 
@@ -34,9 +36,7 @@ export interface Thematologia {
   FromDate: string;
   ToDate: string;
   QuizQuestionCount?: number;
-  quizQuestionCount?: number;
   QuizDifficultyPercent?: number;
-  quizDifficultyPercent?: number;
 }
 
 export interface QuizTheory {
@@ -49,14 +49,14 @@ export interface QuizTheory {
 }
 
 export interface QuizOption {
-  answer: string;
-  is_correct: boolean;
+  Answer: string;
+  IsCorrect: boolean;
 }
 
 export interface QuizQuestionView {
   QId?: number;
-  question: string;
-  options: QuizOption[];
+  Question: string;
+  Options: QuizOption[];
   Difficulty: number;
 }
 
@@ -90,6 +90,7 @@ export interface UpdateQuizQuestionRequest {
   Difficulty: number;
   Answers: UpdateQuizAnswerRequest[];
 }
+
 export interface QuizPreviewAnswer {
   AId: number;
   Answer: string;
@@ -103,7 +104,9 @@ export interface QuizPreviewQuestion {
   Question: string;
   Answers: QuizPreviewAnswer[];
   Difficulty: number;
+  Details?: string;
 }
+
 export interface Ranking {
   Nickname: string;
   CorrectAnswers: number;
@@ -112,8 +115,8 @@ export interface Ranking {
   TotalSeconds: number;
   CreateDate: string;
   Points?: number;
-  points?: number;
 }
+
 export interface QuizAttemptDetail {
   Nickname: string;
   CorrectAnswers: number;

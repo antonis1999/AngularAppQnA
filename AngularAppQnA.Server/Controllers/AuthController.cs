@@ -33,19 +33,27 @@ public class AuthController : ControllerBase
 
         if (
             string.IsNullOrWhiteSpace(request.Email) ||
-            string.IsNullOrWhiteSpace(request.Pin) ||
-            string.IsNullOrWhiteSpace(request.Nickname) ||
-            request.StoreId <= 0
+            string.IsNullOrWhiteSpace(request.Pin)
         )
         {
             ret.IsSuccess = false;
-            ret.Message = "Invalid input data";
+            ret.Message = "Συμπλήρωσε email και PIN";
+            return ret;
+        }
+
+        if (
+            request.IsFirstLogin &&
+            (string.IsNullOrWhiteSpace(request.Nickname) || request.StoreId <= 0)
+        )
+        {
+            ret.IsSuccess = false;
+            ret.Message = "Συμπλήρωσε nickname και χώρο εργασίας";
             return ret;
         }
 
         request.Email = request.Email.Trim().ToLower();
 
-        User? userFound = await _context.Users
+        msc_Users? userFound = await _context.msc_Users
             .FirstOrDefaultAsync(x => x.Email == request.Email);
 
         if (userFound == null)
@@ -54,14 +62,43 @@ public class AuthController : ControllerBase
             ret.Message = "User not found";
             return ret;
         }
+        if (!userFound.IsActive)
+        {
+            ret.IsSuccess = false;
+            ret.Message = "Ο λογαριασμός σας είναι ανενεργός. Επικοινωνήστε με τον διαχειριστή.";
+            return ret;
+        }
+
+        bool hasPassword = !string.IsNullOrWhiteSpace(userFound.PasswordSha256);
+
+        if (request.IsFirstLogin && hasPassword)
+        {
+            ret.IsSuccess = false;
+            ret.Message = "Έχεις ήδη ολοκληρώσει την πρώτη σύνδεση.  Πάτησε Όχι στην ερώτηση «Συνδέεσαι πρώτη φορά;» και συνδέσου μόνο με email και PIN.";
+            return ret;
+        }
+
+        if (!request.IsFirstLogin && !hasPassword)
+        {
+            ret.IsSuccess = false;
+            ret.Message = "Φαίνεται ότι συνδέεσαι πρώτη φορά. Πάτησε Ναι στην ερώτηση «Συνδέεσαι πρώτη φορά;» και συμπλήρωσε nickname και χώρο εργασίας.";
+            return ret;
+        }
 
         string passwordHash = CreateSha256(request.Email + request.Pin);
 
         if (string.IsNullOrWhiteSpace(userFound.PasswordSha256))
         {
+            if (!request.IsFirstLogin)
+            {
+                ret.IsSuccess = false;
+                ret.Message = "Επίλεξε 'Ναι' στην πρώτη σύνδεση για να δημιουργήσεις PIN.";
+                return ret;
+            }
+
             string nickname = request.Nickname.Trim();
 
-            bool nicknameExists = await _context.Users
+            bool nicknameExists = await _context.msc_Users
                 .AnyAsync(x =>
                     x.Nickname.ToLower() == nickname.ToLower()
                     && x.Email != request.Email
@@ -76,8 +113,9 @@ public class AuthController : ControllerBase
 
             userFound.PasswordSha256 = passwordHash;
             userFound.Nickname = nickname;
+            userFound.StoreId = request.StoreId;
 
-            _context.Users.Update(userFound);
+            _context.msc_Users.Update(userFound);
             await _context.SaveChangesAsync();
 
             ret.IsSuccess = true;
@@ -114,7 +152,7 @@ public class AuthController : ControllerBase
     [HttpGet("GetUsers")]
     public IActionResult GetUsers()
     {
-        var users = _context.Users
+        var users = _context.msc_Users
             .Select(x => new
             {
                 x.Id,
@@ -122,6 +160,7 @@ public class AuthController : ControllerBase
                 x.Nickname,
                 x.StoreId,
                 x.RoleId,
+                x.IsActive,
                 x.CreatedAt
             })
             .ToList();
@@ -160,7 +199,7 @@ public class AuthController : ControllerBase
                 });
             }
 
-            var user = await _context.Users
+            var user = await _context.msc_Users
                 .FirstOrDefaultAsync(x => x.Id == request.UserId);
 
             if (user == null)
@@ -197,7 +236,7 @@ public class AuthController : ControllerBase
             });
         } 
     }
-        private string CreateJwtToken(User user)
+        private string CreateJwtToken(msc_Users user)
     {
         var claims = new List<Claim>
     {

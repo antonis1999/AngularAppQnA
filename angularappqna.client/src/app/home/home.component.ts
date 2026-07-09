@@ -22,10 +22,10 @@ export class HomeComponent {
   showHelpPopup = false;
   showAdminPopup = false;
   adminPin = '';
-
+  isFirstLogin = false;
   constructor(private http: HttpClient, private router: Router, private notificationService: NotificationService) { }
-
   login() {
+
     if (!this.email.trim()) {
       this.notificationService.warning('Συμπλήρωσε το email σου.');
       return;
@@ -36,27 +36,30 @@ export class HomeComponent {
       return;
     }
 
-    if (!this.nickname.trim()) {
-      this.notificationService.warning('Συμπλήρωσε το nickname σου.');
-      return;
-    }
+    if (this.isFirstLogin) {
 
-    if (!this.selectedStore) {
-      this.notificationService.warning('Επίλεξε κατάστημα / γραφεία / logistics.');
-      return;
-    }
+      if (!this.nickname.trim()) {
+        this.notificationService.warning('Συμπλήρωσε το nickname σου.');
+        return;
+      }
 
-    const storeId = this.getStoreId();
+      if (!this.selectedStore) {
+        this.notificationService.warning('Επίλεξε κατάστημα / γραφεία / logistics.');
+        return;
+      }
+    }
 
     const body: LoginRequest = {
       Email: this.email.trim(),
       Pin: this.pin.trim(),
-      Nickname: this.nickname.trim(),
-      StoreId: storeId
+      Nickname: this.isFirstLogin ? this.nickname.trim() : '',
+      StoreId: this.isFirstLogin ? this.getStoreId() : 0,
+      IsFirstLogin: this.isFirstLogin
     };
 
     this.http.post<LoginResponse>('api/Auth/login', body).subscribe({
       next: (res: any) => {
+
         const isSuccess = res.isSuccess ?? res.IsSuccess;
         const message = res.message ?? res.Message;
         const user = res.user ?? res.User;
@@ -68,7 +71,8 @@ export class HomeComponent {
 
           this.notificationService.success('Επιτυχία σύνδεσης');
           this.router.navigate(['/mainpage']);
-        } else {
+        }
+        else {
           this.notificationService.error(message || 'Λάθος email ή PIN.');
         }
       },
@@ -77,7 +81,6 @@ export class HomeComponent {
       }
     });
   }
-
   openAdminPopup() {
     this.adminPin = '';
     this.showAdminPopup = true;

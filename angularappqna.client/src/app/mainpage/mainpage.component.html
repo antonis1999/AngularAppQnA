@@ -1,20 +1,13 @@
 <div class="page">
 
   <div class="user-panel">
-
-    <img src="admin.png"
-         alt="User Icon"
-         class="user-icon">
+    <img src="admin.png" alt="User Icon" class="user-icon">
 
     <div class="user-info">
-      <h2>{{ user?.nickname || user?.Nickname || 'Χρήστης' }}</h2>
+      <h2>{{ user?.Nickname || 'Χρήστης' }}</h2>
+      <p>{{ getStoreName(user?.StoreId) }}</p>
 
-      <p>
-        {{ getStoreName(user?.storeId ?? user?.StoreId) }}
-      </p>
-
-      <button class="logout-btn"
-              (click)="logout()">
+      <button class="logout-btn" (click)="logout()">
         Log Out
       </button>
     </div>
@@ -23,54 +16,45 @@
   <div class="main-panel">
 
     <div class="tab-menu">
-
-      <button [class.active]="activeSection === 'theory'"
-              (click)="setSection('theory')">
+      <button [class.active]="activeSection === 'theory'" (click)="setSection('theory')">
         Αρχική
       </button>
-      <button [class.active]="activeSection === 'quiz'"
-              (click)="setSection('quiz')">
+
+      <button [class.active]="activeSection === 'quiz'" (click)="setSection('quiz')">
         {{ isAdmin ? 'Demo-Quiz' : 'Quiz' }}
       </button>
-      <button [class.active]="activeSection === 'ranking'"
-              (click)="setSection('ranking')">
+
+      <button [class.active]="activeSection === 'ranking'" (click)="setSection('ranking')">
         Κατάταξη
       </button>
 
-      <button [class.active]="activeSection === 'settings'"
-              (click)="setSection('settings')">
+      <button [class.active]="activeSection === 'settings'" (click)="setSection('settings')">
         Ρυθμίσεις
       </button>
-
     </div>
 
     <div class="section-card">
 
+      <!-- ΑΡΧΙΚΗ -->
       <div *ngIf="activeSection === 'theory'">
 
-        <div *ngIf="isAdmin"
-             class="form-section add-thematologia-panel">
-
+        <div *ngIf="isAdmin" class="form-section add-thematologia-panel">
           <label>Νέα Θεματολογία</label>
 
           <input type="text"
                  [(ngModel)]="thematologiaTitle"
                  placeholder="π.χ. Εκπαίδευση Ασφαλείας">
 
-          <button class="save-header-btn"
-                  (click)="saveThematologia()">
+          <button class="save-header-btn" (click)="saveThematologia()">
             Προσθήκη Θεματολογίας
           </button>
-
         </div>
 
-        <div class="empty-theory"
-             *ngIf="topics.length === 0">
+        <div class="empty-theory" *ngIf="topics.length === 0">
           Δεν υπάρχουν ακόμη διαθέσιμες θεματολογίες.
         </div>
 
-        <div class="theory-list"
-             *ngIf="topics.length > 0">
+        <div class="theory-list" *ngIf="topics.length > 0">
 
           <div class="theory-card clickable-theory-card"
                *ngFor="let topic of topics; let i = index"
@@ -82,7 +66,6 @@
             </div>
 
             <div class="theory-content">
-
               <h2>{{ topic.title || 'Χωρίς τίτλο' }}</h2>
 
               <div class="topic-period">
@@ -90,8 +73,7 @@
                 <span>Έως: {{ topic.toDate | date:'dd/MM/yyyy' }}</span>
               </div>
 
-              <div class="expired-badge"
-                   *ngIf="isAdmin && isExpiredThematologia(topic)">
+              <div class="expired-badge" *ngIf="isAdmin && isExpiredThematologia(topic)">
                 Μη διαθέσιμη για χρήστες
               </div>
 
@@ -102,38 +84,33 @@
               <div class="preview-theory-details"
                    *ngIf="!isAdmin && openedPreviewThematologiaId === topic.id">
 
-                <div class="empty-theory"
-                     *ngIf="previewTheories.length === 0">
+                <div class="empty-theory" *ngIf="previewTheories.length === 0">
                   Δεν υπάρχουν ακόμη διαθέσιμες θεωρίες για αυτή τη θεματολογία.
                 </div>
 
                 <div class="preview-theory-item"
                      *ngFor="let theory of previewTheories; let j = index">
 
-                  <h3>
-                    {{ j + 1 }}. {{ theory.header || theory.Header }}
-                  </h3>
+                  <h3>{{ j + 1 }}. {{ theory.Header }}</h3>
 
                   <div class="preview-theory-text"
-                       [innerHTML]="theory.details || theory.Details">
+                       [innerHTML]="theory.Details">
                   </div>
-
                 </div>
 
               </div>
-
             </div>
 
           </div>
 
         </div>
-
       </div>
 
+      <!-- QUIZ -->
       <div *ngIf="activeSection === 'quiz'">
         <div class="quiz-container">
-
           <div class="quiz-center-box">
+
             <p class="quiz-subtitle">
               <strong>Επέλεξε θεματολογία</strong>
             </p>
@@ -149,7 +126,6 @@
                       [ngValue]="t.Id">
                 {{ t.Title }}
               </option>
-
             </select>
 
             <button type="button"
@@ -159,9 +135,10 @@
             </button>
 
           </div>
-
         </div>
       </div>
+
+      <!-- ΚΑΤΑΤΑΞΗ -->
       <div *ngIf="activeSection === 'ranking'" class="ranking-section">
 
         <h1>Κατάταξη</h1>
@@ -213,8 +190,6 @@
               <option [ngValue]="1">Εύκολο</option>
               <option [ngValue]="2">Μεσαίο</option>
               <option [ngValue]="3">Δύσκολο</option>
-
-
             </select>
 
             <button *ngIf="showOnlyBestPerUser || rankingSearch || rankingDate"
@@ -229,6 +204,7 @@
           <div *ngIf="rankingLoading" class="ranking-empty">
             Φόρτωση κατάταξης...
           </div>
+
           <div class="ranking-table"
                *ngIf="!rankingLoading && filteredRankings.length > 0">
 
@@ -241,14 +217,15 @@
               <span>Ημερομηνία</span>
               <span>Ποσοστό</span>
 
-              <span class="points-popover-wrap">
+              <div class="points-popover-wrap">
                 <button type="button"
                         class="points-info-btn"
                         (click)="togglePointsPopover($event)">
-                  ΠΟΝΤΟΙ 
+                  ΠΟΝΤΟΙ
                 </button>
 
                 <div class="points-card" *ngIf="showPointsPopover">
+
                   <div class="points-card-header">
                     <button type="button"
                             class="points-card-close"
@@ -258,21 +235,22 @@
                   </div>
 
                   <div class="points-card-body">
+
                     <div class="points-card-section">
                       <h4 class="points-card-section-title">Κανονικό Quiz</h4>
 
                       <div class="points-card-line">
-                        <span>Ευκολο</span>
+                        <span>Εύκολο</span>
                         <b>×1</b>
                       </div>
 
                       <div class="points-card-line">
-                        <span>Μεσαιο</span>
+                        <span>Μεσαίο</span>
                         <b>×1.5</b>
                       </div>
 
                       <div class="points-card-line">
-                        <span>Δυσκολο</span>
+                        <span>Δύσκολο</span>
                         <b>×2</b>
                       </div>
                     </div>
@@ -285,9 +263,10 @@
                         Οι πόντοι υπολογίζονται με τον ίδιο τύπο.
                       </p>
                     </div>
+
                   </div>
                 </div>
-              </span>
+              </div>
             </div>
 
             <div class="ranking-row"
@@ -302,133 +281,114 @@
               <span>{{ formatTime(r.TotalSeconds) }}</span>
               <span>{{ formatDate(r.CreateDate) }}</span>
               <span>{{ r.Percentage }}%</span>
-              <span>{{ r.Points || r.points }}</span>
+              <span>{{ r.Points }}</span>
             </div>
 
           </div>
-      </div>
         </div>
+      </div>
+
+      <!-- ΡΥΘΜΙΣΕΙΣ -->
       <div *ngIf="activeSection === 'settings'" class="settings-section">
 
-        <h1>Ρυθμίσεις</h1>
-        <p>Διαχείριση ρυθμίσεων λογαριασμού.</p>
+        <div class="settings-title">
+          <h1>Ρυθμίσεις</h1>
+          <p>Διαχείριση ρυθμίσεων λογαριασμού.</p>
+        </div>
 
+        <!-- ADMIN -->
         <div *ngIf="isAdmin" class="settings-card admin-settings-card">
 
-          <div class="settings-card-text">
-            <h3>Διαχείριση χρηστών</h3>
+          <div class="settings-header-row">
+
+            <div class="settings-header-left">
+              <div>
+                <h3>Διαχείριση χρηστών</h3>
+                <p>Αναζήτηση, προβολή και διαχείριση χρηστών.</p>
+              </div>
+            </div>
+
+            <div class="settings-actions-row">
+
+              <button type="button"
+                      class="settings-action-btn"
+                      (click)="downloadUsersExcelTemplate()">
+                Λήψη φόρμας Excel
+              </button>
+
+              <label for="importUsersExcel"
+                     class="settings-action-btn import-label">
+                Εισαγωγή Excel
+              </label>
+
+              <input id="importUsersExcel"
+                     type="file"
+                     accept=".xlsx,.xls"
+                     hidden
+                     (change)="importUsersExcel($event)">
+
+              <button type="button"
+                      class="settings-action-btn add-user-btn"
+                      (click)="openAddUserForm()">
+                Προσθήκη χρήστη
+              </button>
+
+            </div>
+          </div>
+
+          <div class="add-user-panel" *ngIf="showAddUser">
+
+            <h3>Προσθήκη νέου χρήστη</h3>
+
             <p>
-              Αναζήτηση και προβολή λεπτομερειών χρήστη.
+              Δημιουργία νέου λογαριασμού. Ο χρήστης θα ορίσει
+              μόνος του PIN, nickname και κατάστημα κατά την πρώτη σύνδεση.
             </p>
-          </div>
 
-          <button type="button"
-                  class="settings-action-btn"
-                  (click)="openUserDetailsPopup()">
-            Εμφάνιση λεπτομερειών χρήστη
-          </button>
+            <div class="add-user-form">
 
-        </div>
-        <div *ngIf="!isAdmin && user" class="selected-user-card user-own-settings-card">
+              <div class="pin-input-group">
+                <label>Email</label>
 
-          <h3>Στοιχεία λογαριασμού</h3>
+                <input type="email"
+                       [(ngModel)]="newUserEmail"
+                       placeholder="π.χ. user@masoutis.gr">
+              </div>
 
-          <div class="user-detail-row">
-            <span>Nickname</span>
-            <strong>{{ user.Nickname || user.nickname }}</strong>
-          </div>
+              <div class="add-user-buttons">
 
-          <div class="user-detail-row">
-            <span>Email</span>
-            <strong>{{ user.Email || user.email }}</strong>
-          </div>
+                <button type="button"
+                        class="cancel-user-btn"
+                        (click)="cancelAddUser()">
+                  Ακύρωση
+                </button>
 
-          <div class="user-detail-row">
-            <span>Κατάστημα</span>
-            <strong>{{ getStoreName(user.StoreId || user.storeId) }}</strong>
-          </div>
+                <button type="button"
+                        class="save-user-btn"
+                        (click)="saveNewUser()">
+                  Αποθήκευση
+                </button>
 
-          <div class="user-detail-row">
-            <span>Ρόλος</span>
-            <strong>
-              {{ (user.RoleId || user.roleId) === 99 ? 'Admin' : 'Χρήστης' }}
-            </strong>
-          </div>
-
-          <hr class="user-divider">
-
-          <h3>Αλλαγή PIN</h3>
-
-          <div class="pin-change-area">
-
-            <div class="pin-input-group">
-              <label>Νέο PIN</label>
-
-              <input type="password"
-                  
-                     [(ngModel)]="newPin"
-                     placeholder="">
+              </div>
             </div>
-
-            <div class="pin-input-group">
-              <label>Επιβεβαίωση PIN</label>
-
-              <input type="password"
-                     
-                     [(ngModel)]="confirmPin"
-                     placeholder="">
-            </div>
-
-            <button type="button"
-                    class="save-pin-btn"
-                    (click)="changeUserPin()">
-
-              Αποθήκευση PIN
-
-            </button>
-
           </div>
 
-        </div>
-      </div>
-    
-    </div>
-    <div class="modal-backdrop"
-         *ngIf="showUserDetailsPopup">
+          <div class="settings-search-row">
 
-      <div class="user-details-modal">
-
-        <div class="modal-header">
-          <h2>Λεπτομέρειες χρήστη</h2>
-
-          <button type="button"
-                  class="close-btn"
-                  (click)="closeUserDetailsPopup()">
-            ×
-          </button>
-        </div>
-
-        <div class="modal-body">
-
-          <div class="user-top-row">
             <div class="user-search-box">
-
-              <label>Αναζήτηση με nickname</label>
+              <label>Αναζήτηση χρήστη</label>
 
               <input type="text"
                      class="search-input"
-                     placeholder="Πληκτρολογήστε nickname..."
+                     placeholder="Πληκτρολογήστε email..."
                      [(ngModel)]="userSearchText"
                      autocomplete="off"
-                     name="userNicknameSearch">
-
+                     name="userEmailSearch">
             </div>
 
-        
             <div class="user-picker-box">
-
               <label>Επιλογή χρήστη</label>
-              <!--(ngModelChange)="onPickerUserChange()"-->
+
               <select [(ngModel)]="selectedUserId"
                       (change)="onPickerUserChange()"
                       class="user-picker"
@@ -439,102 +399,181 @@
                 </option>
 
                 <option *ngFor="let u of users"
-                        [ngValue]="u.Id ?? u.id">
-
-                  {{ u.Email || u.email }}
-
+                        [ngValue]="u.Id">
+                  {{ u.Email }}
                 </option>
-
               </select>
-
             </div>
-
           </div>
-          <div class="user-details-area">
 
-            <div class="search-results"
-                 *ngIf="filteredUsers.length > 0">
+          <div class="settings-content-grid">
 
-              <div class="search-user-item"
-                   *ngFor="let u of filteredUsers"
-                   (click)="selectUserFromPopup(u)">
+            <div class="users-list-card">
 
-                <strong>
-                  {{ u.Nickname || u.nickname }}
-                </strong>
+              <h4>Αποτελέσματα αναζήτησης</h4>
 
-                <span>
-                  {{ u.Email || u.email }}
-                </span>
+              <div class="search-results"
+                   *ngIf="filteredUsers.length > 0">
 
+                <div class="search-user-item"
+                     *ngFor="let u of filteredUsers"
+                     (click)="selectUserFromPopup(u)">
+
+                  <div>
+                    
+                    <span>{{ u.Email }}</span>
+                  </div>
+
+                  <em>›</em>
+                </div>
               </div>
 
+              <div class="empty-results"
+                   *ngIf="userSearchText && filteredUsers.length === 0">
+                Δεν βρέθηκε χρήστης.
+              </div>
             </div>
 
-            <div class="empty-results"
-                 *ngIf="userSearchText && filteredUsers.length === 0">
+            <div class="selected-user-card"
+                 *ngIf="selectedPopupUser">
 
-              Δεν βρέθηκε χρήστης.
-
-            </div>
-            <div class="selected-user-card" *ngIf="selectedPopupUser">
-
-              <h3>Στοιχεία χρήστη</h3>
+              <div class="selected-user-title">
+                <h3>Στοιχεία χρήστη</h3>
+              </div>
 
               <div class="user-detail-row">
                 <span>Nickname</span>
-                <strong>{{ selectedPopupUser.Nickname || selectedPopupUser.nickname }}</strong>
+                <strong>{{ selectedPopupUser.Nickname || '-' }}</strong>
               </div>
 
               <div class="user-detail-row">
                 <span>Email</span>
-                <strong>{{ selectedPopupUser.Email || selectedPopupUser.email }}</strong>
+                <strong>{{ selectedPopupUser.Email }}</strong>
               </div>
 
               <div class="user-detail-row">
                 <span>Κατάστημα</span>
-                <strong>{{ getStoreName(selectedPopupUser.StoreId || selectedPopupUser.storeId) }}</strong>
+                <strong>{{ getStoreName(selectedPopupUser.StoreId) }}</strong>
               </div>
+
+              <div class="user-detail-row">
+                <span>Ρόλος</span>
+                <strong class="role-badge">
+                  {{ selectedPopupUser.RoleId === 99 ? 'Admin' : 'Χρήστης' }}
+                </strong>
+              </div>
+
+              <div class="user-detail-row">
+                <span>Κατάσταση</span>
+
+                <div class="user-status">
+                  <span class="status-badge"
+                        [class.active]="selectedPopupUser.RoleId === 99 || selectedPopupUser.IsActive"
+                        [class.inactive]="selectedPopupUser.RoleId !== 99 && !selectedPopupUser.IsActive">
+                    {{ selectedPopupUser.RoleId === 99 || selectedPopupUser.IsActive ? 'Ενεργός' : 'Ανενεργός' }}
+                  </span>
+
+                  <label class="switch" *ngIf="selectedPopupUser.RoleId !== 99">
+                    <input type="checkbox"
+                           [checked]="selectedPopupUser.IsActive"
+                           (change)="toggleUserActive(selectedPopupUser)">
+
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
               <hr class="user-divider">
 
-              <h3>Αλλαγή PIN</h3>
+              <div class="selected-user-title">
+                <h3>Αλλαγή PIN</h3>
+              </div>
 
               <div class="pin-change-area">
 
                 <div class="pin-input-group">
-
                   <label>Νέο PIN</label>
-
                   <input type="password"
                          [(ngModel)]="newPin"
-                         placeholder="">
-
+                         placeholder="Εισάγετε νέο PIN">
                 </div>
 
                 <div class="pin-input-group">
-
                   <label>Επιβεβαίωση PIN</label>
-
-                  <input type="password"                     
+                  <input type="password"
                          [(ngModel)]="confirmPin"
-                         placeholder="">
-
+                         placeholder="Επιβεβαιώστε νέο PIN">
                 </div>
 
-                <button class="save-pin-btn"
+                <button type="button"
+                        class="save-pin-btn"
                         (click)="changeUserPin()">
-
                   Αποθήκευση PIN
-
                 </button>
-
               </div>
             </div>
-           
           </div>
-
         </div>
 
+        <!-- USER -->
+        <div *ngIf="!isAdmin && user"
+             class="selected-user-card user-own-settings-card">
+
+          <div class="selected-user-title">
+            <h3>Στοιχεία λογαριασμού</h3>
+          </div>
+
+          <div class="user-detail-row">
+            <span>Nickname</span>
+            <strong>{{ user.Nickname || '-' }}</strong>
+          </div>
+
+          <div class="user-detail-row">
+            <span>Email</span>
+            <strong>{{ user.Email }}</strong>
+          </div>
+
+          <div class="user-detail-row">
+            <span>Κατάστημα</span>
+            <strong>{{ getStoreName(user.StoreId) }}</strong>
+          </div>
+
+          <div class="user-detail-row">
+            <span>Ρόλος</span>
+            <strong class="role-badge">
+              {{ user.RoleId === 99 ? 'Admin' : 'Χρήστης' }}
+            </strong>
+          </div>
+
+          <hr class="user-divider">
+
+          <div class="selected-user-title">
+            <h3>Αλλαγή PIN</h3>
+          </div>
+
+          <div class="pin-change-area">
+
+            <div class="pin-input-group">
+              <label>Νέο PIN</label>
+              <input type="password"
+                     [(ngModel)]="newPin"
+                     placeholder="Εισάγετε νέο PIN">
+            </div>
+
+            <div class="pin-input-group">
+              <label>Επιβεβαίωση PIN</label>
+              <input type="password"
+                     [(ngModel)]="confirmPin"
+                     placeholder="Επιβεβαιώστε νέο PIN">
+            </div>
+
+            <button type="button"
+                    class="save-pin-btn"
+                    (click)="changeUserPin()">
+              Αποθήκευση PIN
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>

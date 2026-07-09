@@ -1162,6 +1162,15 @@ quill-editor {
   .import-btn:hover {
     background: #1b2436;
   }
+.theory-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  margin-right: 6px;
+  font-weight: 800;
+  color: #0f766e;
+}
 
 @media (max-width: 560px) {
   .modal-tabs {

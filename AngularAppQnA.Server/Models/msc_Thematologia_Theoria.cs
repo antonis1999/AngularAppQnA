@@ -1,6 +1,6 @@
 ﻿namespace AngularAppQnA.Server.Models
 {
-    public class Thematologia_Theoria
+    public class msc_Thematologia_Theoria
     {
         public int Id { get; set; }
         public int DetId { get; set; }
