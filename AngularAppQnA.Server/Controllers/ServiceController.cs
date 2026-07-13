@@ -27,7 +27,6 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpGet("GetThematologies")]
-        [Authorize]
         public async Task<List<msc_Thematologia>> GetThematologies()
         {
             List<msc_Thematologia> ret = new List<msc_Thematologia>();
@@ -116,7 +115,7 @@ namespace AngularAppQnA.Server.Controllers
             return ret;
         }
 
-        [HttpDelete("DeleteThematologia/{id}")]
+        [HttpPost("DeleteThematologia/{id}")]
         [Authorize(Roles = "99")]
         public async Task<BasicResponse> DeleteThematologia(int id)
         {
@@ -265,7 +264,7 @@ namespace AngularAppQnA.Server.Controllers
             return ret;
         }
 
-        [HttpDelete("DeleteTheoria/{id}/{detId}")]
+        [HttpPost("DeleteTheoria/{id}/{detId}")]
         [Authorize(Roles = "99")]
         public async Task<BasicResponse> DeleteTheoria(int id, int detId)
         {

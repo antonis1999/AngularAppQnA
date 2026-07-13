@@ -39,7 +39,7 @@ export class HomeComponent {
     if (this.isFirstLogin) {
 
       if (!this.nickname.trim()) {
-        this.notificationService.warning('Συμπλήρωσε το nickname σου.');
+        this.notificationService.warning('Συμπλήρωσε το nickname σου.');  
         return;
       }
 
@@ -48,7 +48,7 @@ export class HomeComponent {
         return;
       }
     }
-
+  
     const body: LoginRequest = {
       Email: this.email.trim(),
       Pin: this.pin.trim(),
@@ -129,7 +129,6 @@ export class HomeComponent {
       
     });
   }
-
   getStoreId(): number {
     if (this.selectedStore === 'store') return 1;
     if (this.selectedStore === 'office') return 2;

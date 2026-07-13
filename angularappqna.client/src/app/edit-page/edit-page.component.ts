@@ -256,15 +256,25 @@ export class EditPageComponent implements OnInit {
       return;
     }
 
-    this.http.delete<ApiResponse>(`api/Service/DeleteThematologia/${item.Id}`)
+    this.http.post<ApiResponse>(
+      `api/Service/DeleteThematologia/${item.Id}`,
+      {}
+    )
       .subscribe({
-        next: () => {
+        next: (response) => {
+          if (!response.IsSuccess) {
+            this.notificationService.error(
+              response.Message || 'Η διαγραφή απέτυχε'
+            );
+            return;
+          }
+
           this.selectedThematologia = null;
           this.selectedTheories = [];
           this.thematologiaTitle = '';
 
           this.loadThematologies();
-          this.notificationService.success('Διαγράφηκε Επιτυχώς');
+          this.notificationService.success('Διαγράφηκε επιτυχώς');
           this.router.navigate(['/mainpage']);
         },
         error: (err) => {
@@ -386,8 +396,9 @@ export class EditPageComponent implements OnInit {
       return;
     }
 
-    this.http.delete<ApiResponse>(
-      `api/Service/DeleteTheoria/${theory.Id}/${theory.DetId}`
+    this.http.post<ApiResponse>(
+      `api/Service/DeleteTheoria/${theory.Id}/${theory.DetId}`,
+      {}
     )
       .subscribe({
         next: (res) => {
@@ -622,11 +633,19 @@ export class EditPageComponent implements OnInit {
       return;
     }
 
-    this.http.delete<ApiResponse>(
-      `api/Service/DeleteQuestion/${question.Id}/${question.DetId}/${question.QId}`
+    this.http.post<ApiResponse>(
+      `api/Service/DeleteQuestion/${question.Id}/${question.DetId}/${question.QId}`,
+      {}
     )
       .subscribe({
-        next: () => {
+        next: (response) => {
+          if (!response.IsSuccess) {
+            this.notificationService.error(
+              response.Message || 'Η διαγραφή απέτυχε'
+            );
+            return;
+          }
+
           this.notificationService.success('Η ερώτηση διαγράφηκε');
 
           this.loadQuizQuestionsCount();
