@@ -497,7 +497,7 @@ namespace AngularAppQnA.Server.Controllers
                 });
             }
         }
-        [HttpDelete("DeleteQuestion/{id}/{detId}/{qId}")]
+        [HttpPost("DeleteQuestion/{id}/{detId}/{qId}")]
         [Authorize(Roles = "99")]
         public async Task<ActionResult> DeleteQuestion(int id, int detId, int qId)
         {
@@ -1563,6 +1563,7 @@ namespace AngularAppQnA.Server.Controllers
 
             return Ok(ret);
         }
+        
         private object CreateSuggestion(
     List<msc_Thematologia_Question> allQuestions,
     int difficulty,
