@@ -14,6 +14,8 @@ obj/
 *.deps.json
 *.runtimeconfig.json
 *.FileListAbsolute.txt
+*.pubxml
+
 
 # Angular / Node
 node_modules/
@@ -23,6 +25,7 @@ coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+wwwroot/
 
 # Env
 .env
