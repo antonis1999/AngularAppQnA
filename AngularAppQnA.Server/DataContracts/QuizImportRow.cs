@@ -13,13 +13,13 @@ namespace AngularAppQnA.Server.DataContracts
         [Column("ΕΡΩΤΗΣΗ")]
         public string Question { get; set; } = "";
 
-        [Column("ΒΑΘΜΟΣ ΔΥΣΚΟΛΙΑΣ")]
-        public int? Difficulty { get; set; }
-
         [Column("ΑΠΑΝΤΗΣΕΙΣ (Διαχωρισμός με ;)")]
         public string Answers { get; set; } = "";
 
         [Column("ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ(Δήλωση με αριθμό)")]
         public int CorrectAnswer { get; set; }
+
+        [Column("ΒΑΘΜΟΣ ΔΥΣΚΟΛΙΑΣ(1 ή 2)")]
+        public int? Difficulty { get; set; }
     }
 }
