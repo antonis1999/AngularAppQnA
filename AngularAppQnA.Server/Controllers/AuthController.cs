@@ -2,14 +2,15 @@
 using AngularAppQnA.Server.DataContract;
 using AngularAppQnA.Server.DataContracts;
 using AngularAppQnA.Server.Models;
+using AngularAppQnA.Server.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authorization;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace AngularAppQnA.Server.Controllers;
 
@@ -19,11 +20,13 @@ public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly IEmailService _emailService;
 
-    public AuthController(AppDbContext context, IConfiguration configuration)
+    public AuthController(AppDbContext context, IConfiguration configuration, IEmailService emailService)
     {
         _context = context;
         _configuration = configuration;
+        _emailService = emailService;
     }
 
     [HttpPost("login")]
@@ -234,9 +237,9 @@ public class AuthController : ControllerBase
                 IsSuccess = false,
                 Message = ex.Message
             });
-        } 
+        }
     }
-        private string CreateJwtToken(msc_Users user)
+    private string CreateJwtToken(msc_Users user)
     {
         var claims = new List<Claim>
     {
@@ -263,6 +266,174 @@ public class AuthController : ControllerBase
  );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    [HttpPost("forgot-pin")]
+    public async Task<IActionResult> ForgotPin(
+        [FromBody] ForgotPinRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Email))
+        {
+            return BadRequest(new
+            {
+                IsSuccess = false,
+                Message = "Το email είναι υποχρεωτικό."
+            });
+        }
+
+        string normalizedEmail = request.Email.Trim().ToLower();
+
+        var user = await _context.msc_Users
+            .FirstOrDefaultAsync(x =>
+                x.Email.ToLower() == normalizedEmail);
+
+        if (user == null)
+        {
+            return NotFound(new
+            {
+                IsSuccess = false,
+                Message = "Δεν βρέθηκε χρήστης με αυτό το email."
+            });
+        }
+
+        var previousTokens = await _context.msc_PasswordResetTokens
+            .Where(x =>
+                x.UserId == user.Id &&
+                !x.Used &&
+                x.ExpireDate > DateTime.UtcNow)
+            .ToListAsync();
+
+        foreach (var previousToken in previousTokens)
+        {
+            previousToken.Used = true;
+        }
+
+        var resetToken = new msc_PasswordResetToken
+        {
+            UserId = user.Id,
+            Token = Guid.NewGuid(),
+            CreatedAt = DateTime.UtcNow,
+            ExpireDate = DateTime.UtcNow.AddMinutes(30),
+            Used = false
+        };
+
+        _context.msc_PasswordResetTokens.Add(resetToken);
+
+        await _context.SaveChangesAsync();
+
+        string resetLink =
+       $"https://localhost:51418/reset-pin?token={resetToken.Token}";
+
+        try
+        {
+            await _emailService.SendResetPinEmailAsync(
+                user.Email,
+                user.Nickname ?? "",
+                resetLink);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                IsSuccess = false,
+                Message = "Δημιουργήθηκε το αίτημα, αλλά απέτυχε η αποστολή του email.",
+                Error = ex.Message
+            });
+        }
+
+        return Ok(new
+        {
+            IsSuccess = true,
+            Message = "Στάλθηκε σύνδεσμος επαναφοράς PIN στο email σου."
+        });
+    }
+    [HttpPost("reset-pin")]
+    public async Task<IActionResult> ResetPin(
+    [FromBody] ResetPinRequest request)
+    {
+        if (request.Token == Guid.Empty)
+        {
+            return BadRequest(new
+            {
+                IsSuccess = false,
+                Message = "Ο σύνδεσμος επαναφοράς δεν είναι έγκυρος."
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.NewPin))
+        {
+            return BadRequest(new
+            {
+                IsSuccess = false,
+                Message = "Το νέο PIN είναι υποχρεωτικό."
+            });
+        }
+
+        if (request.NewPin != request.ConfirmPin)
+        {
+            return BadRequest(new
+            {
+                IsSuccess = false,
+                Message = "Τα PIN δεν ταιριάζουν."
+            });
+        }
+
+        if (request.NewPin.Length < 4)
+        {
+            return BadRequest(new
+            {
+                IsSuccess = false,
+                Message = "Το PIN πρέπει να έχει τουλάχιστον 4 χαρακτήρες."
+            });
+        }
+
+        var resetToken = await _context.msc_PasswordResetTokens
+            .FirstOrDefaultAsync(x =>
+                x.Token == request.Token &&
+                !x.Used);
+
+        if (resetToken == null)
+        {
+            return BadRequest(new
+            {
+                IsSuccess = false,
+                Message = "Ο σύνδεσμος επαναφοράς δεν είναι έγκυρος ή έχει ήδη χρησιμοποιηθεί."
+            });
+        }
+
+        if (resetToken.ExpireDate < DateTime.UtcNow)
+        {
+            return BadRequest(new
+            {
+                IsSuccess = false,
+                Message = "Ο σύνδεσμος επαναφοράς έχει λήξει."
+            });
+        }
+
+        var user = await _context.msc_Users
+            .FirstOrDefaultAsync(x => x.Id == resetToken.UserId);
+
+        if (user == null)
+        {
+            return NotFound(new
+            {
+                IsSuccess = false,
+                Message = "Ο χρήστης δεν βρέθηκε."
+            });
+        }
+
+        user.PasswordSha256 =
+            CreateSha256(user.Email.Trim().ToLower() + request.NewPin);
+
+        resetToken.Used = true;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            IsSuccess = true,
+            Message = "Το PIN άλλαξε επιτυχώς."
+        });
     }
 }
 

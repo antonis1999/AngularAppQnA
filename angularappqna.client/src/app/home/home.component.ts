@@ -1,99 +1,291 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse
+} from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoginRequest, LoginResponse } from '../interfaces/models';
-import { NotificationService } from '../services/notification.service';
+import { LoaderService } from '../services/loader.service';
+import {
+  LoginRequest,
+  LoginResponse
+} from '../interfaces/models';
+
+import {
+  NotificationService
+} from '../services/notification.service';
+
+interface ForgotPinResponse {
+  isSuccess?: boolean;
+  IsSuccess?: boolean;
+
+  message?: string;
+  Message?: string;
+
+  resetLink?: string;
+  ResetLink?: string;
+}
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule
+  ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent {
+
   email = '';
   pin = '';
   nickname = '';
 
-  selectedStore: string = '';
+  selectedStore = '';
+  isFirstLogin = false;
+
   showHelpPopup = false;
+
   showAdminPopup = false;
   adminPin = '';
-  isFirstLogin = false;
-  constructor(private http: HttpClient, private router: Router, private notificationService: NotificationService) { }
-  login() {
 
+  showForgotPinPopup = false;
+  forgotPinEmail = '';
+  forgotPinErrorMessage = '';
+  forgotPinSuccessMessage = '';
+  isSendingForgotPin = false;
+
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private notificationService: NotificationService,
+    private loader: LoaderService
+  ) { }
+
+  login(): void {
     if (!this.email.trim()) {
-      this.notificationService.warning('Συμπλήρωσε το email σου.');
+      this.notificationService.warning(
+        'Συμπλήρωσε το email σου.'
+      );
       return;
     }
 
     if (!this.pin.trim()) {
-      this.notificationService.warning('Συμπλήρωσε το PIN σου.');
+      this.notificationService.warning(
+        'Συμπλήρωσε το PIN σου.'
+      );
       return;
     }
 
     if (this.isFirstLogin) {
-
       if (!this.nickname.trim()) {
-        this.notificationService.warning('Συμπλήρωσε το nickname σου.');  
+        this.notificationService.warning(
+          'Συμπλήρωσε το nickname σου.'
+        );
         return;
       }
 
       if (!this.selectedStore) {
-        this.notificationService.warning('Επίλεξε κατάστημα / γραφεία / logistics.');
+        this.notificationService.warning(
+          'Επίλεξε κατάστημα / γραφεία / logistics.'
+        );
         return;
       }
     }
-  
+
     const body: LoginRequest = {
       Email: this.email.trim(),
       Pin: this.pin.trim(),
-      Nickname: this.isFirstLogin ? this.nickname.trim() : '',
-      StoreId: this.isFirstLogin ? this.getStoreId() : 0,
+      Nickname: this.isFirstLogin
+        ? this.nickname.trim()
+        : '',
+      StoreId: this.isFirstLogin
+        ? this.getStoreId()
+        : 0,
       IsFirstLogin: this.isFirstLogin
     };
+    this.loader.show();
+    this.http
+      .post<LoginResponse>('api/Auth/login', body)
+      .subscribe({
+        next: (response: any) => {
+          const isSuccess =
+            response.isSuccess ??
+            response.IsSuccess;
 
-    this.http.post<LoginResponse>('api/Auth/login', body).subscribe({
-      next: (res: any) => {
+          const message =
+            response.message ??
+            response.Message;
 
-        const isSuccess = res.isSuccess ?? res.IsSuccess;
-        const message = res.message ?? res.Message;
-        const user = res.user ?? res.User;
-        const token = res.token ?? res.Token;
+          const user =
+            response.user ??
+            response.User;
 
-        if (isSuccess && user && token) {
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          localStorage.setItem('token', token);
+          const token =
+            response.token ??
+            response.Token;
 
-          this.notificationService.success('Επιτυχία σύνδεσης');
-          this.router.navigate(['/mainpage']);
+          if (isSuccess && user && token) {
+            localStorage.setItem(
+              'currentUser',
+              JSON.stringify(user)
+            );
+
+            localStorage.setItem(
+              'token',
+              token
+            );
+            this.loader.hide();
+            this.notificationService.success(
+              'Επιτυχία σύνδεσης'
+            );
+
+            this.router.navigate([
+              '/mainpage'
+            ]);
+
+            return;
+          }
+          this.loader.hide();
+          this.notificationService.error(
+            message || 'Λάθος email ή PIN.'
+          );
+        },
+
+        error: (error: HttpErrorResponse) => {
+          this.loader.hide();
+          const message =
+            error.error?.message ??
+            error.error?.Message ??
+            'Λάθος email ή PIN.';
+
+          this.notificationService.error(
+            message
+          );
         }
-        else {
-          this.notificationService.error(message || 'Λάθος email ή PIN.');
-        }
-      },
-      error: () => {
-        this.notificationService.error('Λάθος email ή PIN.');
-      }
-    });
+      });
   }
-  openAdminPopup() {
+
+  openForgotPinPopup(): void {
+    this.forgotPinEmail =
+      this.email.trim();
+
+    this.forgotPinErrorMessage = '';
+    this.forgotPinSuccessMessage = '';
+    this.isSendingForgotPin = false;
+    this.showForgotPinPopup = true;
+  }
+
+  closeForgotPinPopup(): void {
+    if (this.isSendingForgotPin) {
+      return;
+    }
+
+    this.showForgotPinPopup = false;
+    this.forgotPinEmail = '';
+    this.forgotPinErrorMessage = '';
+    this.forgotPinSuccessMessage = '';
+  }
+
+  sendForgotPinEmail(): void {
+    this.forgotPinErrorMessage = '';
+    this.forgotPinSuccessMessage = '';
+
+    const normalizedEmail =
+      this.forgotPinEmail
+        .trim()
+        .toLowerCase();
+
+    if (!normalizedEmail) {
+      this.forgotPinErrorMessage =
+        'Συμπλήρωσε το εταιρικό email σου.';
+      return;
+    }
+
+    if (!this.isValidEmail(normalizedEmail)) {
+      this.forgotPinErrorMessage =
+        'Συμπλήρωσε ένα έγκυρο email.';
+      return;
+    }
+
+    this.isSendingForgotPin = true;
+
+    const body = {
+      Email: normalizedEmail
+    };
+
+    this.http
+      .post<ForgotPinResponse>(
+        'api/Auth/forgot-pin',
+        body
+      )
+      .subscribe({
+        next: (response: ForgotPinResponse) => {
+          this.isSendingForgotPin = false;
+
+          const isSuccess =
+            response.isSuccess ??
+            response.IsSuccess ??
+            false;
+
+          const message =
+            response.message ??
+            response.Message ??
+            'Δημιουργήθηκε σύνδεσμος επαναφοράς PIN.';
+
+          if (!isSuccess) {
+            this.forgotPinErrorMessage =
+              message;
+            return;
+          }
+
+          this.forgotPinSuccessMessage =
+            message;
+
+          const resetLink =
+            response.resetLink ??
+            response.ResetLink;
+
+          if (resetLink) {
+            console.log(
+              'Reset PIN link:',
+              resetLink
+            );
+          }
+
+          this.notificationService.success(
+            message
+          );
+        },
+
+        error: (error: HttpErrorResponse) => {
+          this.isSendingForgotPin = false;
+
+          this.forgotPinErrorMessage =
+            error.error?.message ??
+            error.error?.Message ??
+            'Δεν ήταν δυνατή η αποστολή του συνδέσμου επαναφοράς.';
+        }
+      });
+  }
+
+  openAdminPopup(): void {
     this.adminPin = '';
     this.showAdminPopup = true;
   }
 
-  closeAdminPopup() {
+  closeAdminPopup(): void {
     this.showAdminPopup = false;
     this.adminPin = '';
   }
 
-  adminLogin() {
+  adminLogin(): void {
     if (!this.adminPin.trim()) {
-      this.notificationService.warning('Συμπλήρωσε το PIN διαχειριστή.');
+      this.notificationService.warning(
+        'Συμπλήρωσε το PIN διαχειριστή.'
+      );
       return;
     }
 
@@ -101,38 +293,99 @@ export class HomeComponent {
       Email: 'admin@masoutis.gr',
       Pin: this.adminPin.trim(),
       Nickname: 'Admin',
-      StoreId: 2
+      StoreId: 2,
+      IsFirstLogin: false
     };
+    this.loader.show();
+    this.http
+      .post<LoginResponse>(
+        'api/Auth/login',
+        body
+      )
+      .subscribe({
+        next: (response: any) => {
+          const isSuccess =
+            response.isSuccess ??
+            response.IsSuccess;
 
-    this.http.post<LoginResponse>('api/Auth/login', body).subscribe({
-      next: (res: any) => {
-        const isSuccess = res.isSuccess ?? res.IsSuccess;
-        const message = res.message ?? res.Message;
-        const user = res.user ?? res.User;
-        const token = res.token ?? res.Token;
+          const message =
+            response.message ??
+            response.Message;
 
-        if (isSuccess && user && token) {
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          localStorage.setItem('token', token);
+          const user =
+            response.user ??
+            response.User;
 
-          this.closeAdminPopup();
-          this.notificationService.success('Επιτυχία Σύνδεσης');
-          this.router.navigate(['/mainpage']);
-        } else {
-          this.notificationService.error(message || 'Λάθος PIN διαχειριστή.');
+          const token =
+            response.token ??
+            response.Token;
+
+          if (isSuccess && user && token) {
+            localStorage.setItem(
+              'currentUser',
+              JSON.stringify(user)
+            );
+
+            localStorage.setItem(
+              'token',
+              token
+            );
+            this.loader.hide();
+            this.closeAdminPopup();
+
+            this.notificationService.success(
+              'Επιτυχία σύνδεσης'
+            );
+
+            this.router.navigate([
+              '/mainpage'
+            ]);
+
+            return;
+          }
+
+          this.notificationService.error(
+            message ||
+            'Λάθος PIN διαχειριστή.'
+          );
+        },
+
+        error: (error: HttpErrorResponse) => {
+          this.loader.hide();
+          const message =
+            error.error?.message ??
+            error.error?.Message ??
+            'Σφάλμα κατά τη σύνδεση διαχειριστή.';
+
+          this.notificationService.error(
+            message
+          );
         }
-      },
-      error: (err) => {
-        console.log(err);
-        this.notificationService.error(err.error?.Message || err.error?.message || 'Σφάλμα');
-      }
-      
-    });
+      });
   }
+
   getStoreId(): number {
-    if (this.selectedStore === 'store') return 1;
-    if (this.selectedStore === 'office') return 2;
-    if (this.selectedStore === 'logistics') return 3;
-    return 0;
+    switch (this.selectedStore) {
+      case 'store':
+        return 1;
+
+      case 'office':
+        return 2;
+
+      case 'logistics':
+        return 3;
+
+      default:
+        return 0;
+    }
+  }
+
+  private isValidEmail(
+    email: string
+  ): boolean {
+    const emailPattern =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    return emailPattern.test(email);
   }
 }

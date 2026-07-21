@@ -1,9 +1,11 @@
+
 <div class="home-page">
   <div class="background-shape"></div>
 
   <section class="hero">
     <div class="brand">
       <img src="/safety.png" class="brand-icon" alt="Safety">
+
       <div>
         <h3>Μασούτης</h3>
         <span>SAFETY CAMPAIGN</span>
@@ -21,7 +23,8 @@
 
     <p>
       Μάθε, παίξε, κέρδισε. Διαδραστική εκπαίδευση και μηνιαία
-      αναγνώριση για όσους <strong>ξεχωρίζουν στην ασφάλεια.</strong>
+      αναγνώριση για όσους
+      <strong>ξεχωρίζουν στην ασφάλεια.</strong>
     </p>
 
     <div class="stats">
@@ -53,11 +56,17 @@
         <h2>Ξεκίνα την εκπαίδευση</h2>
 
         <div class="title-actions">
-          <button type="button" class="icon-btn admin-icon-btn" (click)="openAdminPopup()">
+          <button type="button"
+                  class="icon-btn admin-icon-btn"
+                  (click)="openAdminPopup()">
+
             <img src="/admin.png" alt="Admin">
           </button>
 
-          <button type="button" class="icon-btn help-btn" (click)="showHelpPopup = true">
+          <button type="button"
+                  class="icon-btn help-btn"
+                  (click)="showHelpPopup = true">
+
             <img src="/help.png" alt="Βοήθεια">
           </button>
         </div>
@@ -67,21 +76,28 @@
         <input type="email"
                placeholder="π.χ. user@company.gr"
                [(ngModel)]="email"
-               name="email" />
+               name="email">
 
         <input type="password"
                placeholder="Πληκτρολόγησε το PIN σου"
                [(ngModel)]="pin"
-               name="pin" />
+               name="pin">
+
+        <div class="forgot-pin-row">
+          <button type="button"
+                  class="forgot-pin-btn"
+                  (click)="openForgotPinPopup()">
+
+            Ξέχασα το PIN
+          </button>
+        </div>
 
         <div class="first-login-box">
-
           <label class="first-login-title">
             Συνδέεσαι πρώτη φορά;
           </label>
 
           <div class="first-login-options">
-
             <label class="radio-option">
               <input type="radio"
                      name="firstLogin"
@@ -99,19 +115,25 @@
 
               <span>Όχι</span>
             </label>
-
           </div>
-
         </div>
-        <div class="first-login-panel" *ngIf="isFirstLogin">
+
+        <div class="first-login-panel"
+             *ngIf="isFirstLogin">
+
           <div class="first-login-panel-title">
             <strong>Στοιχεία πρώτης σύνδεσης</strong>
-            <span>Συμπλήρωσε nickname και χώρο εργασίας για την αρχική ενεργοποίηση.</span>
+
+            <span>
+              Συμπλήρωσε nickname και χώρο εργασίας
+              για την αρχική ενεργοποίηση.
+            </span>
           </div>
+
           <input type="text"
-                 placeholder="π.χ. Jhon"
+                 placeholder="π.χ. John"
                  [(ngModel)]="nickname"
-                 name="nickname" />
+                 name="nickname">
 
           <label>ΧΩΡΟΣ ΕΡΓΑΣΙΑΣ</label>
 
@@ -120,7 +142,11 @@
                     class="work-card"
                     [class.active]="selectedStore === 'store'"
                     (click)="selectedStore = 'store'">
-              <img src="/stores.png" class="work-icon" alt="Store">
+
+              <img src="/stores.png"
+                   class="work-icon"
+                   alt="Store">
+
               <strong>Κατάστημα</strong>
               <span>Πώληση & ταμείο</span>
             </button>
@@ -129,7 +155,11 @@
                     class="work-card"
                     [class.active]="selectedStore === 'office'"
                     (click)="selectedStore = 'office'">
-              <img src="/offices.png" class="work-icon" alt="Office">
+
+              <img src="/offices.png"
+                   class="work-icon"
+                   alt="Office">
+
               <strong>Κεντρικά Γραφεία</strong>
               <span>Διοίκηση</span>
             </button>
@@ -138,7 +168,11 @@
                     class="work-card"
                     [class.active]="selectedStore === 'logistics'"
                     (click)="selectedStore = 'logistics'">
-              <img src="/logistics.png" class="work-icon" alt="Logistics">
+
+              <img src="/logistics.png"
+                   class="work-icon"
+                   alt="Logistics">
+
               <strong>Logistics</strong>
               <span>Αποθήκη</span>
             </button>
@@ -147,89 +181,207 @@
           <div class="alert-box">
             Διάλεξε τον χώρο εργασίας σου.
           </div>
-          </div>
+        </div>
 
-          <button type="button" class="login-btn" (click)="login()">
-            <span>Είσοδος στην Εκπαίδευση</span>
-            <span class="arrow">→</span>
-          </button>
+        <button type="button"
+                class="login-btn"
+                (click)="login()">
 
-          <p class="terms">
-            Με τη συμμετοχή σου συμφωνείς ότι τα στοιχεία της απόδοσής σου
-            καταγράφονται για τον σκοπό της εταιρικής εκπαίδευσης.
-          </p>
-</form>
+          <span>Είσοδος στην Εκπαίδευση</span>
+          <span class="arrow">→</span>
+        </button>
+
+        <p class="terms">
+          Με τη συμμετοχή σου συμφωνείς ότι τα στοιχεία της απόδοσής σου
+          καταγράφονται για τον σκοπό της εταιρικής εκπαίδευσης.
+        </p>
+      </form>
     </div>
   </section>
 
+  <!-- Βοήθεια σύνδεσης -->
   <div class="modal-backdrop"
        *ngIf="showHelpPopup"
        (click)="showHelpPopup = false">
 
-    <div class="help-modal" (click)="$event.stopPropagation()">
-      <button type="button" class="modal-close" (click)="showHelpPopup = false">×</button>
+    <div class="help-modal"
+         (click)="$event.stopPropagation()">
+
+      <button type="button"
+              class="modal-close"
+              (click)="showHelpPopup = false">
+
+        ×
+      </button>
 
       <h3>Βοήθεια σύνδεσης</h3>
-      <p class="modal-subtitle">Συμπλήρωσε τα παρακάτω στοιχεία για να συνεχίσεις.</p>
+
+      <p class="modal-subtitle">
+        Συμπλήρωσε τα παρακάτω στοιχεία για να συνεχίσεις.
+      </p>
 
       <div class="help-list">
         <div class="help-item">
           <strong>Email</strong>
-          <span>Συμπλήρωσε το email που χρησιμοποιείς στην εταιρεία.</span>
+
+          <span>
+            Συμπλήρωσε το email που χρησιμοποιείς στην εταιρεία.
+          </span>
         </div>
 
         <div class="help-item">
           <strong>PIN</strong>
+
           <span>
-            Βάλε το PIN σου. Αν συνδέεσαι πρώτη φορά, επίλεξε “Ναι”
+            Βάλε το PIN σου. Αν συνδέεσαι πρώτη φορά, επίλεξε «Ναι»
             και δημιούργησε ένα καινούριο PIN.
           </span>
         </div>
 
         <div class="help-item">
           <strong>Πρώτη σύνδεση</strong>
+
           <span>
-            Αν είναι η πρώτη σου σύνδεση, συμπλήρωσε ψευδώνυμο και χώρο εργασίας.
+            Αν είναι η πρώτη σου σύνδεση, συμπλήρωσε ψευδώνυμο
+            και χώρο εργασίας.
           </span>
         </div>
       </div>
 
-      <button type="button" class="modal-ok" (click)="showHelpPopup = false">
+      <button type="button"
+              class="modal-ok"
+              (click)="showHelpPopup = false">
+
         Το κατάλαβα
       </button>
     </div>
   </div>
 
+  <!-- Admin login -->
   <div class="modal-backdrop"
        *ngIf="showAdminPopup"
        (click)="closeAdminPopup()">
 
-    <div class="admin-login-modal" (click)="$event.stopPropagation()">
-      <button type="button" class="modal-close" (click)="closeAdminPopup()">×</button>
+    <div class="admin-login-modal"
+         (click)="$event.stopPropagation()">
+
+      <button type="button"
+              class="modal-close"
+              (click)="closeAdminPopup()">
+
+        ×
+      </button>
 
       <h3>Admin είσοδος</h3>
-      <p class="modal-subtitle">Συμπλήρωσε μόνο το PIN διαχειριστή.</p>
+
+      <p class="modal-subtitle">
+        Συμπλήρωσε μόνο το PIN διαχειριστή.
+      </p>
 
       <label>Email διαχειριστή</label>
+
       <input type="email"
              value="admin@masoutis.gr"
              disabled>
 
       <label>PIN</label>
+
       <input type="password"
              placeholder="Πληκτρολόγησε admin PIN"
              [(ngModel)]="adminPin"
              name="adminPin">
 
       <div class="admin-login-actions">
-        <button type="button" class="cancel-admin-btn" (click)="closeAdminPopup()">
+        <button type="button"
+                class="cancel-admin-btn"
+                (click)="closeAdminPopup()">
+
           Ακύρωση
         </button>
 
-        <button type="button" class="submit-admin-btn" (click)="adminLogin()">
+        <button type="button"
+                class="submit-admin-btn"
+                (click)="adminLogin()">
+
           Είσοδος
         </button>
       </div>
     </div>
   </div>
+
+  <!-- Forgot PIN popup -->
+  <div class="modal-backdrop"
+       *ngIf="showForgotPinPopup"
+       (click)="closeForgotPinPopup()">
+
+    <div class="forgot-pin-modal"
+         (click)="$event.stopPropagation()">
+
+      <button type="button"
+              class="modal-close"
+              (click)="closeForgotPinPopup()">
+
+        ×
+      </button>
+
+      <h3>Ξέχασες το PIN σου;</h3>
+
+      <p class="modal-subtitle">
+        Συμπλήρωσε το εταιρικό email σου και θα λάβεις
+        σύνδεσμο για να δημιουργήσεις νέο PIN.
+      </p>
+
+      <form (ngSubmit)="sendForgotPinEmail()"
+            #forgotPinForm="ngForm">
+
+        <label for="forgotPinEmail">
+          Email
+        </label>
+
+        <input id="forgotPinEmail"
+               type="email"
+               name="forgotPinEmail"
+               placeholder="π.χ. user@company.gr"
+               [(ngModel)]="forgotPinEmail"
+               autocomplete="email"
+               required>
+
+        <div class="forgot-pin-message error"
+             *ngIf="forgotPinErrorMessage">
+
+          {{ forgotPinErrorMessage }}
+        </div>
+
+        <div class="forgot-pin-message success"
+             *ngIf="forgotPinSuccessMessage">
+
+          {{ forgotPinSuccessMessage }}
+        </div>
+
+        <div class="forgot-pin-actions">
+          <button type="button"
+                  class="cancel-forgot-pin-btn"
+                  (click)="closeForgotPinPopup()"
+                  [disabled]="isSendingForgotPin">
+
+            Ακύρωση
+          </button>
+
+          <button type="submit"
+                  class="submit-forgot-pin-btn"
+                  [disabled]="isSendingForgotPin">
+
+            <span *ngIf="!isSendingForgotPin">
+              Αποστολή συνδέσμου
+            </span>
+
+            <span *ngIf="isSendingForgotPin">
+              Αποστολή...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+```

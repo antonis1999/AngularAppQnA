@@ -28,6 +28,8 @@ namespace AngularAppQnA.Server.Data
         public virtual DbSet<DeleteTheoria_Result> DeleteTheoria_Results { get; set; }
         public virtual DbSet<RankingDto> QuizRankingDto { get; set; }
         public virtual DbSet<QuizQuestionFlatDto> QuizQuestionFlatDto { get; set; }
+        public DbSet<msc_PasswordResetToken> msc_PasswordResetTokens { get; set; }
+        public DbSet<msc_AuditLog> msc_AuditLog { get; set; }
 
 
 

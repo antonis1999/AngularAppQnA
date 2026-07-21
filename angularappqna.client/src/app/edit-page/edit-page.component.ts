@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
+import { LoaderService } from '../services/loader.service';
 
 import {
   ApiResponse,
@@ -80,7 +81,8 @@ export class EditPageComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private http: HttpClient,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private loader: LoaderService
   ) { }
   ngOnInit(): void {
     this.thematologiaId = Number(this.route.snapshot.paramMap.get('id'));
@@ -764,7 +766,7 @@ export class EditPageComponent implements OnInit {
 
     const formData = new FormData();
     formData.append('file', file);
-
+    this.loader.show();
     this.http.post<ApiResponse>(
       `api/Service/ImportQuizExcel/${this.thematologiaId}`,
       formData
@@ -775,20 +777,24 @@ export class EditPageComponent implements OnInit {
 
           this.loadThematologies();
           this.loadQuizQuestionsCount();
-
+          this.loader.hide();
           if (this.selectedQuizTheory) {
+            this.loader.hide();
             this.loadExistingQuestions(this.selectedQuizTheory);
           }
         } else {
+          this.loader.hide();
           this.notificationService.warning(res.Message || 'Το Excel δεν εισήχθη');
         }
 
         input.value = '';
       },
       error: (err) => {
+        this.loader.hide();
         console.error('Import quiz excel error:', err);
         this.notificationService.error('Σφάλμα εισαγωγής Excel');
         input.value = '';
+
       }
     });
   }

@@ -1,0 +1,107 @@
+<section class="reset-page">
+
+  <div class="reset-card">
+
+    <div class="reset-header">
+      <div class="brand-mark">M</div>
+
+      <span class="eyebrow">Επαναφορά λογαριασμού</span>
+
+      <h1>Δημιουργία νέου PIN</h1>
+
+      <p>
+        Συμπλήρωσε το νέο PIN που θέλεις να χρησιμοποιείς
+        για τη σύνδεσή σου.
+      </p>
+    </div>
+
+    <div class="message error-message"
+         *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="success-state"
+         *ngIf="isSuccess">
+
+      <div class="success-icon">✓</div>
+
+      <h2>Η αλλαγή ολοκληρώθηκε</h2>
+
+      <p>
+        {{ successMessage }}
+      </p>
+
+      <button type="button"
+              class="primary-btn"
+              (click)="goToLogin()">
+        Μετάβαση στη σύνδεση
+      </button>
+
+    </div>
+
+    <form *ngIf="!isSuccess && token"
+          (ngSubmit)="resetPin()">
+
+      <div class="form-group">
+        <label for="newPin">
+          Νέο PIN
+        </label>
+
+        <input id="newPin"
+               name="newPin"
+               type="password"
+               inputmode="numeric"
+               autocomplete="new-password"
+               maxlength="20"
+               placeholder="Πληκτρολόγησε το νέο PIN"
+               [(ngModel)]="newPin"
+               required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPin">
+          Επιβεβαίωση νέου PIN
+        </label>
+
+        <input id="confirmPin"
+               name="confirmPin"
+               type="password"
+               inputmode="numeric"
+               autocomplete="new-password"
+               maxlength="20"
+               placeholder="Πληκτρολόγησε ξανά το PIN"
+               [(ngModel)]="confirmPin"
+               required>
+      </div>
+
+      <p class="pin-info">
+        Το PIN πρέπει να αποτελείται από τουλάχιστον
+        4 χαρακτήρες.
+      </p>
+
+      <button type="submit"
+              class="primary-btn"
+              [disabled]="isLoading">
+
+        <span *ngIf="!isLoading">
+          Αλλαγή PIN
+        </span>
+
+        <span *ngIf="isLoading">
+          Παρακαλώ περιμένετε...
+        </span>
+
+      </button>
+
+    </form>
+
+    <button *ngIf="!isSuccess"
+            type="button"
+            class="back-btn"
+            (click)="goToLogin()">
+      Επιστροφή στη σύνδεση
+    </button>
+
+  </div>
+
+</section>

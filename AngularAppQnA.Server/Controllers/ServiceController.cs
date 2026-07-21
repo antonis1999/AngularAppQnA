@@ -1,17 +1,23 @@
 ﻿using AngularAppQnA.Server.Data;
 using AngularAppQnA.Server.DataContracts;
 using AngularAppQnA.Server.Models;
+using AngularAppQnA.Server.Services;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Office2016.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Ganss.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NPOI.OpenXmlFormats.Dml.Diagram;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Org.BouncyCastle.Crypto.Signers;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Authorization;
+using System.Text.RegularExpressions;
+
 
 namespace AngularAppQnA.Server.Controllers
 {
@@ -20,10 +26,14 @@ namespace AngularAppQnA.Server.Controllers
     public class ServiceController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly AuditService _auditService;
 
-        public ServiceController(AppDbContext context)
+        public ServiceController(
+          AppDbContext context,
+          AuditService auditService)
         {
             _context = context;
+            _auditService = auditService;
         }
 
         [HttpGet("GetThematologies")]
@@ -273,7 +283,7 @@ namespace AngularAppQnA.Server.Controllers
             try
             {
                 var theory = await _context.msc_Thematologia_Theoria
-                  .FirstOrDefaultAsync(x => x.Id == id && x.DetId == detId);
+                    .FirstOrDefaultAsync(x => x.Id == id && x.DetId == detId);
 
                 if (theory == null)
                 {
@@ -282,22 +292,34 @@ namespace AngularAppQnA.Server.Controllers
                     return ret;
                 }
 
+                var oldValues = new
+                {
+                    theory.Id,
+                    theory.DetId,
+                    theory.Header,
+                    theory.Details
+                };
+
                 if (await _context.DeleteTheoriaAsync(id, detId))
                 {
+                    await _auditService.LogAsync(
+                        actionType: "DELETE_THEORIA",
+                        tableName: "msc_Thematologia_Theoria",
+                        recordId: $"{id}/{detId}",
+                        description: $"Διαγράφηκε η θεωρία '{theory.Header}'.",
+                        oldValues: oldValues
+                    );
+
                     ret.IsSuccess = true;
-                    ret.Message = $"Theory with ID: {id} and DetId: {detId} deleted successfully.";
+                    ret.Message =
+                        $"Theory with ID: {id} and DetId: {detId} deleted successfully.";
                 }
                 else
                 {
                     ret.IsSuccess = false;
-                    ret.Message = "Failed to delete theory. It may have associated questions or answers.";
+                    ret.Message =
+                        "Failed to delete theory. It may have associated questions or answers.";
                 }
-
-                //_context.Thematologia_Theoria.Remove(theory);
-                //await _context.SaveChangesAsync();
-
-                //ret.IsSuccess = true;
-                //ret.Message = $"Theory with ID: {id} and DetId: {detId} deleted successfully.";
             }
             catch (Exception ex)
             {
@@ -499,7 +521,11 @@ namespace AngularAppQnA.Server.Controllers
         }
         [HttpPost("DeleteQuestion/{id}/{detId}/{qId}")]
         [Authorize(Roles = "99")]
-        public async Task<ActionResult> DeleteQuestion(int id, int detId, int qId)
+        public async Task<ActionResult> DeleteQuestion(
+            
+            int id,
+            int detId,
+            int qId)
         {
             try
             {
@@ -524,10 +550,40 @@ namespace AngularAppQnA.Server.Controllers
                         a.QId == qId)
                     .ToListAsync();
 
+                var oldValues = new
+                {
+                    Question = new
+                    {
+                        question.Id,
+                        question.DetId,
+                        question.QId,
+                        question.Question,
+                        question.Difficulty
+                    },
+
+                    Answers = answers.Select(a => new
+                    {
+                        a.Id,
+                        a.DetId,
+                        a.QId,
+                        a.AId,
+                        a.Answer,
+                        a.IsCorrect
+                    }).ToList()
+                };
+
                 _context.msc_Thematologia_Answers.RemoveRange(answers);
                 _context.msc_Thematologia_Question.Remove(question);
 
                 await _context.SaveChangesAsync();
+
+                await _auditService.LogAsync(
+                    actionType: "DELETE_QUESTION",
+                    tableName: "msc_Thematologia_Question",
+                    recordId: $"{id}/{detId}/{qId}",
+                    description: $"Διαγράφηκε η ερώτηση '{question.Question}'.",
+                    oldValues: oldValues
+                );
 
                 return Ok(new
                 {
@@ -1436,6 +1492,20 @@ namespace AngularAppQnA.Server.Controllers
                 _context.msc_Users.Add(user);
                 await _context.SaveChangesAsync();
 
+                await _auditService.LogAsync(
+                    actionType: "ADD_USER",
+                    tableName: "msc_Users",
+                    recordId: user.Id.ToString(),
+                    description: $"Προστέθηκε ο χρήστης {user.Email}.",
+                    newValues: new
+                    {
+                        user.Id,
+                        user.Email,
+                        user.RoleId,
+                        user.IsActive,
+                        user.CreatedAt
+                    });
+
                 ret.IsSuccess = true;
                 ret.Message = "Ο χρήστης δημιουργήθηκε.";
 
@@ -1462,9 +1532,29 @@ namespace AngularAppQnA.Server.Controllers
                 return Ok(ret);
             }
 
+            bool oldStatus = user.IsActive;
+
             user.IsActive = request.IsActive;
 
             await _context.SaveChangesAsync();
+
+            await _auditService.LogAsync(
+                actionType: request.IsActive
+                    ? "ACTIVATE_USER"
+                    : "DEACTIVATE_USER",
+                tableName: "msc_Users",
+                recordId: user.Id.ToString(),
+                description: request.IsActive
+                    ? $"Ενεργοποιήθηκε ο χρήστης {user.Email}."
+                    : $"Απενεργοποιήθηκε ο χρήστης {user.Email}.",
+                oldValues: new
+                {
+                    IsActive = oldStatus
+                },
+                newValues: new
+                {
+                    IsActive = user.IsActive
+                });
 
             ret.IsSuccess = true;
             ret.Message = request.IsActive
@@ -1507,63 +1597,112 @@ namespace AngularAppQnA.Server.Controllers
         {
             BasicResponse ret = new BasicResponse();
 
-            if (file == null || file.Length == 0)
+            try
             {
-                ret.IsSuccess = false;
-                ret.Message = "Δεν επιλέχθηκε αρχείο.";
+                if (file == null || file.Length == 0)
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Δεν επιλέχθηκε αρχείο.";
+                    return Ok(ret);
+                }
+
+                int inserted = 0;
+                int skipped = 0;
+
+                var insertedEmails = new List<string>();
+
+                using var stream = file.OpenReadStream();
+                using var workbook = new XLWorkbook(stream);
+
+                var worksheet = workbook.Worksheet(1);
+                var rows = worksheet.RowsUsed().Skip(1);
+
+                foreach (var row in rows)
+                {
+                    string email = row.Cell(1)
+                        .GetString()
+                        .Trim()
+                        .ToLower();
+
+                    if (string.IsNullOrWhiteSpace(email))
+                    {
+                        skipped++;
+                        continue;
+                    }
+
+                    bool isValidEmail = Regex.IsMatch(
+                        email,
+                        @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+                    );
+
+                    if (!isValidEmail)
+                    {
+                        skipped++;
+                        continue;
+                    }
+
+                    bool existsInDatabase = await _context.msc_Users
+                        .AnyAsync(x => x.Email == email);
+
+                    bool existsInCurrentImport = insertedEmails.Contains(email);
+
+                    if (existsInDatabase || existsInCurrentImport)
+                    {
+                        skipped++;
+                        continue;
+                    }
+
+                    msc_Users user = new msc_Users
+                    {
+                        Email = email,
+                        RoleId = 1,
+                        IsActive = true,
+                        PasswordSha256 = null,
+                        Nickname = null,
+                        StoreId = null,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    _context.msc_Users.Add(user);
+
+                    insertedEmails.Add(email);
+                    inserted++;
+                }
+
+                await _context.SaveChangesAsync();
+
+                await _auditService.LogAsync(
+                    actionType: "IMPORT_USERS_EXCEL",
+                    tableName: "msc_Users",
+                    description:
+                        $"Έγινε εισαγωγή χρηστών από το αρχείο '{file.FileName}'. " +
+                        $"Νέοι χρήστες: {inserted}, αγνοήθηκαν: {skipped}.",
+                    newValues: new
+                    {
+                        FileName = file.FileName,
+                        Inserted = inserted,
+                        Skipped = skipped,
+                        InsertedEmails = insertedEmails
+                    }
+                );
+
+                ret.IsSuccess = true;
+                ret.Message =
+                    $"Η εισαγωγή ολοκληρώθηκε. " +
+                    $"Νέοι χρήστες: {inserted}, " +
+                    $"Υπάρχοντες ή μη έγκυροι που αγνοήθηκαν: {skipped}.";
+
                 return Ok(ret);
             }
-
-            int inserted = 0;
-            int skipped = 0;
-
-            using var stream = file.OpenReadStream();
-            using var workbook = new XLWorkbook(stream);
-
-            var worksheet = workbook.Worksheet(1);
-            var rows = worksheet.RowsUsed().Skip(1);
-
-            foreach (var row in rows)
+            catch (Exception ex)
             {
-                string email = row.Cell(1).GetString().Trim().ToLower();
+                ret.IsSuccess = false;
+                ret.Message = $"Αποτυχία εισαγωγής αρχείου: {ex.Message}";
 
-                if (string.IsNullOrWhiteSpace(email))
-                {
-                    continue;
-                }
-
-                bool exists = await _context.msc_Users
-                    .AnyAsync(x => x.Email == email);
-
-                if (exists)
-                {
-                    skipped++;
-                    continue;
-                }
-
-                msc_Users user = new msc_Users
-                {
-                    Email = email,
-                    RoleId = 1,
-                    IsActive = true,
-                    PasswordSha256 = null,
-                    Nickname = null,
-                    StoreId = null,
-                    CreatedAt = DateTime.Now
-                };
-
-                _context.msc_Users.Add(user);
-                inserted++;
+                return BadRequest(ret);
             }
-
-            await _context.SaveChangesAsync();
-
-            ret.IsSuccess = true;
-            ret.Message = $"Η εισαγωγή ολοκληρώθηκε. Νέοι χρήστες: {inserted}, Υπάρχοντες που αγνοήθηκαν: {skipped}.";
-
-            return Ok(ret);
         }
-        
+
         private object CreateSuggestion(
     List<msc_Thematologia_Question> allQuestions,
     int difficulty,
