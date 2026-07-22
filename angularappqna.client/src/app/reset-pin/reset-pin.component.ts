@@ -1,17 +1,8 @@
 import { CommonModule } from '@angular/common';
-import {
-  HttpClient,
-  HttpErrorResponse
-} from '@angular/common/http';
-import {
-  Component,
-  OnInit
-} from '@angular/core';
+import {  HttpClient,  HttpErrorResponse} from '@angular/common/http';
+import { Component,  OnInit} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  ActivatedRoute,
-  Router
-} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 interface ResetPinResponse {
   isSuccess?: boolean;
@@ -42,6 +33,8 @@ export class ResetPinComponent implements OnInit {
 
   errorMessage = '';
   successMessage = '';
+  isCheckingToken = true;
+  isTokenValid = false;
 
   private readonly apiUrl = 'api/Auth/reset-pin';
 
@@ -56,9 +49,14 @@ export class ResetPinComponent implements OnInit {
       this.route.snapshot.queryParamMap.get('token') ?? '';
 
     if (!this.token) {
+      this.isCheckingToken = false;
+      this.isTokenValid = false;
       this.errorMessage =
         'Ο σύνδεσμος επαναφοράς PIN δεν είναι έγκυρος.';
+      return;
     }
+
+    this.validateToken();
   }
 
   resetPin(): void {
@@ -141,7 +139,47 @@ export class ResetPinComponent implements OnInit {
         }
       });
   }
+  validateToken(): void {
+    this.isCheckingToken = true;
+    this.isTokenValid = false;
+    this.errorMessage = '';
 
+    this.http
+      .get<any>(
+        `api/Auth/validate-reset-token?token=${encodeURIComponent(this.token)}`
+      )
+      .subscribe({
+        next: response => {
+          this.isCheckingToken = false;
+
+          const isSuccess =
+            response.isSuccess ??
+            response.IsSuccess ??
+            false;
+
+          if (!isSuccess) {
+            this.isTokenValid = false;
+            this.errorMessage =
+              response.message ??
+              response.Message ??
+              'Ο σύνδεσμος επαναφοράς δεν είναι έγκυρος.';
+            return;
+          }
+
+          this.isTokenValid = true;
+        },
+
+        error: (error: HttpErrorResponse) => {
+          this.isCheckingToken = false;
+          this.isTokenValid = false;
+
+          this.errorMessage =
+            error.error?.message ??
+            error.error?.Message ??
+            'Ο σύνδεσμος επαναφοράς δεν είναι έγκυρος.';
+        }
+      });
+  }
   goToLogin(): void {
     this.router.navigate(['/']);
   }

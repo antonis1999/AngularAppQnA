@@ -322,7 +322,7 @@ public class AuthController : ControllerBase
         await _context.SaveChangesAsync();
 
         string resetLink =
-       $"https://localhost:51418/reset-pin?token={resetToken.Token}";
+     $"https://learn.masoutis.gr/reset-pin?token={resetToken.Token}";
 
         try
         {
@@ -434,6 +434,65 @@ public class AuthController : ControllerBase
             IsSuccess = true,
             Message = "Το PIN άλλαξε επιτυχώς."
         });
+    }
+    [HttpGet("validate-reset-token")]
+    public async Task<IActionResult> ValidateResetToken([FromQuery] Guid token)
+    {
+        try
+        {
+            if (token == Guid.Empty)
+            {
+                return BadRequest(new
+                {
+                    IsSuccess = false,
+                    Message = "Ο σύνδεσμος επαναφοράς δεν είναι έγκυρος."
+                });
+            }
+
+            var resetToken = await _context.msc_PasswordResetTokens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Token == token);
+
+            if (resetToken == null)
+            {
+                return BadRequest(new
+                {
+                    IsSuccess = false,
+                    Message = "Ο σύνδεσμος δεν βρέθηκε."
+                });
+            }
+
+            if (resetToken.Used)
+            {
+                return BadRequest(new
+                {
+                    IsSuccess = false,
+                    Message = "Ο σύνδεσμος έχει ήδη χρησιμοποιηθεί."
+                });
+            }
+
+            if (resetToken.ExpireDate <= DateTime.UtcNow)
+            {
+                return BadRequest(new
+                {
+                    IsSuccess = false,
+                    Message = "Ο σύνδεσμος έχει λήξει."
+                });
+            }
+
+            return Ok(new
+            {
+                IsSuccess = true
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                Message = ex.Message,
+                Inner = ex.InnerException?.Message
+            });
+        }
     }
 }
 
