@@ -1171,6 +1171,43 @@ quill-editor {
   font-weight: 800;
   color: #0f766e;
 }
+/* Αποτροπή οριζόντιου overflow σε ολόκληρη τη σελίδα */
+
+.page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.main-panel {
+  width: 100%;
+  max-width: 1040px;
+  overflow: hidden;
+}
+
+.section-card,
+.topic-card,
+.selected-topic-area,
+.theory-list-inside,
+.inner-theory-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Περιεχόμενο θεωρίας από το Quill */
+
+.theory-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  word-break: normal;
+}
+
+
 
 @media (max-width: 560px) {
   .modal-tabs {

@@ -1,2 +1,85 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'quill/dist/quill.snow.css';
+/* Επειδή το innerHTML δημιουργεί δυναμικά στοιχεία */
+
+:host ::ng-deep .theory-content img {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  margin: 16px auto;
+  object-fit: contain;
+}
+
+:host ::ng-deep .theory-content video,
+:host ::ng-deep .theory-content iframe {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto;
+  margin: 16px auto;
+}
+
+:host ::ng-deep .theory-content table {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-collapse: collapse;
+}
+
+:host ::ng-deep .theory-content p,
+:host ::ng-deep .theory-content span,
+:host ::ng-deep .theory-content div,
+:host ::ng-deep .theory-content li,
+:host ::ng-deep .theory-content h1,
+:host ::ng-deep .theory-content h2,
+:host ::ng-deep .theory-content h3,
+:host ::ng-deep .theory-content h4 {
+  max-width: 100% !important;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Αφαιρεί fixed widths που μπορεί να έχουν επικολληθεί από Word/Excel */
+
+:host ::ng-deep .theory-content [style*="width"] {
+  max-width: 100% !important;
+}
+
+/* Quill editor */
+
+:host ::ng-deep .ql-editor img {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  margin: 12px auto;
+}
+
+:host ::ng-deep .ql-editor {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+/* Εικόνες που προέρχονται από Angular innerHTML / Quill */
+
+.theory-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+  .theory-content p {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .theory-content img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 16px auto !important;
+    object-fit: contain;
+  }
