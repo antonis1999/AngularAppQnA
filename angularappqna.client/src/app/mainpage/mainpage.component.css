@@ -189,27 +189,49 @@ button,
     grid-template-columns: repeat(2, 1fr);
   }
 
+.tab-menu {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px;
+  background: #f4f6f8;
+  border: 1px solid #e1e5ea;
+  border-radius: 16px;
+}
+
   .tab-menu button {
-    height: 42px;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
     border: 1px solid transparent;
-    border-radius: 14px;
+    border-radius: 11px;
     background: transparent;
-    color: #657083;
-    font-size: 13px;
-    font-weight: 800;
+    color: #536174;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
     cursor: pointer;
+    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
   }
+
+    .tab-menu button:hover {
+      background: rgba(255, 255, 255, 0.75);
+      color: #182235;
+    }
 
     .tab-menu button.active {
       background: #ffffff;
-      color: #172033;
-      border-color: #e6eaf0;
-      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.07);
-    }
-
-    .tab-menu button:hover {
-      color: #172033;
-      background: #ffffff;
+      color: #111827;
+      border-color: #e4e7eb;
+      box-shadow: 0 2px 7px rgba(15, 23, 42, 0.08), 0 2px 0 #d8a023;
+      transform: translateY(-1px);
     }
 
 .section-card {
@@ -2155,3 +2177,19 @@ quill-editor {
   .switch input:checked + .slider::before {
     transform: translateX(22px);
   }
+@media (max-width: 800px) {
+  .tab-menu {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .tab-menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+    .tab-menu button {
+      min-height: 42px;
+      font-size: 13px;
+    }
+}

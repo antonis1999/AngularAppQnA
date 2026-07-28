@@ -6,11 +6,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Ranking, Thematologia, User } from '../interfaces/models';
+import { PresentationComponent } from '../presentation/presentation.component';
 
 @Component({
   selector: 'app-mainpage',
   standalone: true,
-  imports: [CommonModule, FormsModule, QuillModule],
+  imports: [CommonModule, FormsModule, QuillModule,PresentationComponent],
   templateUrl: './mainpage.component.html',
   styleUrl: './mainpage.component.css'
 })

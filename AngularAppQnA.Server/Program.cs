@@ -1,8 +1,10 @@
 using AngularAppQnA.Server.Data;
-using Microsoft.EntityFrameworkCore;
+using AngularAppQnA.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AngularAppQnA.Server.Settings;
 internal class Program
 {
     private static void Main(string[] args)
@@ -33,6 +35,9 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<AuditService>();
+
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
             options.UseSqlServer(
@@ -58,7 +63,10 @@ internal class Program
             });
 
         builder.Services.AddAuthorization();
+        builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
 
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
         var app = builder.Build();
 

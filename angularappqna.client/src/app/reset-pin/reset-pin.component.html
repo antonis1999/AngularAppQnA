@@ -1,0 +1,148 @@
+<section class="reset-page">
+
+  <div class="reset-card">
+
+    <div class="reset-header">
+      <div class="brand-mark">M</div>
+
+      <span class="eyebrow">
+        Επαναφορά λογαριασμού
+      </span>
+
+      <h1>Δημιουργία νέου PIN</h1>
+
+      <p>
+        Συμπλήρωσε το νέο PIN που θέλεις να χρησιμοποιείς
+        για τη σύνδεσή σου.
+      </p>
+    </div>
+
+    <!-- Έλεγχος token -->
+    <div class="token-check-state"
+         *ngIf="isCheckingToken">
+
+      <div class="token-spinner"></div>
+
+      <p>
+        Γίνεται έλεγχος του συνδέσμου...
+      </p>
+    </div>
+
+    <!-- Μήνυμα άκυρου / ληγμένου token -->
+    <div class="message error-message"
+         *ngIf="
+        !isCheckingToken &&
+        !isTokenValid &&
+        errorMessage
+      ">
+
+      {{ errorMessage }}
+    </div>
+
+    <!-- Επιτυχής αλλαγή PIN -->
+    <div class="success-state"
+         *ngIf="
+        !isCheckingToken &&
+        isSuccess
+      ">
+
+      <div class="success-icon">✓</div>
+
+      <h2>Η αλλαγή ολοκληρώθηκε</h2>
+
+      <p>
+        {{ successMessage }}
+      </p>
+
+      <button type="button"
+              class="primary-btn"
+              (click)="goToLogin()">
+
+        Μετάβαση στη σύνδεση
+      </button>
+    </div>
+
+    <!-- Φόρμα νέου PIN -->
+    <form *ngIf="
+        !isCheckingToken &&
+        isTokenValid &&
+        !isSuccess
+      "
+          (ngSubmit)="resetPin()">
+
+      <!-- Μήνυμα λάθους κατά την υποβολή -->
+      <div class="message error-message"
+           *ngIf="errorMessage">
+
+        {{ errorMessage }}
+      </div>
+
+      <div class="form-group">
+        <label for="newPin">
+          Νέο PIN
+        </label>
+
+        <input id="newPin"
+               name="newPin"
+               type="password"
+               inputmode="numeric"
+               autocomplete="new-password"
+               maxlength="20"
+               placeholder="Πληκτρολόγησε το νέο PIN"
+               [(ngModel)]="newPin"
+               [disabled]="isLoading"
+               required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPin">
+          Επιβεβαίωση νέου PIN
+        </label>
+
+        <input id="confirmPin"
+               name="confirmPin"
+               type="password"
+               inputmode="numeric"
+               autocomplete="new-password"
+               maxlength="20"
+               placeholder="Πληκτρολόγησε ξανά το PIN"
+               [(ngModel)]="confirmPin"
+               [disabled]="isLoading"
+               required>
+      </div>
+
+      <p class="pin-info">
+        Το PIN πρέπει να αποτελείται από τουλάχιστον
+        4 χαρακτήρες.
+      </p>
+
+      <button type="submit"
+              class="primary-btn"
+              [disabled]="isLoading">
+
+        <span *ngIf="!isLoading">
+          Αλλαγή PIN
+        </span>
+
+        <span *ngIf="isLoading">
+          Παρακαλώ περιμένετε...
+        </span>
+      </button>
+    </form>
+
+    <!-- Επιστροφή όταν το token είναι άκυρο -->
+    <button *ngIf="
+        !isCheckingToken &&
+        !isTokenValid &&
+        !isSuccess
+      "
+            type="button"
+            class="back-btn"
+            (click)="goToLogin()">
+
+      Επιστροφή στη σύνδεση
+    </button>
+
+  </div>
+
+</section>

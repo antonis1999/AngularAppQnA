@@ -108,7 +108,8 @@
 
             <div class="theory-list-inside" *ngIf="selectedTheories.length > 0">
 
-              <div class="inner-theory-card"*ngFor="let theory of selectedTheories; let i = index">
+              <div class="inner-theory-card"
+                   *ngFor="let theory of selectedTheories; let i = index">
 
                 <div class="topic-top">
                   <h4>
@@ -129,7 +130,9 @@
                   </div>
                 </div>
 
-                <div [innerHTML]="theory.Details"></div>
+                <div class="theory-content"
+                     [innerHTML]="theory.Details">
+                </div>
 
                 <div class="edit-theory-row"
                      *ngIf="editingTheoryId === theory.Id && editingTheoryDetId === theory.DetId">

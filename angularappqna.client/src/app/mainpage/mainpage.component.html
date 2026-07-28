@@ -42,6 +42,13 @@
         Αρχική
       </button>
 
+      <button [class.active]="activeSection === 'presentation'"
+              (click)="setSection('presentation')">
+
+        Παρουσίαση
+
+      </button>
+
       <button [class.active]="activeSection === 'quiz'" (click)="setSection('quiz')">
         {{ isAdmin ? 'Demo-Quiz' : 'Quiz' }}
       </button>
@@ -127,7 +134,12 @@
 
         </div>
       </div>
+      <!--PRESENTANTION-->
+      <div *ngIf="activeSection === 'presentation'">
 
+        <app-presentation></app-presentation>
+
+      </div>
       <!-- QUIZ -->
       <div *ngIf="activeSection === 'quiz'">
         <div class="quiz-container">
