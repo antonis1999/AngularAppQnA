@@ -1299,19 +1299,17 @@ quill-editor {
   }
 
 .ranking-table-cont {
-  min-width: 765px;
-  overflow: auto;
-  position: relative;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .ranking-table {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  position: absolute;
-  min-width: 700px;
+  min-width: 900px;
+  position: static;
 }
-
 .ranking-row {
   display: grid;
   grid-template-columns: 80px 2fr 1fr 1fr 1fr 1.5fr 1fr 1.5fr;
