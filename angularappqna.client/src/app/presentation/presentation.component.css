@@ -231,8 +231,9 @@
   position: fixed;
   inset: 0;
   z-index: 99999;
-  width: 100vw;
-  height: 100dvh;
+  /*width: 100vw;*/
+  /* height: 100dvh;*/
+  height: fit-content;
   padding: 20px 30px 24px;
   display: grid;
   grid-template-rows: auto 4px minmax(0, 1fr) 76px;
@@ -370,8 +371,8 @@
   color: var(--presentation-text);
   background: rgba(255, 255, 255, 0.82);
   font: inherit;
-  font-size: 12px;
-  font-weight: 750;
+  font-size: 15px;
+  font-weight: 550;
   cursor: pointer;
   transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
@@ -386,6 +387,15 @@
   color: var(--presentation-accent);
   font-weight: 900;
 }
+
+.fscr-button {
+  background-color: #3562a4;
+  color: white;
+}
+
+  .fscr-button:hover {
+    background: #374864;
+  }
 
 .exit-button {
   color: #9b4141;
@@ -428,6 +438,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  align-self: start;
 }
 
 .slide {
@@ -619,10 +630,10 @@
 .theory-title h1 {
   margin: 11px 0 0;
   color: var(--presentation-text);
-  font-size: clamp(31px, 4vw, 53px);
+  font-size: clamp(31px, 4vw, 43px);
   font-weight: 900;
   line-height: 1.12;
-  letter-spacing: -1.7px;
+ /* letter-spacing: -1.7px;*/
 }
 
 .theory-content {

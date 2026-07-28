@@ -19,8 +19,8 @@
   min-height: 100vh;
   padding: 32px;
   font-family: Inter, Arial, Helvetica, sans-serif;
-  background: radial-gradient(circle at top left, rgba(214, 176, 104, 0.14), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #f4f1ea 45%, #eef2f6 100%);
-  background: #f8f2e69c;
+  /*background: radial-gradient(circle at top left, rgba(214, 176, 104, 0.14), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #f4f1ea 45%, #eef2f6 100%);*/
+  /*background: #f8f2e69c;*/
 }
 
 .logo-panel {

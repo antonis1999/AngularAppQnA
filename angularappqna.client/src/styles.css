@@ -1,9 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'quill/dist/quill.snow.css';
 
+:root {
+  font-family: Roboto, sans-serif
+}
+
 body {
   margin: 0 !important;
-/*  font-family:Roboto, sans-serif, Arial, Helvetica, sans-serif*/
+  background: #f9f4ea;
+  /*  font-family:Roboto, sans-serif, Arial, Helvetica, sans-serif*/
 }
 
 .brand {
