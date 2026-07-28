@@ -1,16 +1,38 @@
 <div class="page">
 
-  <div class="user-panel">
-    <img src="admin.png" alt="User Icon" class="user-icon">
+ 
 
-    <div class="user-info">
-      <h2>{{ user?.Nickname || 'Χρήστης' }}</h2>
-      <p>{{ getStoreName(user?.StoreId) }}</p>
-
-      <button class="logout-btn" (click)="logout()">
-        Log Out
-      </button>
+  <div class="user-panel logo-wrapper">
+    <div>
+      <div class="brand" style="margin-bottom:0">
+        <img src="/safety.png" class="brand-icon" alt="Safety">
+        <div>
+          <span>
+            <img src="logo-mas.webp" class="logo-mas" />
+          </span>
+          <span>SAFETY CAMPAIGN</span>
+        </div>
+      </div>
     </div>
+
+
+    <div>
+      <!--<img src="admin.png" alt="User Icon" class="user-icon">-->
+
+      <div class="user-info">
+        <div>
+          <h2>{{ user?.Nickname || 'Χρήστης' }}</h2>
+          <p>{{ getStoreName(user?.StoreId) }}</p>
+        </div>
+
+        <button class="logout-btn" (click)="logout()">
+          Log Out
+        </button>
+      </div>
+    </div>
+
+
+
   </div>
 
   <div class="main-panel">
@@ -77,9 +99,9 @@
                 Μη διαθέσιμη για χρήστες
               </div>
 
-              <small>
+              <!--<small>
                 {{ isAdmin ? 'Πατήστε για επεξεργασία' : 'Πατήστε για προβολή θεωριών' }}
-              </small>
+              </small>-->
 
               <div class="preview-theory-details"
                    *ngIf="!isAdmin && openedPreviewThematologiaId === topic.id">
@@ -185,7 +207,7 @@
                     [(ngModel)]="selectedRankingDifficulty"
                     (change)="loadRanking()">
 
-              <option [ngValue]="null">Όλες οι δυσκολίες</option>
+              <option [ngValue]="null">Επίπεδο δυσκολίας</option>
               <option [ngValue]="0">Τυχαίο</option>
               <option [ngValue]="1">Εύκολο</option>
               <option [ngValue]="2">Μεσαίο</option>
@@ -205,86 +227,92 @@
             Φόρτωση κατάταξης...
           </div>
 
-          <div class="ranking-table"
-               *ngIf="!rankingLoading && filteredRankings.length > 0">
 
-            <div class="ranking-row ranking-head">
-              <span>Θέση</span>
-              <span>Nickname</span>
-              <span>Σωστές</span>
-              <span>Σύνολο</span>
-              <span>Χρόνος</span>
-              <span>Ημερομηνία</span>
-              <span>Ποσοστό</span>
 
-              <div class="points-popover-wrap">
-                <button type="button"
-                        class="points-info-btn"
-                        (click)="togglePointsPopover($event)">
-                  ΠΟΝΤΟΙ
-                </button>
+          <div class="ranking-table-cont">
 
-                <div class="points-card" *ngIf="showPointsPopover">
+            <div class="ranking-table"
+                 *ngIf="!rankingLoading && filteredRankings.length > 0">
 
-                  <div class="points-card-header">
-                    <button type="button"
-                            class="points-card-close"
-                            (click)="showPointsPopover = false">
-                      ×
-                    </button>
-                  </div>
+              <div class="ranking-row ranking-head">
+                <span>ΘΕΣΗ</span>
+                <span>NICKNAME</span>
+                <span>ΣΩΣΤΕΣ</span>
+                <span>ΣΥΝΟΛΟ</span>
+                <span>ΧΡΟΝΟΣ</span>
+                <span>ΗΜ/ΝΙΑ</span>
+                <span>ΠΟΣΟΣΤΟ</span>
 
-                  <div class="points-card-body">
+                <div class="points-popover-wrap">
+                  <button type="button"
+                          class="points-info-btn"
+                          (click)="togglePointsPopover($event)">
+                    ΠΟΝΤΟΙ
+                  </button>
 
-                    <div class="points-card-section">
-                      <h4 class="points-card-section-title">Κανονικό Quiz</h4>
+                  <div class="points-card" *ngIf="showPointsPopover">
 
-                      <div class="points-card-line">
-                        <span>Εύκολο</span>
-                        <b>×1</b>
-                      </div>
-
-                      <div class="points-card-line">
-                        <span>Μεσαίο</span>
-                        <b>×1.5</b>
-                      </div>
-
-                      <div class="points-card-line">
-                        <span>Δύσκολο</span>
-                        <b>×2</b>
-                      </div>
+                    <div class="points-card-header">
+                      <button type="button"
+                              class="points-card-close"
+                              (click)="showPointsPopover = false">
+                        ×
+                      </button>
                     </div>
 
-                    <div class="points-card-section">
-                      <h4 class="points-card-section-title">Τυχαίο Quiz</h4>
+                    <div class="points-card-body">
 
-                      <p class="points-card-text">
-                        Η δυσκολία καθορίζεται από τις ρυθμίσεις του διαχειριστή.
-                        Οι πόντοι υπολογίζονται με τον ίδιο τύπο.
-                      </p>
+                      <div class="points-card-section">
+                        <h4 class="points-card-section-title">Κανονικό Quiz</h4>
+
+                        <div class="points-card-line">
+                          <span>Εύκολο</span>
+                          <b>×1</b>
+                        </div>
+
+                        <div class="points-card-line">
+                          <span>Μεσαίο</span>
+                          <b>×1.5</b>
+                        </div>
+
+                        <div class="points-card-line">
+                          <span>Δύσκολο</span>
+                          <b>×2</b>
+                        </div>
+                      </div>
+
+                      <div class="points-card-section">
+                        <h4 class="points-card-section-title">Τυχαίο Quiz</h4>
+
+                        <p class="points-card-text">
+                          Η δυσκολία καθορίζεται από τις ρυθμίσεις του διαχειριστή.
+                          Οι πόντοι υπολογίζονται με τον ίδιο τύπο.
+                        </p>
+                      </div>
+
                     </div>
-
                   </div>
                 </div>
               </div>
+
+              <div class="ranking-row"
+                   [class.ranking-clickable]="isAdmin"
+                   *ngFor="let r of filteredRankings; let i = index"
+                   (click)="isAdmin && openQuizDetails(r)">
+
+                <span>{{ i + 1 }}</span>
+                <span>{{ r.Nickname || 'Χρήστης' }}</span>
+                <span>{{ r.CorrectAnswers }}</span>
+                <span>{{ r.TotalQuestions }}</span>
+                <span>{{ formatTime(r.TotalSeconds) }}</span>
+                <span>{{ formatDate(r.CreateDate) }}</span>
+                <span>{{ r.Percentage }}%</span>
+                <span>{{ r.Points }}</span>
+              </div>
+
             </div>
-
-            <div class="ranking-row"
-                 [class.ranking-clickable]="isAdmin"
-                 *ngFor="let r of filteredRankings; let i = index"
-                 (click)="isAdmin && openQuizDetails(r)">
-
-              <span>{{ i + 1 }}</span>
-              <span>{{ r.Nickname || 'Χρήστης' }}</span>
-              <span>{{ r.CorrectAnswers }}</span>
-              <span>{{ r.TotalQuestions }}</span>
-              <span>{{ formatTime(r.TotalSeconds) }}</span>
-              <span>{{ formatDate(r.CreateDate) }}</span>
-              <span>{{ r.Percentage }}%</span>
-              <span>{{ r.Points }}</span>
-            </div>
-
           </div>
+
         </div>
       </div>
 
@@ -420,7 +448,7 @@
                      (click)="selectUserFromPopup(u)">
 
                   <div>
-                    
+
                     <span>{{ u.Email }}</span>
                   </div>
 

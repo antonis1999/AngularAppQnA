@@ -5,19 +5,24 @@
     <div class="brand">
       <img src="/safety.png" class="brand-icon" alt="Safety">
       <div>
-        <h3>Μασούτης</h3>
+        <span>
+          <img src="logo-mas.webp" class="logo-mas"/>
+        </span>
         <span>SAFETY CAMPAIGN</span>
       </div>
     </div>
 
     <div class="campaign-badge">Καμπάνια 2026</div>
 
-    <div class="company">ΔΙΑΜΑΝΤΗΣ ΜΑΣΟΥΤΗΣ Α.Ε.</div>
+    <!--<div class="company">ΔΙΑΜΑΝΤΗΣ ΜΑΣΟΥΤΗΣ Α.Ε.</div>-->
 
-    <h1>
-      Η ασφάλεια μας,<br>
-      <span>στο επίκεντρο.</span>
-    </h1>
+    <div>
+      <h1>
+        Η ασφάλεια μας,<br>
+        <span>στο επίκεντρο.</span>
+      </h1>
+    </div>
+
 
     <p>
       Μάθε, παίξε, κέρδισε. Διαδραστική εκπαίδευση και μηνιαία
@@ -47,7 +52,7 @@
 
   <section class="login-area">
     <div class="login-card">
-      <div class="login-chip">Είσοδος</div>
+      <!--<div class="login-chip">Είσοδος</div>-->
 
       <div class="login-title-row">
         <h2>Ξεκίνα την εκπαίδευση</h2>
@@ -147,20 +152,44 @@
           <div class="alert-box">
             Διάλεξε τον χώρο εργασίας σου.
           </div>
-          </div>
+        </div>
 
-          <button type="button" class="login-btn" (click)="login()">
-            <span>Είσοδος στην Εκπαίδευση</span>
-            <span class="arrow">→</span>
-          </button>
+        <button type="button" class="login-btn" (click)="login()">
+          <span>Είσοδος στην Εκπαίδευση</span>
+          <span class="arrow">→</span>
+        </button>
 
-          <p class="terms">
-            Με τη συμμετοχή σου συμφωνείς ότι τα στοιχεία της απόδοσής σου
-            καταγράφονται για τον σκοπό της εταιρικής εκπαίδευσης.
-          </p>
-</form>
+        <p class="terms">
+          Με τη συμμετοχή σου συμφωνείς ότι τα στοιχεία της απόδοσής σου
+          καταγράφονται για τον σκοπό της εταιρικής εκπαίδευσης.
+        </p>
+      </form>
     </div>
   </section>
+
+
+  <div class="stats-mob">
+    <div class="stat-card">
+      <div class="stat-dot navy"></div>
+      <strong>12</strong>
+      <span>ΔΙΑΔΡΑΣΤΙΚΑ QUIZ</span>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-dot red"></div>
+      <strong>04</strong>
+      <span>ΕΝΟΤΗΤΕΣ</span>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-dot gold"></div>
+      <strong>01</strong>
+      <span>ΝΙΚΗΤΗΣ/ΤΡΙΑ</span>
+    </div>
+  </div>
+
+
+
 
   <div class="modal-backdrop"
        *ngIf="showHelpPopup"
@@ -210,7 +239,7 @@
       <h3>Admin είσοδος</h3>
       <p class="modal-subtitle">Συμπλήρωσε μόνο το PIN διαχειριστή.</p>
 
-      <label>Email διαχειριστή</label>
+      <label style="color: #909db1; font-weight: 550;">Email διαχειριστή</label>
       <input type="email"
              value="admin@masoutis.gr"
              disabled>

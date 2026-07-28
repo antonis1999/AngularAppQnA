@@ -6,19 +6,38 @@
   display: block;
 }
 
+.logo-wrapper {
+  justify-content: space-between;
+  align-items: center;
+  background-color: white !important;
+  border-color: white !important;
+  padding: 20px !important;
+  box-shadow: 0 8px 6px rgba(15, 23, 42, 0.07) !important;
+}
+
 .page {
   min-height: 100vh;
   padding: 32px;
   font-family: Inter, Arial, Helvetica, sans-serif;
   background: radial-gradient(circle at top left, rgba(214, 176, 104, 0.14), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #f4f1ea 45%, #eef2f6 100%);
-  color: #172033;
+  background: #f8f2e69c;
+}
+
+.logo-panel {
+  min-height: 92px;
+  padding: 10px 22px 30px 22px;
+  display: flex;
+  justify-content: start;
+ 
 }
 
 .user-panel,
 .main-panel {
   max-width: 1040px;
   margin: 0 auto 18px;
-  background: rgba(255, 255, 255, 0.82);
+  /*background: rgba(255, 255, 255, 0.82);*/
+  background: rgba(218, 234, 242, 0.82);
+  background: rgb(231, 237, 240);
   border: 1px solid rgba(218, 223, 232, 0.85);
   border-radius: 22px;
   box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
@@ -35,6 +54,9 @@
 
 .main-panel {
   padding: 22px;
+  border-radius: 22px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  border-color: white;
 }
 
 .user-icon {
@@ -50,6 +72,8 @@
 
 .user-info {
   min-width: 0;
+  display: flex;
+  gap: 20px;
 }
 
   .user-info h2 {
@@ -103,8 +127,8 @@ button,
   border-radius: 999px;
   padding: 0 18px;
   border: 1px solid transparent;
-  font-size: 12px;
-  font-weight: 850;
+  font-size: 14px;
+  font-weight: 550;
   cursor: pointer;
 }
 
@@ -200,12 +224,13 @@ button,
     margin: 0 0 8px;
     color: #172033;
     font-size: 26px;
-    font-weight: 900;
+    /*font-weight: 900;*/
     letter-spacing: -0.035em;
   }
 
   .section-card p {
-    color: #6b7586;
+    /*color: #6b7586;*/
+    color: #2271b8;
   }
 
 .form-section {
@@ -329,7 +354,7 @@ button,
     margin: 1px 0 5px;
     color: #172033;
     font-size: 17px;
-    font-weight: 900;
+    /*font-weight: 900;*/
     letter-spacing: -0.025em;
     text-transform: uppercase;
   }
@@ -355,6 +380,7 @@ button,
   padding: 16px;
   border-radius: 16px;
   background: #faf7f0;
+  background: #f2f2f1a8;
   border: 1px solid #ecdcb9;
   border-left: 3px solid #c59a4a;
 }
@@ -371,7 +397,7 @@ button,
     margin: 0 0 10px;
     color: #172033;
     font-size: 16px;
-    font-weight: 850;
+    /*font-weight: 850;*/
   }
 
 .preview-theory-text {
@@ -406,10 +432,10 @@ button,
 
 .quiz-subtitle {
   margin: 0 0 4px;
-  color: #172033;
+ /* color: #172033;*/
   font-size: 20px;
-  font-weight: 850;
-  letter-spacing: -0.02em;
+/*  font-weight: 850;
+  letter-spacing: -0.02em;*/
 }
 
 .quiz-topic-select {
@@ -1029,7 +1055,7 @@ quill-editor {
 
 .section-card {
   padding: 24px;
-  background: rgba(255, 255, 255, 0.72);
+  /*background: rgba(255, 255, 255, 0.72);*/
   border-radius: 22px;
 }
 
@@ -1060,24 +1086,26 @@ quill-editor {
   height: 38px;
   border-radius: 50%;
   background: linear-gradient(145deg, #fffaf0, #ffffff);
-  color: #9a6a16;
+  color: #be8d36;
   border: 1px solid #dcc18a;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 6px 16px rgba(154, 106, 22, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 6px 10px rgba(154, 106, 22, 0.12);
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .theory-content {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
+  padding-right: 25px;
+  padding-top: 6px;
+  flex-wrap: wrap;
 }
 
   .theory-content h2 {
     margin: 0;
     color: #121827;
-    font-size: 15px;
-    font-weight: 900;
+    font-size: 16px;
+   /* font-weight: 900;*/
     letter-spacing: 0.01em;
     text-transform: uppercase;
   }
@@ -1157,14 +1185,15 @@ quill-editor {
   .tab-menu button {
     height: 39px;
     border-radius: 13px;
-    font-size: 12px;
+    font-size: 15px;
+    font-weight: 600;
   }
 
     .tab-menu button.active {
       background: #ffffff;
       color: #111827;
       box-shadow: 0 7px 18px rgba(15, 23, 42, 0.07);
-      border-bottom: 2px solid #c99b3f;
+      border-bottom: 2px solid #c59a4a;
     }
 
 .main-panel,
@@ -1183,8 +1212,8 @@ quill-editor {
 
   .ranking-section h1 {
     text-align: center;
-    font-size: 36px;
-    font-weight: 900;
+    font-size: 26px;
+    font-weight: 550;
     color: #172033;
     margin-bottom: 8px;
   }
@@ -1218,7 +1247,7 @@ quill-editor {
   border: 1px solid #dfe5ee;
   background: #ffffff;
   color: #172033;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   outline: none;
 }
@@ -1238,8 +1267,8 @@ quill-editor {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 13px;
-  font-weight: 850;
+  font-size: 14px;
+  font-weight: 550;
   cursor: pointer;
 }
 
@@ -1247,16 +1276,25 @@ quill-editor {
     accent-color: #c59a4a;
   }
 
+.ranking-table-cont {
+  min-width: 765px;
+  overflow: auto;
+  position: relative;
+}
+
 .ranking-table {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: absolute;
+  min-width: 700px;
 }
 
 .ranking-row {
   display: grid;
   grid-template-columns: 80px 2fr 1fr 1fr 1fr 1.5fr 1fr 1.5fr;
   align-items: center;
+  text-align: center;
   padding: 17px 20px;
   border-radius: 18px;
   background: linear-gradient(180deg, #ffffff 0%, #fbfaf7 100%);
@@ -1296,25 +1334,25 @@ quill-editor {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(145deg, #fffaf0, #ffffff);
+   /* background: linear-gradient(145deg, #fffaf0, #ffffff);*/
     color: #9a6a16;
-    border: 1px solid #dcc18a;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 6px 16px rgba(154,106,22,.12);
+    /*border: 1px solid #dcc18a;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 6px 16px rgba(154,106,22,.12);*/
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 900;
+    /*font-weight: 900;*/
   }
 
   .ranking-row span:nth-child(2) {
     color: #172033;
-    font-size: 15px;
-    font-weight: 900;
+    font-size: 14px;
+    /*font-weight: 900;*/
   }
 
   .ranking-row span:last-child {
     color: #0f766e;
-    font-weight: 900;
+    /*font-weight: 900;*/
   }
 
 .ranking-row:nth-child(2) span:first-child {
@@ -1356,7 +1394,7 @@ quill-editor {
     transform: scale(1.003);
   }
 
-@media (max-width: 850px) {
+/*@media (max-width: 850px) {
   .ranking-row {
     grid-template-columns: 60px 1fr;
     gap: 8px;
@@ -1365,7 +1403,7 @@ quill-editor {
   .ranking-head {
     display: none;
   }
-}
+}*/
 .ranking-clear-btn {
   height: 44px;
   padding: 0 18px;
@@ -1448,8 +1486,8 @@ quill-editor {
   .settings-card h3 {
     margin: 0 0 4px;
     color: #172033;
-    font-size: 16px;
-    font-weight: 900;
+    font-size: 19px;
+    /*font-weight: 900;*/
   }
 
   .settings-card p {
@@ -1641,10 +1679,9 @@ quill-editor {
 }
 
   .topic-period span {
-    color: #6b7280;
-    font-size: 13px; /* μικρότερες ημερομηνίες */
-    font-weight: 600;
-    line-height: 1.2;
+    color: #47484a;
+    font-size: 14px;
+    font-weight: 500;
   }
 /* SETTINGS ADMIN PANEL  */
 
@@ -1737,7 +1774,7 @@ quill-editor {
   .user-picker-box label,
   .pin-input-group label {
     display: block;
-    margin-bottom: 7px;
+    margin-bottom: 5px;
     color: #172033;
     font-size: 13px;
     font-weight: 900;
@@ -1756,6 +1793,7 @@ quill-editor {
   font-size: 14px;
   font-weight: 700;
   outline: none;
+  margin-bottom: 15px;
 }
 
   .search-input:focus,
@@ -1780,13 +1818,14 @@ quill-editor {
   border: 1px solid rgba(218, 203, 174, 0.65);
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.045);
   text-align: left;
+  line-height: 1.5;
 }
 
   .users-list-card h4 {
     margin: 0 0 14px;
     color: #172033;
     font-size: 15px;
-    font-weight: 900;
+    /*font-weight: 900;*/
   }
 
 .search-results {
@@ -1849,6 +1888,9 @@ quill-editor {
   background: #fbf6ea;
   color: #8b6420 !important;
   border: 1px solid #ead8b3;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 6px;
 }
 
 .pin-change-area {
@@ -1878,10 +1920,15 @@ quill-editor {
     box-shadow: none;
   }
 
+.user-divider {
+  background-color: #d2cbbd;
+  height: 1px;
+  border: 0;
+  margin: 20px 0;
+}
+
 @media (max-width: 900px) {
-  .settings-header-row,
-  .settings-search-row,
-  .settings-content-grid {
+  .settings-header-row, .settings-search-row, .settings-content-grid {
     grid-template-columns: 1fr;
   }
 
