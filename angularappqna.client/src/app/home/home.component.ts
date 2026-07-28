@@ -343,7 +343,7 @@ export class HomeComponent {
 
             return;
           }
-
+          this.loader.hide();
           this.notificationService.error(
             message ||
             'Λάθος PIN διαχειριστή.'

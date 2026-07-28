@@ -1108,7 +1108,6 @@ quill-editor {
 .suggestion-questions {
   margin-top: 16px;
 }
-/* RESPONSIVE */
 
 @media (max-width: 860px) {
   .page {
@@ -1171,7 +1170,6 @@ quill-editor {
   font-weight: 800;
   color: #0f766e;
 }
-/* Αποτροπή οριζόντιου overflow σε ολόκληρη τη σελίδα */
 
 .page {
   width: 100%;
@@ -1194,8 +1192,6 @@ quill-editor {
   max-width: 100%;
   min-width: 0;
 }
-
-/* Περιεχόμενο θεωρίας από το Quill */
 
 .theory-content {
   width: 100%;

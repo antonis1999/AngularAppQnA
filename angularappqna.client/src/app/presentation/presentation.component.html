@@ -1,0 +1,427 @@
+<section class="presentation-entry"
+         *ngIf="!isPresentationStarted">
+
+  <div class="presentation-entry-content">
+
+    <header class="entry-header">
+
+      <span class="entry-eyebrow">
+        Εκπαιδευτικό υλικό
+      </span>
+
+      <h1>
+        Παρουσίαση Θεωρίας
+      </h1>
+
+      <p>
+        Επίλεξε τη θεματολογία που θέλεις να παρουσιάσεις.
+      </p>
+
+    </header>
+
+    <div class="topic-selector">
+
+      <label for="thematologiaSelect">
+        Επιλογή θεματολογίας
+      </label>
+
+      <div class="select-container">
+
+        <select id="thematologiaSelect"
+                [(ngModel)]="selectedThematologiaId">
+
+          <option [ngValue]="0">
+            Επίλεξε θεματολογία
+          </option>
+
+          <option *ngFor="let item of thematologies"
+                  [ngValue]="item.Id">
+
+            {{ item.Title }}
+
+          </option>
+
+        </select>
+
+        <span class="select-icon">
+          ⌄
+        </span>
+
+      </div>
+
+      <div class="selected-topic"
+           *ngIf="selectedThematologiaId !== 0">
+
+        <span class="selected-topic-check">
+          ✓
+        </span>
+
+        <div>
+          <small>
+            Επιλεγμένη θεματολογία
+          </small>
+
+          <strong>
+            {{ selectedThematologiaTitle }}
+          </strong>
+        </div>
+
+      </div>
+
+      <button type="button"
+              class="start-button"
+              [disabled]="selectedThematologiaId === 0"
+              (click)="startPresentation()">
+
+        <span class="start-button-icon">
+          ▶
+        </span>
+
+        <span>
+          Έναρξη Παρουσίασης
+        </span>
+
+        <span class="start-button-arrow">
+          →
+        </span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     FULLSCREEN ΠΑΡΟΥΣΙΑΣΗ
+===================================================== -->
+<section #presentationViewer
+         class="presentation-viewer"
+         *ngIf="isPresentationStarted">
+
+  <!-- Επάνω μπάρα -->
+  <header class="viewer-toolbar">
+
+    <div class="viewer-title">
+
+      <span>
+        Εκπαιδευτικό υλικό
+      </span>
+
+      <strong>
+        {{ selectedThematologiaTitle }}
+      </strong>
+
+    </div>
+
+    <div class="viewer-actions">
+
+      <!-- Timer -->
+      <div class="slide-timer"
+           [class.paused]="isTimerPaused">
+
+        <div class="timer-circle">
+
+          <svg viewBox="0 0 42 42">
+
+            <circle class="timer-circle-background"
+                    cx="21"
+                    cy="21"
+                    r="17">
+            </circle>
+
+            <circle class="timer-circle-progress"
+                    cx="21"
+                    cy="21"
+                    r="17"
+                    [style.stroke-dashoffset]="timerCircleOffset">
+            </circle>
+
+          </svg>
+
+          <strong>
+            {{ remainingSeconds }}
+          </strong>
+
+        </div>
+
+        <div class="timer-text">
+
+          <small>
+            Χρόνος slide
+          </small>
+
+          <strong>
+            {{ isTimerPaused ? 'Σε παύση' : 'Αυτόματη συνέχεια' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+      <!-- Pause / Play -->
+      <button type="button"
+              class="toolbar-button pause-button"
+              (click)="toggleTimer()">
+
+        <span>
+          {{ isTimerPaused ? '▶' : 'Ⅱ' }}
+        </span>
+
+        {{ isTimerPaused ? 'Συνέχεια' : 'Παύση' }}
+
+      </button>
+
+      <!-- Fullscreen -->
+      <button type="button"
+              class="toolbar-button"
+              (click)="toggleFullscreen()">
+
+        <span>
+          ⛶
+        </span>
+
+        Πλήρης οθόνη
+
+      </button>
+
+      <!-- Exit -->
+      <button type="button"
+              class="toolbar-button exit-button"
+              (click)="closePresentation()">
+
+        <span>
+          ✕
+        </span>
+
+        Έξοδος
+
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- Συνολική πρόοδος παρουσίασης -->
+  <div class="presentation-progress">
+
+    <div class="presentation-progress-value"
+         [style.width.%]="presentationProgress">
+    </div>
+
+  </div>
+
+  <main class="slide-stage">
+
+    <article class="slide slide-cover"
+             *ngIf="currentSlideIndex === 0"
+             [attr.data-slide]="currentSlideIndex">
+
+      <div class="cover-content">
+
+        <span class="slide-label">
+          Παρουσίαση εκπαίδευσης
+        </span>
+
+        <h1>
+          {{ selectedThematologiaTitle }}
+        </h1>
+
+        <p>
+          Η παρουσίαση περιλαμβάνει
+          <strong>{{ theories.length }}</strong>
+          {{ theories.length === 1 ? 'θεωρία' : 'θεωρίες' }}.
+        </p>
+
+      </div>
+
+      <div class="cover-decoration">
+
+        <span>
+          01
+        </span>
+
+      </div>
+
+    </article>
+
+    <article class="slide slide-theory"
+             *ngIf="
+             currentSlideIndex>
+      0 &&
+      currentSlideIndex <= theories.length
+      "
+      [attr.data-slide]="currentSlideIndex">
+
+      <header class="theory-header">
+
+        <div class="theory-index">
+
+          <small>
+            Θεωρία
+          </small>
+
+          <strong>
+            {{
+              currentSlideIndex
+                .toString()
+                .padStart(2, '0')
+            }}
+          </strong>
+
+        </div>
+
+        <div class="theory-title">
+
+          <span class="slide-label">
+            {{ selectedThematologiaTitle }}
+          </span>
+
+          <h1>
+            {{ theories[currentSlideIndex - 1]?.Header }}
+          </h1>
+
+        </div>
+
+      </header>
+
+      <div class="theory-content">
+
+        <div class="theory-details"
+             [innerHTML]="
+               theories[currentSlideIndex - 1]?.Details
+             ">
+        </div>
+
+      </div>
+
+      <footer class="theory-footer">
+
+        <span>
+          Εκπαιδευτική ενότητα
+        </span>
+
+        <strong>
+          {{ currentSlideIndex }}
+          /
+          {{ theories.length }}
+        </strong>
+
+      </footer>
+
+    </article>
+
+    <article class="slide slide-finish"
+             *ngIf="currentSlideIndex === theories.length + 1"
+             [attr.data-slide]="currentSlideIndex">
+
+      <div class="finish-symbol">
+        ✓
+      </div>
+
+      <span class="slide-label">
+        Ολοκλήρωση παρουσίασης
+      </span>
+
+      <h1>
+        Η παρουσίαση ολοκληρώθηκε
+      </h1>
+
+      <p>
+        Ολοκληρώθηκε η παρουσίαση της θεματολογίας
+        <strong>{{ selectedThematologiaTitle }}</strong>.
+      </p>
+
+      <div class="finish-actions">
+
+        <button type="button"
+                class="secondary-action"
+                (click)="restartPresentation()">
+
+          ↻ Επανάληψη
+
+        </button>
+
+        <button type="button"
+                class="primary-action"
+                (click)="closePresentation()">
+
+          Ολοκλήρωση →
+
+        </button>
+
+      </div>
+
+    </article>
+
+  </main>
+
+
+  <!-- =================================================
+       ΚΑΤΩ ΠΛΟΗΓΗΣΗ
+  ================================================== -->
+  <footer class="viewer-navigation">
+
+    <button type="button"
+            class="navigation-button navigation-previous"
+            [disabled]="currentSlideIndex === 0"
+            (click)="previousSlide()">
+
+      <span class="navigation-arrow">
+        ←
+      </span>
+
+      <span class="navigation-label">
+        Προηγούμενο
+      </span>
+
+    </button>
+
+
+    <div class="navigation-center">
+
+      <div class="slide-position">
+        {{ currentSlideIndex + 1 }}
+        /
+        {{ totalSlides }}
+      </div>
+
+      <div class="slide-indicators">
+
+        <button type="button"
+                class="slide-indicator"
+                *ngFor="
+                let item of slideItems;
+                let index = index
+              "
+                [class.active]="index === currentSlideIndex"
+                [class.completed]="index < currentSlideIndex"
+                (click)="goToSlide(index)">
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <button type="button"
+            class="navigation-button navigation-next"
+            [disabled]="currentSlideIndex === totalSlides - 1"
+            (click)="nextSlide()">
+
+      <span class="navigation-label">
+        Επόμενο
+      </span>
+
+      <span class="navigation-arrow">
+        →
+      </span>
+
+    </button>
+
+  </footer>
+
+</section>
