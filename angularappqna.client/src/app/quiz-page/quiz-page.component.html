@@ -1,156 +1,173 @@
-<div class="quiz-page">
+<div class="page">
 
-  <!-- QUIZ -->
-  <div class="quiz-card" *ngIf="!showReview && !quizFinished">
+  <div class="user-panel logo-wrapper" style="justify-content: center;">
 
-    <div class="quiz-top">
-      <button type="button" class="quiz-back-btn" (click)="GoBack()">
-        ← Πίσω
-      </button>
-
-      <div class="quiz-progress-text">
-        Ερώτηση {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+    <div class="brand">
+      <img src="/safety.png" class="brand-icon" alt="Safety">
+      <div>
+        <span>
+          <img src="logo-mas.webp" class="logo-mas" />
+        </span>
+        <span>SAFETY CAMPAIGN</span>
       </div>
     </div>
-
-    <div class="quiz-progress-bar">
-      <div class="quiz-progress-fill" [style.width.%]="progressPercent"></div>
-    </div>
-
-    <div class="timer-wrapper">
-      <div class="timer-header">
-        <span>Χρόνος που απομένει</span>
-        <span>{{ timeLeft }}s</span>
-      </div>
-
-      <div class="timer-bar">
-        <div class="timer-fill" [style.width.%]="(timeLeft / 15) * 100"></div>
-      </div>
-    </div>
-
-    <div class="quiz-question-area" *ngIf="currentQuestion">
-      <h2>{{ currentQuestion.Question }}</h2>
-
-      <div class="quiz-answers">
-        <label class="quiz-answer-option"
-               *ngFor="let answer of currentQuestion.Answers"
-               [class.disabled]="timeLeft <= 0"
-               [class.selected]="selectedAnswerId === answer.AId">
-
-          <input type="radio"
-                 name="answer"
-                 [checked]="selectedAnswerId === answer.AId"
-                 [disabled]="timeLeft <= 0"
-                 (change)="selectAnswer(answer.AId)">
-
-          <span>{{ answer.Answer }}</span>
-        </label>
-      </div>
-    </div>
-
-    <div class="quiz-actions">
-
-      <button type="button"
-              class="quiz-skip-btn"
-              (click)="skipQuestion()">
-        Skip
-      </button>
-
-      <button type="button"
-              class="quiz-next-btn"
-              [disabled]="selectedAnswerId === null"
-              (click)="nextQuestion()">
-        {{ currentQuestionIndex === questions.length - 1 ? 'Έλεγχος απαντήσεων' : 'Επόμενη' }}
-      </button>
-
-    </div>
-
   </div>
 
-  <!-- REVIEW -->
-  <div class="quiz-card" *ngIf="showReview && !quizFinished">
 
-    <div class="quiz-result">
-      <h2>Έλεγχος απαντήσεων</h2>
-      <p>Δες τις απαντήσεις σου πριν την τελική υποβολή.</p>
-    </div>
+  <div class="quiz-page">
 
-    <div class="review-list">
-      <div class="review-item" *ngFor="let q of questions; let i = index">
-        <h3>Ερώτηση {{ i + 1 }}</h3>
+    <!-- QUIZ -->
+    <div class="quiz-card" *ngIf="!showReview && !quizFinished">
 
-        <p class="review-question">
-          {{ q.Question }}
-        </p>
+      <div class="quiz-top">
+        <button type="button" class="quiz-back-btn" (click)="GoBack()">
+          ← Πίσω
+        </button>
 
-        <p class="review-answer">
-          Απάντησες:
-          <strong>{{ getSelectedAnswerText(q) }}</strong>
-        </p>
+        <div class="quiz-progress-text">
+          Ερώτηση {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+        </div>
       </div>
-    </div>
 
-    <div class="quiz-actions">
-      <button type="button" class="quiz-next-btn" (click)="submitAnswers()">
-        Υποβολή απαντήσεων
-      </button>
-    </div>
+      <div class="quiz-progress-bar">
+        <div class="quiz-progress-fill" [style.width.%]="progressPercent"></div>
+      </div>
 
-  </div>
-
-  <!-- RESULTS -->
-  <div class="quiz-card" *ngIf="quizFinished">
-
-    <div class="quiz-result">
-      <h2>Το Quiz ολοκληρώθηκε</h2>
-
-      <p>
-        Σκορ: {{ score }} / {{ questions.length }}
-      </p>
-    </div>
-
-    <div class="review-list">
-      <div class="review-item"
-           *ngFor="let q of questions; let i = index"
-           [class.correct]="isQuestionCorrect(q)"
-           [class.wrong]="!isQuestionCorrect(q)">
-
-        <h3>Ερώτηση {{ i + 1 }}</h3>
-
-        <p class="review-question">
-          {{ q.Question }}
-        </p>
-
-        <p class="review-answer">
-          Η απάντησή σου:
-          <strong>{{ getSelectedAnswerText(q) }}</strong>
-        </p>
-
-        <p class="review-answer" *ngIf="!isQuestionCorrect(q)">
-          Σωστή απάντηση:
-          <strong>{{ getCorrectAnswerText(q) }}</strong>
-        </p>
-
-        <div class="review-details"
-             *ngIf="shouldShowDetails(q)">
-          <div class="review-details-title">
-            Επεξήγηση θεωρίας
-          </div>
-
-          <div class="review-details-text"
-               [innerHTML]="getTheoryDetails(q)">
-          </div>
+      <div class="timer-wrapper">
+        <div class="timer-header">
+          <span>Χρόνος που απομένει</span>
+          <span>{{ timeLeft }}s</span>
         </div>
 
+        <div class="timer-bar">
+          <div class="timer-fill" [style.width.%]="(timeLeft / 15) * 100"></div>
+        </div>
       </div>
+
+      <div class="quiz-question-area" *ngIf="currentQuestion">
+        <h2>{{ currentQuestion.Question }}</h2>
+
+        <div class="quiz-answers">
+          <label class="quiz-answer-option"
+                 *ngFor="let answer of currentQuestion.Answers"
+                 [class.disabled]="timeLeft <= 0"
+                 [class.selected]="selectedAnswerId === answer.AId">
+
+            <input type="radio"
+                   name="answer"
+                   [checked]="selectedAnswerId === answer.AId"
+                   [disabled]="timeLeft <= 0"
+                   (change)="selectAnswer(answer.AId)">
+
+            <span>{{ answer.Answer }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+
+        <button type="button"
+                class="quiz-skip-btn"
+                (click)="skipQuestion()">
+          Skip
+        </button>
+
+        <button type="button"
+                class="quiz-next-btn"
+                [disabled]="selectedAnswerId === null"
+                (click)="nextQuestion()">
+          {{ currentQuestionIndex === questions.length - 1 ? 'Έλεγχος απαντήσεων' : 'Επόμενη' }}
+        </button>
+
+      </div>
+
     </div>
 
-    <div class="quiz-actions">
-      <button type="button" class="quiz-back-btn" (click)="GoBack()">
-        ← Πίσω
-      </button>
+    <!-- REVIEW -->
+    <div class="quiz-card" *ngIf="showReview && !quizFinished">
+
+      <div class="quiz-result">
+        <h2>Έλεγχος απαντήσεων</h2>
+        <p>Δες τις απαντήσεις σου πριν την τελική υποβολή.</p>
+      </div>
+
+      <div class="review-list">
+        <div class="review-item" *ngFor="let q of questions; let i = index">
+          <h3>Ερώτηση {{ i + 1 }}</h3>
+
+          <p class="review-question">
+            {{ q.Question }}
+          </p>
+
+          <p class="review-answer">
+            Απάντησες:
+            <strong>{{ getSelectedAnswerText(q) }}</strong>
+          </p>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <button type="button" class="quiz-next-btn" (click)="submitAnswers()">
+          Υποβολή απαντήσεων
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RESULTS -->
+    <div class="quiz-card" *ngIf="quizFinished">
+
+      <div class="quiz-result">
+        <h2>Το Quiz ολοκληρώθηκε</h2>
+
+        <p>
+          Σκορ: {{ score }} / {{ questions.length }}
+        </p>
+      </div>
+
+      <div class="review-list">
+        <div class="review-item"
+             *ngFor="let q of questions; let i = index"
+             [class.correct]="isQuestionCorrect(q)"
+             [class.wrong]="!isQuestionCorrect(q)">
+
+          <h3>Ερώτηση {{ i + 1 }}</h3>
+
+          <p class="review-question">
+            {{ q.Question }}
+          </p>
+
+          <p class="review-answer">
+            Η απάντησή σου:
+            <strong>{{ getSelectedAnswerText(q) }}</strong>
+          </p>
+
+          <p class="review-answer" *ngIf="!isQuestionCorrect(q)">
+            Σωστή απάντηση:
+            <strong>{{ getCorrectAnswerText(q) }}</strong>
+          </p>
+
+          <div class="review-details"
+               *ngIf="shouldShowDetails(q)">
+            <div class="review-details-title">
+              Επεξήγηση θεωρίας
+            </div>
+
+            <div class="review-details-text"
+                 [innerHTML]="getTheoryDetails(q)">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <button type="button" class="quiz-back-btn" (click)="GoBack()">
+          ← Πίσω
+        </button>
+      </div>
+
     </div>
 
   </div>
-
 </div>

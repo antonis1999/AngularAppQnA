@@ -1,5 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'quill/dist/quill.snow.css';
+@import url('app/mainpage/mainpage.component.css');
+
 
 :root {
   font-family: Roboto, sans-serif
@@ -15,7 +17,6 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 20px
 }
 
 .brand h3 {
@@ -38,3 +39,4 @@ body {
   height: 52px;
   object-fit: contain;
 }
+
