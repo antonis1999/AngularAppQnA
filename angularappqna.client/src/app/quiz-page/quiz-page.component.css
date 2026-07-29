@@ -12,8 +12,8 @@
   min-height: 100vh;
   padding: 36px;
   font-family: Inter, Arial, Helvetica, sans-serif;
-  background: radial-gradient(circle at top left, rgba(214, 176, 104, 0.13), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #f4f1ea 48%, #eef2f6 100%);
-  display: flex;
+/*  background: radial-gradient(circle at top left, rgba(214, 176, 104, 0.13), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #f4f1ea 48%, #eef2f6 100%);
+*/  display: flex;
   align-items: center;
   justify-content: center;
   color: #172033;
