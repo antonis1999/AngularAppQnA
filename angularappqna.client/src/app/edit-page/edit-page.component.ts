@@ -253,8 +253,18 @@ export class EditPageComponent implements OnInit {
       });
   }
 
-  deleteThematologia(item: Thematologia): void {
-    if (!confirm('Να διαγραφεί αυτή η θεματολογία;')) {
+  deleteThematologia(
+    item: Thematologia,
+    event: MouseEvent
+  ): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const confirmed = confirm(
+      `Να διαγραφεί η θεματολογία "${item.Title}";`
+    );
+
+    if (!confirmed) {
       return;
     }
 
@@ -263,7 +273,7 @@ export class EditPageComponent implements OnInit {
       {}
     )
       .subscribe({
-        next: (response) => {
+        next: response => {
           if (!response.IsSuccess) {
             this.notificationService.error(
               response.Message || 'Η διαγραφή απέτυχε'
@@ -276,12 +286,20 @@ export class EditPageComponent implements OnInit {
           this.thematologiaTitle = '';
 
           this.loadThematologies();
-          this.notificationService.success('Διαγράφηκε επιτυχώς');
+          this.notificationService.success(
+            'Διαγράφηκε επιτυχώς'
+          );
           this.router.navigate(['/mainpage']);
         },
-        error: (err) => {
-          console.error('Delete thematologia error:', err);
-          this.notificationService.error('Σφάλμα διαγραφής θεματολογίας');
+        error: err => {
+          console.error(
+            'Delete thematologia error:',
+            err
+          );
+
+          this.notificationService.error(
+            'Σφάλμα διαγραφής θεματολογίας'
+          );
         }
       });
   }
