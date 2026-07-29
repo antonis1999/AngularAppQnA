@@ -52,7 +52,7 @@ export class MainpageComponent {
   userSearchText = '';
   newPin = '';
   confirmPin = '';
-
+  previewLoading = false;
   showPointsPopover = false;
   showAddUser = false;
   newUserEmail = '';
@@ -189,19 +189,34 @@ export class MainpageComponent {
     if (this.openedPreviewThematologiaId === id) {
       this.openedPreviewThematologiaId = null;
       this.previewTheories = [];
+      this.previewLoading = false;
       return;
     }
 
     this.openedPreviewThematologiaId = id;
 
-    this.http.get<any[]>(`api/Service/GetTheoriaByThematologia?thematologiaId=${id}`)
+    
+    this.previewTheories = [];
+    this.previewLoading = true;
+
+    this.http
+      .get<any[]>(
+        `api/Service/GetTheoriaByThematologia?thematologiaId=${id}`
+      )
       .subscribe({
         next: (res) => {
-          this.previewTheories = res;
+          this.previewTheories = res ?? [];
+          this.previewLoading = false;
         },
         error: (err) => {
           console.error('Load preview theories error:', err);
-          this.notificationService.error('Σφάλμα φόρτωσης θεωριών');
+
+          this.previewTheories = [];
+          this.previewLoading = false;
+
+          this.notificationService.error(
+            'Σφάλμα φόρτωσης θεωριών'
+          );
         }
       });
   }

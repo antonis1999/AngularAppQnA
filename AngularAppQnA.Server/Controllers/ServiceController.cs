@@ -124,45 +124,87 @@ namespace AngularAppQnA.Server.Controllers
             }
             return ret;
         }
-
         [HttpPost("DeleteThematologia/{id}")]
         [Authorize(Roles = "99")]
         public async Task<BasicResponse> DeleteThematologia(int id)
         {
             BasicResponse ret = new BasicResponse();
 
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
             try
             {
-                var row = await _context.msc_Thematologia.FindAsync(id);
+                var row = await _context.msc_Thematologia
+                    .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (row == null)
                 {
                     ret.IsSuccess = false;
-                    ret.Message = "Thematologia not found.";
+                    ret.Message = "Η θεματολογία δεν βρέθηκε.";
                     return ret;
                 }
 
                 var theories = await _context.msc_Thematologia_Theoria
-                    .Where(x => x.DetId == id)
+                    .Where(x => x.Id == id)
                     .ToListAsync();
+
+                var userIdClaim = User.FindFirst(
+                    System.Security.Claims.ClaimTypes.NameIdentifier
+                )?.Value;
+
+                int? userId = null;
+
+                if (int.TryParse(userIdClaim, out int parsedUserId))
+                {
+                    userId = parsedUserId;
+                }
+
+                var userEmail = User.FindFirst(
+                    System.Security.Claims.ClaimTypes.Email
+                )?.Value;
+
+                var audit = new msc_AuditLog
+                {
+                    TableName = "_Thematologia",
+                    RecordId = row.Id.ToString(),
+                    ActionType = "DELETE_THEMATOLOGIA",
+
+                    OldValues =
+                        System.Text.Json.JsonSerializer.Serialize(row),
+
+                    PerformedAt = DateTime.Now,
+
+                    Description =
+                        $"Διαγράφηκε η θεματολογία '{row.Title}' με ID {row.Id}.",
+
+                    NewValues = null,
+
+                    PerformedByUserId = userId,
+                    PerformedByEmail = userEmail
+                };
+
+                _context.msc_AuditLog.Add(audit);
 
                 _context.msc_Thematologia_Theoria.RemoveRange(theories);
                 _context.msc_Thematologia.Remove(row);
 
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
                 ret.IsSuccess = true;
-                ret.Message = "Thematologia deleted.";
+                ret.Message = "Η θεματολογία διαγράφηκε επιτυχώς.";
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
+
                 ret.IsSuccess = false;
                 ret.Message = ex.Message;
             }
 
             return ret;
         }
-
 
         [HttpGet("GetTheoriaByThematologia")]
       
