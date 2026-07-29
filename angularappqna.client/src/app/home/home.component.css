@@ -965,3 +965,144 @@ input {
     font-size: clamp(32px, 4.5vw, 100px);
   }
 }
+/* ===========================
+   Forgot PIN
+=========================== */
+
+.forgot-pin-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: -12px 4px 22px;
+}
+
+.forgot-pin-btn {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #1f6bb9;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+  .forgot-pin-btn:hover {
+    color: #cf2231;
+    transform: translateX(-3px);
+  }
+
+.forgot-pin-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  padding: 42px;
+  border-radius: 30px;
+  background: linear-gradient(180deg, #ffffff, #fffaf2);
+  border: 1px solid rgba(214, 170, 75, 0.65);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.35);
+  animation: popupIn 0.35s ease;
+}
+
+  .forgot-pin-modal h3 {
+    margin: 0;
+    color: #0b1328;
+    font-size: 34px;
+    letter-spacing: -1px;
+  }
+
+.forgot-pin-subtitle {
+  color: #697386;
+  line-height: 1.5;
+}
+
+.forgot-pin-modal label {
+  display: block;
+  margin: 18px 0 9px;
+  color: #4b5565;
+}
+
+.forgot-pin-modal input {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.forgot-pin-message {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+  .forgot-pin-message.error {
+    color: #a3121f;
+    background: #fff0f1;
+    border: 1px solid rgba(207, 34, 49, 0.25);
+  }
+
+  .forgot-pin-message.success {
+    color: #17663a;
+    background: #edf9f2;
+    border: 1px solid rgba(30, 130, 76, 0.25);
+  }
+
+.forgot-pin-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.cancel-forgot-btn,
+.submit-forgot-btn {
+  min-height: 56px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.cancel-forgot-btn {
+  background: #eef2f7;
+  color: #0b1328;
+}
+
+.submit-forgot-btn {
+  background: linear-gradient(135deg, #30619e, #1b3f6c);
+  color: #f6d37a;
+  box-shadow: inset 0 0 0 1px rgba(214, 170, 75, 0.75);
+}
+
+  .cancel-forgot-btn:hover:not(:disabled),
+  .submit-forgot-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+  }
+
+  .submit-forgot-btn:hover:not(:disabled) {
+    color: #ffffff;
+  }
+
+  .cancel-forgot-btn:disabled,
+  .submit-forgot-btn:disabled,
+  .forgot-pin-modal input:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+@media screen and (max-width: 520px) {
+  .forgot-pin-modal {
+    padding: 38px 26px 28px;
+  }
+
+    .forgot-pin-modal h3 {
+      font-size: 28px;
+    }
+
+  .forgot-pin-actions {
+    grid-template-columns: 1fr;
+  }
+}
