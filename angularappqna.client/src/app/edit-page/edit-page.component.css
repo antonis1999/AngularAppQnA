@@ -5,6 +5,15 @@
 :host {
   display: block;
 }
+  :host ::ng-deep .ql-editor img {
+    display: block;
+    width: 100%;
+    max-width: 600px;
+    height: 350px;
+    object-fit: contain;
+    margin: 18px auto;
+    border-radius: 10px;
+  }
 
 .page {
   min-height: 100vh;

@@ -100,7 +100,8 @@
 
             <quill-editor [(ngModel)]="newTheoryDetails"
                           [modules]="quillModules"
-                          placeholder="Γράψε τις λεπτομέρειες της θεωρίας...">
+                          placeholder="Γράψε τις λεπτομέρειες της θεωρίας..."
+                          (onEditorCreated)="onNewTheoryEditorCreated($event)">
             </quill-editor>
 
             <button class="save-btn" (click)="addTheoryToSelected()">
@@ -141,10 +142,10 @@
                   <input type="text"
                          [(ngModel)]="editingTheoryHeader"
                          placeholder="Επεξεργασία τίτλου θεωρίας">
-
                   <quill-editor [(ngModel)]="editingTheoryDetails"
                                 [modules]="quillModules"
-                                placeholder="Επεξεργασία λεπτομερειών θεωρίας...">
+                                placeholder="Επεξεργασία λεπτομερειών θεωρίας..."
+                                (onEditorCreated)="onEditingTheoryEditorCreated($event)">
                   </quill-editor>
 
                   <button class="update-topic-btn"

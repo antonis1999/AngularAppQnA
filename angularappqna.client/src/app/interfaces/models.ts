@@ -128,3 +128,31 @@ export interface QuizAttemptDetail {
   TotalTimeSeconds: number;
   CreateDate: string;
 }
+export interface UploadEditorImageResponse {
+  IsSuccess?: boolean;
+  Message?: string;  
+  ImageUrl?: string;
+  BlobName?: string;
+}
+export interface QuizProgress {
+  thematologiaId: number;
+
+  questions: QuizPreviewQuestion[];
+  currentQuestionIndex: number;
+  selectedAnswerId: number | null;
+
+  answers: {
+    questionId: number;
+    answerId: number | null;
+  }[];
+
+  questionTimes: number[];
+
+  timeLeft: number;
+  quizStartTime: number;
+  questionStartTime: number;
+
+  showReview: boolean;
+
+  savedAt: number;
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit,  ViewChild,  ElementRef,  OnDestroy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,8 +15,12 @@ import {
   QuizOption,
   ExistingQuizQuestion,
   ExistingQuizAnswer,
-  UpdateQuizQuestionRequest
+  UpdateQuizQuestionRequest,
+  UploadEditorImageResponse
 } from '../interfaces/models';
+
+import Quill from 'quill';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-edit-page',
@@ -25,7 +29,7 @@ import {
   templateUrl: './edit-page.component.html',
   styleUrl: './edit-page.component.css'
 })
-export class EditPageComponent implements OnInit {
+export class EditPageComponent implements OnInit,OnDestroy {
 
   thematologiaId = 0;
   adminEditTab = 'theory';
@@ -64,17 +68,25 @@ export class EditPageComponent implements OnInit {
   quizSuggestions: any[] = [];
   expandedSuggestionIndex: number | null = null;
 
+  private newTheoryQuill: Quill | null = null;
+  private editingTheoryQuill: Quill | null = null;
+
+  isUploadingEditorImage = false;
+
   quillModules = {
-    toolbar: [
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ header: [1, 2, 3, false] }],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      [{ align: [] }],
-      [{ color: [] }, { background: [] }],
-      ['link'],
-      ['clean']
-    ]
+    toolbar: {
+      container: [
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ header: [1, 2, 3, false] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ align: [] }],
+        [{ color: [] }, { background: [] }],
+        ['link', 'image'],
+        ['clean']
+      ]
+    }
   };
+
   @ViewChild('quizExcelInput')
   quizExcelInput!: ElementRef<HTMLInputElement>;
   constructor(
@@ -84,11 +96,155 @@ export class EditPageComponent implements OnInit {
     private notificationService: NotificationService,
     private loader: LoaderService
   ) { }
+
   ngOnInit(): void {
     this.thematologiaId = Number(this.route.snapshot.paramMap.get('id'));
 
     this.loadThematologies();
     this.loadQuizQuestionsCount();
+  }
+
+  private validateEditorImage(file: File): boolean {
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/webp'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      this.notificationService.warning(
+        'Επιτρέπονται μόνο εικόνες JPG, PNG και WebP.'
+      );
+
+      return false;
+    }
+
+    const maxSizeInBytes = 5 * 1024 * 1024;
+
+    if (file.size > maxSizeInBytes) {
+      this.notificationService.warning(
+        'Η εικόνα δεν μπορεί να ξεπερνά τα 5 MB.'
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
+  private registerImageToolbarHandler(
+    editor: Quill
+  ): void {
+    const toolbar: any = editor.getModule('toolbar');
+
+    if (!toolbar) {
+      return;
+    }
+
+    toolbar.addHandler(
+      'image',
+      () => this.openEditorImagePicker(editor)
+    );
+  }
+
+  private openEditorImagePicker(
+    editor: Quill
+  ): void {
+    const input = document.createElement('input');
+
+    input.type = 'file';
+
+    input.accept = [
+      'image/jpeg',
+      'image/png',
+      'image/webp'
+    ].join(',');
+
+    input.style.display = 'none';
+
+    input.addEventListener(
+      'change',
+      () => {
+        const file = input.files?.[0];
+
+        if (!file) {
+          input.remove();
+          return;
+        }
+
+        console.log(
+          'Επιλέχθηκε εικόνα:',
+          file.name,
+          file.type,
+          file.size
+        );
+
+        if (!this.validateEditorImage(file)) {
+          input.remove();
+          return;
+        }
+
+        const range = editor.getSelection(true);
+
+        const insertIndex =
+          range?.index ??
+          Math.max(0, editor.getLength() - 1);
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const temporaryImageUrl =
+            reader.result as string;
+
+          editor.insertEmbed(
+            insertIndex,
+            'image',
+            temporaryImageUrl,
+            'user'
+          );
+
+          editor.insertText(
+            insertIndex + 1,
+            '\n',
+            'user'
+          );
+
+          editor.setSelection(
+            insertIndex + 2,
+            0,
+            'silent'
+          );
+        };
+
+        reader.onerror = () => {
+          this.notificationService.error(
+            'Δεν ήταν δυνατή η ανάγνωση της εικόνας.'
+          );
+        };
+
+        reader.readAsDataURL(file);
+
+        input.remove();
+      },
+      {
+        once: true
+      }
+    );
+
+    document.body.appendChild(input);
+    input.click();
+  }
+
+  onNewTheoryEditorCreated(editor: Quill): void {
+    this.newTheoryQuill = editor;
+
+    this.registerImageToolbarHandler(editor);
+  }
+
+  onEditingTheoryEditorCreated(editor: Quill): void {
+    this.editingTheoryQuill = editor;
+
+    this.registerImageToolbarHandler(editor);
   }
 
   loadThematologies(): void {
@@ -855,5 +1011,10 @@ export class EditPageComponent implements OnInit {
   }
   goBack(): void {
     this.router.navigate(['/mainpage']);
+  }
+
+  ngOnDestroy(): void {
+    this.newTheoryQuill = null;
+    this.editingTheoryQuill = null;
   }
 }
