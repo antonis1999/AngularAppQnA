@@ -58,7 +58,7 @@
 .campaign-badge {
   align-self: flex-end;
   margin-right: 50px;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   padding: 14px 28px;
   border-radius: 14px;
   background: linear-gradient( 135deg, #4e9ee5, #135dad);
@@ -785,6 +785,11 @@ input {
     .stat-card strong {
       font-size: 46px;
     }
+
+  .campaign-badge {
+    margin-top: 20px;
+    margin-bottom: 15px;
+  }
 }
 
 

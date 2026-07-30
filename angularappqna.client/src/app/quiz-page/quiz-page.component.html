@@ -1,8 +1,8 @@
 <div class="page">
 
-  <div class="user-panel logo-wrapper" style="justify-content: center; width: min(760px, 100%);">
+  <div class="user-panel logo-wrapper quiz-logo">
 
-    <div class="brand">
+    <div class="brand" (click)="'/mainpage'">
       <img src="/safety.png" class="brand-icon" alt="Safety">
       <div>
         <span>
@@ -93,14 +93,14 @@
 
       <div class="review-list">
         <div class="review-item" *ngFor="let q of questions; let i = index">
-          <h3>Ερώτηση {{ i + 1 }}</h3>
+          <div class="quiz-quest">Ερώτηση {{ i + 1 }}</div>
 
           <p class="review-question">
             {{ q.Question }}
           </p>
 
           <p class="review-answer">
-            Απάντησες:
+            <span class="rev-title">Απάντησες:</span>
             <strong>{{ getSelectedAnswerText(q) }}</strong>
           </p>
         </div>
@@ -131,20 +131,20 @@
              [class.correct]="isQuestionCorrect(q)"
              [class.wrong]="!isQuestionCorrect(q)">
 
-          <h3>Ερώτηση {{ i + 1 }}</h3>
+          <div class="quiz-quest">Ερώτηση {{ i + 1 }}</div>
 
           <p class="review-question">
             {{ q.Question }}
           </p>
 
           <p class="review-answer">
-            Η απάντησή σου:
+            <span class="rev-title">Η απάντησή σου:</span>
             <strong>{{ getSelectedAnswerText(q) }}</strong>
           </p>
 
           <p class="review-answer" *ngIf="!isQuestionCorrect(q)">
-            Σωστή απάντηση:
-            <strong>{{ getCorrectAnswerText(q) }}</strong>
+            <span class="rev-title-correct">Σωστή απάντηση:</span>
+            <strong style="color: black; ">{{ getCorrectAnswerText(q) }}</strong>
           </p>
 
           <div class="review-details"
