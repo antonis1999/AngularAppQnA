@@ -420,6 +420,7 @@ input {
   border: 1px solid rgba(214, 170, 75, 0.65);
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.35);
   animation: popupIn 0.52s ease;
+  top:10%;
 }
 
 .modal-close {
@@ -574,6 +575,7 @@ input {
   border: 1px solid rgba(214, 170, 75, 0.65);
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.35);
   animation: popupIn 0.52s ease;
+  top: 10%;
 }
 
   .admin-login-modal h3 {
