@@ -184,3 +184,4 @@ export class ResetPinComponent implements OnInit {
     this.router.navigate(['/']);
   }
 }
+/**/

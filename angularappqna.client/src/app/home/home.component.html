@@ -6,7 +6,7 @@
       <img src="/safety.png" class="brand-icon" alt="Safety">
       <div>
         <span>
-          <img src="logo-mas.webp" class="logo-mas"/>
+          <img src="logo-mas.webp" class="logo-mas" />
         </span>
         <span>SAFETY CAMPAIGN</span>
       </div>
@@ -78,6 +78,14 @@
                placeholder="Πληκτρολόγησε το PIN σου"
                [(ngModel)]="pin"
                name="pin" />
+
+        <div class="forgot-pin-row">
+          <button type="button"
+                  class="forgot-pin-btn"
+                  (click)="openForgotPinPopup()">
+            Ξέχασα το PIN μου
+          </button>
+        </div>
 
         <div class="first-login-box">
 
@@ -257,6 +265,70 @@
 
         <button type="button" class="submit-admin-btn" (click)="adminLogin()">
           Είσοδος
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop"
+       *ngIf="showForgotPinPopup"
+       (click)="closeForgotPinPopup()">
+    <div class="forgot-pin-modal"
+         (click)="$event.stopPropagation()">
+      <button type="button"
+              class="modal-close"
+              [disabled]="isSendingForgotPin"
+              (click)="closeForgotPinPopup()">
+        ×
+      </button>
+
+      <h3>Επαναφορά PIN</h3>
+
+      <p class="modal-subtitle forgot-pin-subtitle">
+        Συμπλήρωσε το εταιρικό email σου και θα λάβεις σύνδεσμο
+        για τη δημιουργία νέου PIN.
+      </p>
+
+      <label for="forgotPinEmail">
+        Εταιρικό email
+      </label>
+
+      <input id="forgotPinEmail"
+             type="email"
+             placeholder="π.χ. user@masoutis.gr"
+             [(ngModel)]="forgotPinEmail"
+             name="forgotPinEmail"
+             [disabled]="isSendingForgotPin"
+             (keyup.enter)="sendForgotPinEmail()" />
+
+      <div class="forgot-pin-message error"
+           *ngIf="forgotPinErrorMessage">
+        {{ forgotPinErrorMessage }}
+      </div>
+
+      <div class="forgot-pin-message success"
+           *ngIf="forgotPinSuccessMessage">
+        {{ forgotPinSuccessMessage }}
+      </div>
+
+      <div class="forgot-pin-actions">
+        <button type="button"
+                class="cancel-forgot-btn"
+                [disabled]="isSendingForgotPin"
+                (click)="closeForgotPinPopup()">
+          Ακύρωση
+        </button>
+
+        <button type="button"
+                class="submit-forgot-btn"
+                [disabled]="isSendingForgotPin || !!forgotPinSuccessMessage"
+                (click)="sendForgotPinEmail()">
+          <span *ngIf="!isSendingForgotPin">
+            Αποστολή συνδέσμου
+          </span>
+
+          <span *ngIf="isSendingForgotPin">
+            Αποστολή...
+          </span>
         </button>
       </div>
     </div>
