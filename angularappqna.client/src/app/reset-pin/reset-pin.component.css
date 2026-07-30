@@ -13,6 +13,10 @@
   box-sizing: border-box;
 }
 
+.logo-txt {
+  letter-spacing: 10px;
+}
+
 .reset-card {
   width: 100%;
   max-width: 470px;
@@ -47,9 +51,10 @@
 
 .eyebrow {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+  margin-top:20px;
   color: #b7791f;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -64,10 +69,10 @@
 }
 
 .reset-header p {
-  margin: 13px 0 0;
-  color: #697386;
-  font-size: 15px;
-  line-height: 1.65;
+  margin: 15px 0 0;
+  color: #414a5b;
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 form {
@@ -75,15 +80,15 @@ form {
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
   .form-group label {
     display: block;
     margin-bottom: 8px;
     color: #28364d;
-    font-size: 14px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 600;
   }
 
   .form-group input {
@@ -129,7 +134,7 @@ form {
   border-radius: 14px;
   background: linear-gradient( 135deg, #1b2f50, #0f1f37 );
   color: #ffffff;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 900;
   letter-spacing: 0.01em;
   cursor: pointer;
@@ -139,6 +144,7 @@ form {
 
   .primary-btn:hover:not(:disabled) {
     transform: translateY(-2px);
+    background: linear-gradient( 135deg, #1f5bbe, #082e68);
     box-shadow: 0 16px 30px rgba(15, 31, 55, 0.26);
   }
 
@@ -266,7 +272,7 @@ form {
   }
 
   .reset-header p {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .form-group input {
@@ -277,4 +283,16 @@ form {
     min-height: 52px;
   }
 }
+
+@media (max-width: 390px) {
+  .logo-mas {
+    width: 90%;
+  }
+
+  .logo-txt {
+    letter-spacing: 4px;
+  }
+}
+
+
 /**/

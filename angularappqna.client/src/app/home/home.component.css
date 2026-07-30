@@ -402,10 +402,10 @@ input {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(11, 19, 40, 0.62);
+  background: rgba(11, 19, 40, 0.73);
   backdrop-filter: blur(8px);
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: center;
   padding: 24px;
 }
@@ -440,7 +440,7 @@ input {
 .help-modal h3 {
   margin: 0;
   color: #0b1328;
-  font-size: 34px;
+  font-size: 30px;
   letter-spacing: -1px;
 }
 
@@ -981,23 +981,26 @@ input {
 }
 
 .forgot-pin-btn {
-  padding: 0;
+  padding: 5px 15px;
   border: none;
-  background: transparent;
+  background: #fff;
   color: #1f6bb9;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
+  border-radius: 20px;
 }
 
   .forgot-pin-btn:hover {
     color: #cf2231;
     transform: translateX(-3px);
+    background-color: #e9eef0;
   }
 
 .forgot-pin-modal {
   position: relative;
+  top: 10%;
   width: 100%;
   max-width: 480px;
   padding: 42px;
@@ -1011,13 +1014,13 @@ input {
   .forgot-pin-modal h3 {
     margin: 0;
     color: #0b1328;
-    font-size: 34px;
-    letter-spacing: -1px;
+    font-size: 30px;
   }
 
 .forgot-pin-subtitle {
-  color: #697386;
-  line-height: 1.5;
+  color: #465064;
+  font-size: 17px;
+  line-height: 1.4;
 }
 
 .forgot-pin-modal label {
