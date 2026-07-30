@@ -289,56 +289,92 @@
     font-size: 22px;
     font-weight: 600;
   }
-
 /* REVIEW */
 
 .review-list {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin-top: 20px;
   max-height: 450px;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   overflow-y: auto;
-  padding-right: 4px;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(107, 117, 134, 0.45) transparent;
 }
 
+  .review-list::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  .review-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .review-list::-webkit-scrollbar-thumb {
+    background: rgba(107, 117, 134, 0.35);
+    border-radius: 999px;
+  }
+
+    .review-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(107, 117, 134, 0.55);
+    }
+
 .review-item {
-  margin-bottom: 14px;
-  padding: 15px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 18px;
   border-radius: 16px;
   background: #ffffff;
   border: 1px solid #e6eaf0;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.035);
+  overflow: visible;
 }
 
 .quiz-quest {
-  font-size: 18px;
-  font-weight: 500;
+  margin-bottom: 10px;
   color: #686868;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .review-question {
-  margin-bottom: 9px;
+  margin: 0 0 14px;
   color: #172033;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .review-answer {
+  margin: 8px 0;
   color: #0457a2;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .rev-title {
-  color: gray;
-  font-size: 14px;
   padding-right: 6px;
+  color: #7b8492;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .rev-title-correct {
-  color: gray;
-  font-size: 14px;
   padding-right: 6px;
   color: #108039;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .correct {
@@ -349,6 +385,151 @@
   border-left: 4px solid #ef4444;
 }
 
+/* THEORY EXPLANATION */
+
+.review-details {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #fffaf2;
+  border: 1px solid #ead8b3;
+  text-align: left;
+  overflow: visible;
+}
+
+.review-details-title {
+  margin-bottom: 12px;
+  color: #8b6420;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+.review-details-text {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  color: #354154;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+
+/*
+  Χρειάζεται επειδή το περιεχόμενο
+  μπαίνει δυναμικά με innerHTML.
+*/
+
+:host ::ng-deep .review-details-text * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .review-details-text p {
+  margin: 0 0 12px;
+  line-height: 1.7;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+  :host ::ng-deep .review-details-text p:last-child {
+    margin-bottom: 0;
+  }
+
+:host ::ng-deep .review-details-text strong {
+  color: #293548;
+  font-weight: 750;
+}
+
+:host ::ng-deep .review-details-text h1,
+:host ::ng-deep .review-details-text h2,
+:host ::ng-deep .review-details-text h3 {
+  margin: 18px 0 10px;
+  color: #293548;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+  :host ::ng-deep .review-details-text h1:first-child,
+  :host ::ng-deep .review-details-text h2:first-child,
+  :host ::ng-deep .review-details-text h3:first-child {
+    margin-top: 0;
+  }
+
+:host ::ng-deep .review-details-text ul,
+:host ::ng-deep .review-details-text ol {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+:host ::ng-deep .review-details-text li {
+  margin-bottom: 8px;
+  padding-left: 3px;
+  line-height: 1.65;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:host ::ng-deep .review-details-text img {
+  display: block;
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 16px auto;
+  border-radius: 10px;
+  object-fit: contain;
+}
+
+:host ::ng-deep .review-details-text table {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 14px 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+:host ::ng-deep .review-details-text th,
+:host ::ng-deep .review-details-text td {
+  padding: 8px;
+  border: 1px solid #e4d5b9;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:host ::ng-deep .review-details-text blockquote {
+  margin: 14px 0;
+  padding: 10px 14px;
+  border-left: 4px solid #d6b16a;
+  background: rgba(255, 255, 255, 0.55);
+  color: #4b5563;
+}
+
+:host ::ng-deep .review-details-text pre {
+  width: 100%;
+  max-width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f2eee6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+
+:host ::ng-deep .review-details-text a {
+  color: #0457a2;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
 /* RESPONSIVE */
 
 @media (max-width: 720px) {
@@ -358,6 +539,7 @@
   }
 
   .quiz-card {
+    min-width: 0;
     padding: 22px;
     border-radius: 22px;
   }
@@ -371,32 +553,34 @@
     flex-direction: column;
   }
 
-  .quiz-next-btn {
+  .quiz-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .quiz-next-btn,
+  .quiz-skip-btn,
+  .quiz-back-btn {
     width: 100%;
   }
-}
-.review-details {
-  margin-top: 14px;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: #fffaf2;
-  border: 1px solid #ead8b3;
-  text-align: left;
-}
 
-.review-details-title {
-  margin-bottom: 8px;
-  color: #8b6420;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.review-details-text {
-  color: #354154;
-  font-size: 13px;
-  line-height: 1.65;
-}
-
-  .review-details-text p {
-    margin: 0 0 8px;
+  .review-item {
+    padding: 15px;
   }
+
+  .review-details {
+    padding: 14px;
+  }
+
+  .review-question {
+    font-size: 15px;
+  }
+
+  .review-answer {
+    font-size: 14px;
+  }
+
+  .review-details-text {
+    font-size: 12px;
+  }
+}

@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { QuizPreviewQuestion } from '../interfaces/models';
 import { HttpClient } from '@angular/common/http';
 import { Location } from '@angular/common';
+
+import { QuizPreviewQuestion, QuizProgress } from '../interfaces/models';
 
 @Component({
   selector: 'app-quiz-page',
@@ -21,12 +22,16 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   showReview = false;
   quizFinished = false;
 
-  answers: { questionId: number; answerId: number | null }[] = [];
+  answers: {
+    questionId: number;
+    answerId: number | null;
+  }[] = [];
 
   timeLeft = 15;
-  timer: any;
+  timer: ReturnType<typeof setInterval> | null = null;
 
   score = 0;
+
   quizStartTime = 0;
   questionStartTime = 0;
   questionTimes: number[] = [];
@@ -38,17 +43,22 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.quizStartTime = Date.now();
-
     this.thematologiaId = Number(
       this.route.snapshot.paramMap.get('id')
     );
+    const restored = this.restoreQuizProgress();
 
-    this.loadQuestions();
+    if (!restored) {
+      this.loadQuestions();
+    }
   }
 
   ngOnDestroy(): void {
     this.clearTimer();
+  }
+
+  private get quizStorageKey(): string {
+    return `quiz-progress-${this.thematologiaId}`;
   }
 
   loadQuestions(): void {
@@ -58,44 +68,64 @@ export class QuizPageComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.questions = res || [];
 
-        if (this.questions.length > 0) {
-          this.currentQuestionIndex = 0;
-          this.selectedAnswerId = null;
-          this.quizStartTime = Date.now();
-          this.answers = [];
-          this.questionTimes = [];
-
-          setTimeout(() => {
-            this.startTimer();
-          }, 0);
+        if (this.questions.length === 0) {
+          return;
         }
+
+        this.currentQuestionIndex = 0;
+        this.selectedAnswerId = null;
+
+        this.showReview = false;
+        this.quizFinished = false;
+
+        this.answers = [];
+        this.questionTimes = [];
+
+        this.quizStartTime = Date.now();
+
+        this.startTimer(true);
       },
       error: (err) => {
-        console.error('Load quiz questions error:', err);
+        console.error(
+          'Load quiz questions error:',
+          err
+        );
       }
     });
   }
-
-  startTimer(): void {
-    this.questionStartTime = Date.now();
-
+  startTimer(resetTime: boolean = true): void {
     this.clearTimer();
 
-    this.timeLeft = 15;
+    if (resetTime) {
+      this.timeLeft = 15;
+      this.questionStartTime = Date.now();
+    }
+
+    this.saveQuizProgress();
+
+    if (this.timeLeft <= 0) {
+      this.timeLeft = 0;
+      this.selectedAnswerId = null;
+      this.saveQuizProgress();
+      return;
+    }
 
     this.timer = setInterval(() => {
       this.timeLeft--;
 
       if (this.timeLeft <= 0) {
         this.timeLeft = 0;
-        this.clearTimer();
         this.selectedAnswerId = null;
+
+        this.clearTimer();
       }
+
+      this.saveQuizProgress();
     }, 1000);
   }
 
   clearTimer(): void {
-    if (this.timer) {
+    if (this.timer !== null) {
       clearInterval(this.timer);
       this.timer = null;
     }
@@ -107,18 +137,27 @@ export class QuizPageComponent implements OnInit, OnDestroy {
     }
 
     this.selectedAnswerId = answerId;
+
+    this.saveQuizProgress();
   }
 
   nextQuestion(): void {
     this.saveCurrentQuestionAnswer();
 
-    if (this.currentQuestionIndex < this.questions.length - 1) {
+    if (
+      this.currentQuestionIndex <
+      this.questions.length - 1
+    ) {
       this.currentQuestionIndex++;
       this.selectedAnswerId = null;
-      this.startTimer();
-    } else {
-      this.showReview = true;
+
+      this.startTimer(true);
+      return;
     }
+
+    this.showReview = true;
+    this.clearTimer();
+    this.saveQuizProgress();
   }
 
   skipQuestion(): void {
@@ -129,153 +168,404 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   private saveCurrentQuestionAnswer(): void {
     this.clearTimer();
 
-    const currentQuestion = this.questions[this.currentQuestionIndex];
+    const currentQuestion =
+      this.questions[this.currentQuestionIndex];
 
-    const secondsSpent = Math.round(
-      (Date.now() - this.questionStartTime) / 1000
+    if (!currentQuestion) {
+      return;
+    }
+    const secondsSpent = Math.min(
+      15,
+      Math.max(
+        0,
+        Math.round(
+          (Date.now() - this.questionStartTime) / 1000
+        )
+      )
     );
 
-    this.questionTimes[this.currentQuestionIndex] = secondsSpent;
+    this.questionTimes[this.currentQuestionIndex] =
+      secondsSpent;
 
-    if (currentQuestion) {
-      this.answers[this.currentQuestionIndex] = {
-        questionId: currentQuestion.QId,
-        answerId: this.selectedAnswerId
-      };
+    this.answers[this.currentQuestionIndex] = {
+      questionId: currentQuestion.QId,
+      answerId: this.selectedAnswerId
+    };
+
+    this.saveQuizProgress();
+  }
+
+  private saveQuizProgress(): void {
+    if (
+      this.questions.length === 0 ||
+      this.quizFinished
+    ) {
+      return;
     }
+
+    const progress: QuizProgress = {
+      thematologiaId: this.thematologiaId,
+
+      questions: this.questions,
+
+      currentQuestionIndex:
+        this.currentQuestionIndex,
+
+      selectedAnswerId:
+        this.selectedAnswerId,
+
+      answers:
+        this.answers,
+
+      questionTimes:
+        this.questionTimes,
+
+      timeLeft:
+        this.timeLeft,
+
+      quizStartTime:
+        this.quizStartTime,
+
+      questionStartTime:
+        this.questionStartTime,
+
+      showReview:
+        this.showReview,
+
+      savedAt:
+        Date.now()
+    };
+
+    try {
+      sessionStorage.setItem(
+        this.quizStorageKey,
+        JSON.stringify(progress)
+      );
+    } catch (error) {
+      console.error(
+        'Save quiz progress error:',
+        error
+      );
+    }
+  }
+
+  private restoreQuizProgress(): boolean {
+    const savedData = sessionStorage.getItem(
+      this.quizStorageKey
+    );
+
+    if (!savedData) {
+      return false;
+    }
+
+    try {
+      const progress: QuizProgress =
+        JSON.parse(savedData);
+
+      if (
+        progress.thematologiaId !== this.thematologiaId ||
+        !Array.isArray(progress.questions) ||
+        progress.questions.length === 0
+      ) {
+        this.clearQuizProgress();
+        return false;
+      }
+
+      const validIndex =
+        progress.currentQuestionIndex >= 0 &&
+        progress.currentQuestionIndex <
+        progress.questions.length;
+
+      if (!validIndex) {
+        this.clearQuizProgress();
+        return false;
+      }
+
+      this.questions =
+        progress.questions;
+
+      this.currentQuestionIndex =
+        progress.currentQuestionIndex;
+
+      this.selectedAnswerId =
+        progress.selectedAnswerId ?? null;
+
+      this.answers =
+        progress.answers ?? [];
+
+      this.questionTimes =
+        progress.questionTimes ?? [];
+
+      this.quizStartTime =
+        progress.quizStartTime || Date.now();
+
+      this.questionStartTime =
+        progress.questionStartTime || Date.now();
+
+      this.showReview =
+        progress.showReview === true;
+
+      this.quizFinished = false;
+
+      const secondsSinceSave = Math.floor(
+        (Date.now() - progress.savedAt) / 1000
+      );
+
+      this.timeLeft = Math.max(
+        0,
+        (progress.timeLeft ?? 15) -
+        secondsSinceSave
+      );
+
+      if (this.showReview) {
+        this.clearTimer();
+        this.timeLeft = 0;
+      } else if (this.timeLeft > 0) {
+
+        this.startTimer(false);
+      } else {
+        this.timeLeft = 0;
+        this.selectedAnswerId = null;
+        this.clearTimer();
+        this.saveQuizProgress();
+      }
+
+      return true;
+    } catch (error) {
+      console.error(
+        'Restore quiz progress error:',
+        error
+      );
+
+      this.clearQuizProgress();
+      return false;
+    }
+  }
+
+  private clearQuizProgress(): void {
+    sessionStorage.removeItem(
+      this.quizStorageKey
+    );
   }
 
   submitAnswers(): void {
     this.clearTimer();
 
-    const totalQuestions = this.questions.length;
+    const totalQuestions =
+      this.questions.length;
 
-    this.score = this.getCorrectAnswersCount();
+    this.score =
+      this.getCorrectAnswersCount();
 
-    const correctAnswers = this.score;
-    const wrongAnswers = totalQuestions - correctAnswers;
+    const correctAnswers =
+      this.score;
+
+    const wrongAnswers =
+      totalQuestions - correctAnswers;
 
     const totalTimeSeconds = Math.round(
       (Date.now() - this.quizStartTime) / 1000
     );
 
-    const answersDetails = this.questions.map((q, index) => {
-      const selectedAId = this.answers[index]?.answerId ?? null;
+    const answersDetails =
+      this.questions.map((q, index) => {
+        const selectedAId =
+          this.answers[index]?.answerId ?? null;
 
-      const selectedAnswer = q.Answers.find(a => a.AId === selectedAId);
-      const correctAnswer = q.Answers.find(a => a.IsCorrect);
+        const selectedAnswer =
+          q.Answers.find(
+            a => a.AId === selectedAId
+          );
 
-      return {
-        DetId: q.DetId,
-        QId: q.QId,
-        Question: q.Question,
-        Difficulty: q.Difficulty,
+        const correctAnswer =
+          q.Answers.find(
+            a => a.IsCorrect
+          );
 
-        SelectedAId: selectedAId,
-        SelectedAnswer: selectedAnswer?.Answer || 'Δεν απαντήθηκε',
+        return {
+          DetId: q.DetId,
+          QId: q.QId,
+          Question: q.Question,
+          Difficulty: q.Difficulty,
 
-        CorrectAId: correctAnswer?.AId ?? null,
-        CorrectAnswer: correctAnswer?.Answer || '',
+          SelectedAId: selectedAId,
 
-        IsCorrect: selectedAnswer?.IsCorrect === true,
+          SelectedAnswer:
+            selectedAnswer?.Answer ||
+            'Δεν απαντήθηκε',
 
-        TimeSeconds: this.questionTimes[index] ?? 0
-      };
-    });
+          CorrectAId:
+            correctAnswer?.AId ?? null,
+
+          CorrectAnswer:
+            correctAnswer?.Answer || '',
+
+          IsCorrect:
+            selectedAnswer?.IsCorrect === true,
+
+          TimeSeconds:
+            this.questionTimes[index] ?? 0
+        };
+      });
 
     const body = {
-      ThematologiaId: this.thematologiaId,
-      UserEmail: this.getCurrentUserEmail(),
-      Nickname: this.getCurrentUserNickname(),
+      ThematologiaId:
+        this.thematologiaId,
 
-      TotalQuestions: totalQuestions,
-      CorrectAnswers: correctAnswers,
-      WrongAnswers: wrongAnswers,
-      TotalTimeSeconds: totalTimeSeconds,
+      UserEmail:
+        this.getCurrentUserEmail(),
 
-      AnswersJson: JSON.stringify(answersDetails)
+      Nickname:
+        this.getCurrentUserNickname(),
+
+      TotalQuestions:
+        totalQuestions,
+
+      CorrectAnswers:
+        correctAnswers,
+
+      WrongAnswers:
+        wrongAnswers,
+
+      TotalTimeSeconds:
+        totalTimeSeconds,
+
+      AnswersJson:
+        JSON.stringify(answersDetails)
     };
 
-    this.http.post('api/Service/SaveQuizResult', body)
-      .subscribe({
-        next: () => {
-          this.quizFinished = true;
-          this.showReview = false;
-        },
-        error: (err) => {
-          console.error('Save quiz result error:', err);
-          this.quizFinished = true;
-          this.showReview = false;
-        }
-      });
+    this.http.post(
+      'api/Service/SaveQuizResult',
+      body
+    ).subscribe({
+      next: () => {
+        this.quizFinished = true;
+        this.showReview = false;
+        this.clearQuizProgress();
+      },
+      error: (err) => {
+        console.error(
+          'Save quiz result error:',
+          err
+        );
+
+        this.quizFinished = true;
+        this.showReview = false;
+
+      }
+    });
   }
 
   getCorrectAnswersCount(): number {
     return this.questions.filter((q, index) => {
-      const answerId = this.answers[index]?.answerId;
+      const answerId =
+        this.answers[index]?.answerId;
 
-      const selectedAnswer = q.Answers.find(
-        a => a.AId === answerId
-      );
+      const selectedAnswer =
+        q.Answers.find(
+          a => a.AId === answerId
+        );
 
       return selectedAnswer?.IsCorrect === true;
     }).length;
   }
 
-  getSelectedAnswerText(question: QuizPreviewQuestion): string {
-    const index = this.questions.indexOf(question);
-    const answerId = this.answers[index]?.answerId;
+  getSelectedAnswerText(
+    question: QuizPreviewQuestion
+  ): string {
+    const index =
+      this.questions.indexOf(question);
 
-    const answer = question.Answers.find(a => a.AId === answerId);
+    const answerId =
+      this.answers[index]?.answerId;
+
+    const answer =
+      question.Answers.find(
+        a => a.AId === answerId
+      );
 
     return answer?.Answer || 'Δεν απαντήθηκε';
   }
 
-  getCorrectAnswerText(question: QuizPreviewQuestion): string {
-    const answer = question.Answers.find(a => a.IsCorrect);
+  getCorrectAnswerText(
+    question: QuizPreviewQuestion
+  ): string {
+    const answer =
+      question.Answers.find(
+        a => a.IsCorrect
+      );
+
     return answer?.Answer || '-';
   }
 
-  getTheoryDetails(question: QuizPreviewQuestion): string {
+  getTheoryDetails(
+    question: QuizPreviewQuestion
+  ): string {
     return question.Details || '';
   }
 
-  shouldShowDetails(question: QuizPreviewQuestion): boolean {
-    return !this.isQuestionCorrect(question) &&
-      this.getTheoryDetails(question).trim() !== '';
+  shouldShowDetails(
+    question: QuizPreviewQuestion
+  ): boolean {
+    return (
+      !this.isQuestionCorrect(question) &&
+      this.getTheoryDetails(question).trim() !== ''
+    );
   }
 
-  isQuestionCorrect(question: QuizPreviewQuestion): boolean {
-    const index = this.questions.indexOf(question);
-    const answerId = this.answers[index]?.answerId;
+  isQuestionCorrect(
+    question: QuizPreviewQuestion
+  ): boolean {
+    const index =
+      this.questions.indexOf(question);
 
-    const answer = question.Answers.find(a => a.AId === answerId);
+    const answerId =
+      this.answers[index]?.answerId;
+
+    const answer =
+      question.Answers.find(
+        a => a.AId === answerId
+      );
 
     return answer?.IsCorrect === true;
   }
 
   getCurrentUserEmail(): string {
-    const data = localStorage.getItem('currentUser');
+    const data =
+      localStorage.getItem('currentUser');
 
     if (!data) {
       return '';
     }
 
-    const user = JSON.parse(data);
+    try {
+      const user = JSON.parse(data);
 
-    return user.Email || user.email || '';
+      return user.Email || user.email || '';
+    } catch {
+      return '';
+    }
   }
 
   getCurrentUserNickname(): string {
-    const data = localStorage.getItem('currentUser');
+    const data =
+      localStorage.getItem('currentUser');
 
     if (!data) {
       return 'Χρήστης';
     }
 
-    const user = JSON.parse(data);
+    try {
+      const user = JSON.parse(data);
 
-    return user.Nickname || user.nickname || 'Χρήστης';
+      return (
+        user.Nickname ||
+        user.nickname ||
+        'Χρήστης'
+      );
+    } catch {
+      return 'Χρήστης';
+    }
   }
 
   getTotalQuizTimeSeconds(): number {
@@ -285,7 +575,9 @@ export class QuizPageComponent implements OnInit, OnDestroy {
   }
 
   get currentQuestion(): QuizPreviewQuestion {
-    return this.questions[this.currentQuestionIndex];
+    return this.questions[
+      this.currentQuestionIndex
+    ];
   }
 
   get progressPercent(): number {
@@ -293,10 +585,19 @@ export class QuizPageComponent implements OnInit, OnDestroy {
       return 0;
     }
 
-    return ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+    return (
+      (
+        this.currentQuestionIndex + 1
+      ) /
+      this.questions.length
+    ) * 100;
   }
 
   GoBack(): void {
+    this.clearTimer();
+
+    this.clearQuizProgress();
+
     this.location.back();
   }
 }
