@@ -42,3 +42,4 @@ testem.log
 Thumbs.db
 
 /obj/*
+AngularAppQnA.Server/appsettings.Development.json

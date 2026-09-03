@@ -39,4 +39,44 @@ body {
   height: 52px;
   object-fit: contain;
 }
+.image-resize-overlay {
+  position: absolute;
+  z-index: 9999;
+  pointer-events: none;
+  border: 2px solid #2563eb;
+  box-sizing: border-box;
+}
 
+.image-resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border: 2px solid #2563eb;
+  border-radius: 50%;
+  pointer-events: auto;
+}
+
+  .image-resize-handle.top-left {
+    top: -7px;
+    left: -7px;
+    cursor: nwse-resize;
+  }
+
+  .image-resize-handle.top-right {
+    top: -7px;
+    right: -7px;
+    cursor: nesw-resize;
+  }
+
+  .image-resize-handle.bottom-left {
+    bottom: -7px;
+    left: -7px;
+    cursor: nesw-resize;
+  }
+
+  .image-resize-handle.bottom-right {
+    bottom: -7px;
+    right: -7px;
+    cursor: nwse-resize;
+  }

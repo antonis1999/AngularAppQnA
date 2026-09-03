@@ -20,7 +20,32 @@ import {
 } from '../interfaces/models';
 
 import Quill from 'quill';
-import { firstValueFrom } from 'rxjs';
+
+const BlockEmbed: any = Quill.import('blots/block/embed');
+
+class CustomVideoBlot extends BlockEmbed {
+
+  static blotName = 'customVideo';
+  static tagName = 'video';
+
+  static create(value: string): HTMLElement {
+    const node = super.create() as HTMLElement;
+
+    node.setAttribute('src', value);
+    node.setAttribute('controls', '');
+    node.setAttribute('preload', 'metadata');
+
+    return node;
+  }
+
+  static value(node: HTMLElement): string | null {
+    return node.getAttribute('src');
+  }
+}
+
+Quill.register(
+  CustomVideoBlot
+);
 
 @Component({
   selector: 'app-edit-page',
@@ -71,8 +96,6 @@ export class EditPageComponent implements OnInit,OnDestroy {
   private newTheoryQuill: Quill | null = null;
   private editingTheoryQuill: Quill | null = null;
 
-  isUploadingEditorImage = false;
-
   quillModules = {
     toolbar: {
       container: [
@@ -81,11 +104,13 @@ export class EditPageComponent implements OnInit,OnDestroy {
         [{ list: 'ordered' }, { list: 'bullet' }],
         [{ align: [] }],
         [{ color: [] }, { background: [] }],
-        ['link', 'image'],
+        ['link', 'image','video'],
         ['clean']
       ]
     }
   };
+
+  private imageResizeOverlay: HTMLDivElement | null = null;
 
   @ViewChild('quizExcelInput')
   quizExcelInput!: ElementRef<HTMLInputElement>;
@@ -131,7 +156,6 @@ export class EditPageComponent implements OnInit,OnDestroy {
 
     return true;
   }
-
   private registerImageToolbarHandler(
     editor: Quill
   ): void {
@@ -146,11 +170,264 @@ export class EditPageComponent implements OnInit,OnDestroy {
       () => this.openEditorImagePicker(editor)
     );
   }
+  private registerImageResize(
+    editor: Quill
+  ): void {
 
+    editor.root.addEventListener(
+      'click',
+      (event: MouseEvent) => {
+
+        const target =
+          event.target as HTMLElement;
+
+        if (target.tagName !== 'IMG') {
+          this.removeImageResizeOverlay();
+          return;
+        }
+
+        const image =
+          target as HTMLImageElement;
+
+        this.showImageResizeOverlay(
+          editor,
+          image
+        );
+      }
+    );
+  }
+  private showImageResizeOverlay(
+    editor: Quill,
+    image: HTMLImageElement
+  ): void {
+
+    this.removeImageResizeOverlay();
+
+    const rect =
+      image.getBoundingClientRect();
+
+    const overlay =
+      document.createElement('div');
+
+    overlay.className =
+      'image-resize-overlay';
+
+    overlay.style.left =
+      `${rect.left + window.scrollX}px`;
+
+    overlay.style.top =
+      `${rect.top + window.scrollY}px`;
+
+    overlay.style.width =
+      `${rect.width}px`;
+
+    overlay.style.height =
+      `${rect.height}px`;
+
+    const corners = [
+      'top-left',
+      'top-right',
+      'bottom-left',
+      'bottom-right'
+    ];
+
+    corners.forEach(corner => {
+
+      const handle =
+        document.createElement('div');
+
+      handle.className =
+        `image-resize-handle ${corner}`;
+
+      handle.addEventListener(
+        'mousedown',
+        (event: MouseEvent) => {
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          this.startImageResize(
+            editor,
+            event,
+            image,
+            corner
+          );
+        }
+      );
+
+      overlay.appendChild(handle);
+    });
+
+    document.body.appendChild(
+      overlay
+    );
+
+    this.imageResizeOverlay =
+      overlay;
+  }
+  private startImageResize(
+    editor: Quill,
+    startEvent: MouseEvent,
+    image: HTMLImageElement,
+    corner: string
+  ): void {
+
+    const startX =
+      startEvent.clientX;
+
+    const startWidth =
+      image.getBoundingClientRect().width;
+
+    const direction =
+      corner.includes('left')
+        ? -1
+        : 1;
+
+    let finalWidth =
+      startWidth;
+
+    const onMouseMove =
+      (event: MouseEvent) => {
+
+        const deltaX =
+          (event.clientX - startX) *
+          direction;
+
+        let newWidth =
+          startWidth + deltaX;
+
+        const maxWidth =
+          editor.root.clientWidth;
+
+        newWidth =
+          Math.max(
+            120,
+            Math.min(
+              newWidth,
+              maxWidth
+            )
+          );
+
+        finalWidth =
+          Math.round(newWidth);
+
+        // Μόνο για να βλέπουμε live το resize
+        image.style.width =
+          `${finalWidth}px`;
+
+        image.style.height =
+          'auto';
+
+        this.updateImageResizeOverlay(
+          image
+        );
+      };
+
+    const onMouseUp =
+      () => {
+
+        document.removeEventListener(
+          'mousemove',
+          onMouseMove
+        );
+
+        document.removeEventListener(
+          'mouseup',
+          onMouseUp
+        );
+
+        const blot: any =
+          Quill.find(image);
+
+        if (blot) {
+
+          const index =
+            editor.getIndex(blot);
+
+          editor.formatText(
+            index,
+            1,
+            'width',
+            finalWidth.toString(),
+            'user'
+          );
+        }
+
+        image.style.removeProperty(
+          'width'
+        );
+
+        image.style.removeProperty(
+          'height'
+        );
+
+        this.updateImageResizeOverlay(
+          image
+        );
+      };
+
+    document.addEventListener(
+      'mousemove',
+      onMouseMove
+    );
+
+    document.addEventListener(
+      'mouseup',
+      onMouseUp
+    );
+  }
+
+  private updateImageResizeOverlay(
+    image: HTMLImageElement
+  ): void {
+
+    if (!this.imageResizeOverlay) {
+      return;
+    }
+
+    const rect =
+      image.getBoundingClientRect();
+
+    this.imageResizeOverlay.style.left =
+      `${rect.left + window.scrollX}px`;
+
+    this.imageResizeOverlay.style.top =
+      `${rect.top + window.scrollY}px`;
+
+    this.imageResizeOverlay.style.width =
+      `${rect.width}px`;
+
+    this.imageResizeOverlay.style.height =
+      `${rect.height}px`;
+  }
+  private removeImageResizeOverlay(): void {
+
+    if (this.imageResizeOverlay) {
+      this.imageResizeOverlay.remove();
+      this.imageResizeOverlay = null;
+    }
+  }
+
+  private registerVideoToolbarHandler(
+    editor: Quill
+  ): void {
+    const toolbar: any = editor.getModule('toolbar');
+
+    if (!toolbar) {
+      return;
+    }
+
+    toolbar.addHandler(
+      'video',
+      () => this.openEditorVideoPicker(editor)
+    );
+  }
   private openEditorImagePicker(
     editor: Quill
   ): void {
-    const input = document.createElement('input');
+
+    const input =
+      document.createElement('input');
 
     input.type = 'file';
 
@@ -165,7 +442,9 @@ export class EditPageComponent implements OnInit,OnDestroy {
     input.addEventListener(
       'change',
       () => {
-        const file = input.files?.[0];
+
+        const file =
+          input.files?.[0];
 
         if (!file) {
           input.remove();
@@ -184,25 +463,36 @@ export class EditPageComponent implements OnInit,OnDestroy {
           return;
         }
 
-        const range = editor.getSelection(true);
+        const range =
+          editor.getSelection(true);
 
         const insertIndex =
           range?.index ??
-          Math.max(0, editor.getLength() - 1);
+          Math.max(
+            0,
+            editor.getLength() - 1
+          );
 
-        const reader = new FileReader();
+        const reader =
+          new FileReader();
 
         reader.onload = () => {
+
           const temporaryImageUrl =
             reader.result as string;
-
           editor.insertEmbed(
             insertIndex,
             'image',
             temporaryImageUrl,
             'user'
           );
-
+          editor.formatText(
+            insertIndex,
+            1,
+            'width',
+            '500',
+            'user'
+          );
           editor.insertText(
             insertIndex + 1,
             '\n',
@@ -217,12 +507,120 @@ export class EditPageComponent implements OnInit,OnDestroy {
         };
 
         reader.onerror = () => {
+
           this.notificationService.error(
             'Δεν ήταν δυνατή η ανάγνωση της εικόνας.'
           );
         };
 
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(
+          file
+        );
+
+        input.remove();
+      },
+      {
+        once: true
+      }
+    );
+
+    document.body.appendChild(
+      input
+    );
+
+    input.click();
+  }
+
+  private openEditorVideoPicker(
+    editor: Quill
+  ): void {
+    const input = document.createElement('input');
+
+    input.type = 'file';
+
+    input.accept = [
+      'video/mp4',
+      'video/webm',
+      'video/quicktime'
+    ].join(',');
+
+    input.style.display = 'none';
+
+    input.addEventListener(
+      'change',
+      () => {
+        const file = input.files?.[0];
+
+        if (!file) {
+          input.remove();
+          return;
+        }
+
+        console.log(
+          'Επιλέχθηκε video:',
+          file.name,
+          file.type,
+          file.size
+        );
+        const range = editor.getSelection(true);
+
+        const insertIndex =
+          range?.index ??
+          Math.max(0, editor.getLength() - 1);
+
+        const theoryDetId =
+          this.editingTheoryDetId ??
+          this.getNextDetId();
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        this.http.post<{ videoUrl: string }>(
+          `api/Upload/TheoryVideo?thematologiaId=${this.thematologiaId}&theoryDetId=${theoryDetId}`,
+          formData
+        ).subscribe({
+          next: (response) => {
+
+            console.log(
+              'Video ανέβηκε:',
+              response.videoUrl
+            );
+
+            editor.insertEmbed(
+              insertIndex,
+              'customVideo',
+              response.videoUrl,
+              'user'
+            );
+
+            editor.insertText(
+              insertIndex + 1,
+              '\n',
+              'user'
+            );
+
+            editor.setSelection(
+              insertIndex + 2,
+              0,
+              'silent'
+            );
+
+            this.notificationService.success(
+              'Το video ανέβηκε επιτυχώς.'
+            );
+          },
+
+          error: (err) => {
+            console.error(
+              'Video upload error:',
+              err
+            );
+
+            this.notificationService.error(
+              'Σφάλμα κατά το ανέβασμα του video.'
+            );
+          }
+        });
 
         input.remove();
       },
@@ -234,17 +632,36 @@ export class EditPageComponent implements OnInit,OnDestroy {
     document.body.appendChild(input);
     input.click();
   }
+  onNewTheoryEditorCreated(
+    editor: Quill
+  ): void {
 
-  onNewTheoryEditorCreated(editor: Quill): void {
     this.newTheoryQuill = editor;
 
-    this.registerImageToolbarHandler(editor);
+    this.registerImageToolbarHandler(
+      editor
+    );
+
+    this.registerVideoToolbarHandler(
+      editor
+    );
+    this.registerImageResize(editor);
   }
 
-  onEditingTheoryEditorCreated(editor: Quill): void {
+  onEditingTheoryEditorCreated(
+    editor: Quill
+  ): void {
+
     this.editingTheoryQuill = editor;
 
-    this.registerImageToolbarHandler(editor);
+    this.registerImageToolbarHandler(
+      editor
+    );
+
+    this.registerVideoToolbarHandler(
+      editor
+    );
+    this.registerImageResize(editor);
   }
 
   loadThematologies(): void {
@@ -489,12 +906,16 @@ export class EditPageComponent implements OnInit,OnDestroy {
       this.notificationService.warning('Συμπλήρωσε τίτλο θεωρίας');
       return;
     }
+    const currentDetails =
+      this.newTheoryQuill
+        ? this.newTheoryQuill.root.innerHTML
+        : this.newTheoryDetails;
 
     const body = {
       Id: this.selectedThematologia.Id,
       DetId: this.getNextDetId(),
       Header: this.newTheoryHeader,
-      Details: this.newTheoryDetails
+      Details: currentDetails
     };
 
     this.http.post<ApiResponse>('api/Service/AddTheoria', body)
@@ -534,37 +955,62 @@ export class EditPageComponent implements OnInit,OnDestroy {
 
   updateTheoria(): void {
     if (!this.editingTheoryHeader.trim()) {
-      this.notificationService.warning('Συμπλήρωσε τίτλο θεωρίας');
+      this.notificationService.warning(
+        'Συμπλήρωσε τίτλο θεωρίας'
+      );
       return;
     }
+
+    const currentDetails =
+      this.editingTheoryQuill
+        ? this.editingTheoryQuill.root.innerHTML
+        : this.editingTheoryDetails;
 
     const body = {
       Id: this.editingTheoryId,
       DetId: this.editingTheoryDetId,
       Header: this.editingTheoryHeader,
-      Details: this.editingTheoryDetails
+      Details: currentDetails
     };
 
-    this.http.post<ApiResponse>('api/Service/UpdateTheoria', body)
-      .subscribe({
-        next: (res) => {
-          if (res.IsSuccess) {
-            this.notificationService.success('Η θεωρία ενημερώθηκε επιτυχώς');
+    this.http.post<ApiResponse>(
+      'api/Service/UpdateTheoria',
+      body
+    ).subscribe({
+      next: (res) => {
+        if (res.IsSuccess) {
 
-            this.resetTheoryEdit();
+          this.notificationService.success(
+            'Η θεωρία ενημερώθηκε επιτυχώς'
+          );
 
-            if (this.selectedThematologia) {
-              this.selectThematologia(this.selectedThematologia);
-            }
-          } else {
-            this.notificationService.error(res.Message);
+          this.resetTheoryEdit();
+
+          if (this.selectedThematologia) {
+            this.selectThematologia(
+              this.selectedThematologia
+            );
           }
-        },
-        error: (err) => {
-          console.error('Update theory error:', err);
-          this.notificationService.error('Σφάλμα ενημέρωσης θεωρίας');
+
+        } else {
+
+          this.notificationService.error(
+            res.Message
+          );
         }
-      });
+      },
+
+      error: (err) => {
+        console.error(
+          'Update theory error:',
+          err
+        );
+
+        this.notificationService.error(
+          'Σφάλμα ενημέρωσης θεωρίας'
+        );
+      }
+    });
   }
 
   deleteTheoria(theory: QuizTheory): void {
@@ -1014,6 +1460,8 @@ export class EditPageComponent implements OnInit,OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.removeImageResizeOverlay();
+
     this.newTheoryQuill = null;
     this.editingTheoryQuill = null;
   }

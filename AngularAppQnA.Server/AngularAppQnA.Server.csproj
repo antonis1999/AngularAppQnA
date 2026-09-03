@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.29.1" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="ExcelMapper" Version="6.0.641" />
     <PackageReference Include="MailKit" Version="4.17.0" />

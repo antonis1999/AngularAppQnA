@@ -27,13 +27,16 @@ namespace AngularAppQnA.Server.Controllers
     {
         private readonly AppDbContext _context;
         private readonly AuditService _auditService;
+        private readonly BlobStorageService _blobStorageService;
 
         public ServiceController(
-          AppDbContext context,
-          AuditService auditService)
+            AppDbContext context,
+            AuditService auditService,
+            BlobStorageService blobStorageService)
         {
             _context = context;
             _auditService = auditService;
+            _blobStorageService = blobStorageService;
         }
 
         [HttpGet("GetThematologies")]
@@ -261,6 +264,13 @@ namespace AngularAppQnA.Server.Controllers
                 newRow.CreateDate = DateTime.Now;
 
                 _context.msc_Thematologia_Theoria.Add(newRow);
+
+                await SyncTheoryVideos(
+                    newRow.Id,
+                    newRow.DetId,
+                    newRow.Details
+                );
+
                 await _context.SaveChangesAsync();
 
                 ret.IsSuccess = true;
@@ -304,7 +314,15 @@ namespace AngularAppQnA.Server.Controllers
                 existingRow.CreateDate = updatedContract.CreateDate ?? existingRow.CreateDate;
 
                 _context.msc_Thematologia_Theoria.Update(existingRow);
+
+                await SyncTheoryVideos(
+                    existingRow.Id,
+                    existingRow.DetId,
+                    existingRow.Details
+                );
+
                 await _context.SaveChangesAsync();
+
                 ret.IsSuccess = true;
                 ret.Message = $"Thematologia with ID: {existingRow.Id} updated successfully.";
             }
@@ -318,14 +336,18 @@ namespace AngularAppQnA.Server.Controllers
 
         [HttpPost("DeleteTheoria/{id}/{detId}")]
         [Authorize(Roles = "99")]
-        public async Task<BasicResponse> DeleteTheoria(int id, int detId)
+        public async Task<BasicResponse> DeleteTheoria(
+    int id,
+    int detId)
         {
             BasicResponse ret = new BasicResponse();
 
             try
             {
                 var theory = await _context.msc_Thematologia_Theoria
-                    .FirstOrDefaultAsync(x => x.Id == id && x.DetId == detId);
+                    .FirstOrDefaultAsync(x =>
+                        x.Id == id &&
+                        x.DetId == detId);
 
                 if (theory == null)
                 {
@@ -333,6 +355,12 @@ namespace AngularAppQnA.Server.Controllers
                     ret.Message = "Thematologia not found.";
                     return ret;
                 }
+
+                var theoryVideos = await _context.TheoriaVideos
+                    .Where(x =>
+                        x.ThematologiaId == id &&
+                        x.TheoryDetId == detId)
+                    .ToListAsync();
 
                 var oldValues = new
                 {
@@ -342,26 +370,54 @@ namespace AngularAppQnA.Server.Controllers
                     theory.Details
                 };
 
-                if (await _context.DeleteTheoriaAsync(id, detId))
-                {
-                    await _auditService.LogAsync(
-                        actionType: "DELETE_THEORIA",
-                        tableName: "msc_Thematologia_Theoria",
-                        recordId: $"{id}/{detId}",
-                        description: $"Διαγράφηκε η θεωρία '{theory.Header}'.",
-                        oldValues: oldValues
+                var deleted =
+                    await _context.DeleteTheoriaAsync(
+                        id,
+                        detId
                     );
 
-                    ret.IsSuccess = true;
-                    ret.Message =
-                        $"Theory with ID: {id} and DetId: {detId} deleted successfully.";
-                }
-                else
+                if (!deleted)
                 {
                     ret.IsSuccess = false;
                     ret.Message =
                         "Failed to delete theory. It may have associated questions or answers.";
+
+                    return ret;
                 }
+
+                // Διαγραφή εγγραφών video από SQL
+                if (theoryVideos.Count > 0)
+                {
+                    _context.TheoriaVideos.RemoveRange(
+                        theoryVideos
+                    );
+
+                    await _context.SaveChangesAsync();
+                }
+
+                // Διαγραφή των πραγματικών video από Azure Blob Storage
+                foreach (var video in theoryVideos)
+                {
+                    if (!string.IsNullOrWhiteSpace(video.BlobName))
+                    {
+                        await _blobStorageService.DeleteBlobAsync(
+                            video.BlobName
+                        );
+                    }
+                }
+
+                await _auditService.LogAsync(
+                    actionType: "DELETE_THEORIA",
+                    tableName: "msc_Thematologia_Theoria",
+                    recordId: $"{id}/{detId}",
+                    description:
+                        $"Διαγράφηκε η θεωρία '{theory.Header}'.",
+                    oldValues: oldValues
+                );
+
+                ret.IsSuccess = true;
+                ret.Message =
+                    $"Theory with ID: {id} and DetId: {detId} deleted successfully.";
             }
             catch (Exception ex)
             {
@@ -1833,6 +1889,87 @@ namespace AngularAppQnA.Server.Controllers
                 Message = $"{difficultyName} quiz με {selectedQuestions.Count} ερωτήσεις.",
                 Questions = selectedQuestions
             };
+        }
+        private async Task SyncTheoryVideos(
+    
+            int thematologiaId,
+            int theoryDetId,
+            string? details)
+        {
+            var videoUrls = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(details))
+            {
+                var matches = Regex.Matches(
+                    details,
+                    @"<video[^>]*src=[""']([^""']+)[""'][^>]*>",
+                    RegexOptions.IgnoreCase
+                );
+
+                foreach (Match match in matches)
+                {
+                    var videoUrl = match.Groups[1].Value;
+
+                    if (!string.IsNullOrWhiteSpace(videoUrl))
+                    {
+                        videoUrls.Add(videoUrl);
+                    }
+                }
+            }
+
+            var existingVideos =
+                await _context.TheoriaVideos
+                    .Where(x =>
+                        x.ThematologiaId == thematologiaId &&
+                        x.TheoryDetId == theoryDetId)
+                    .ToListAsync();
+
+            // Διαγράφουμε videos που αφαιρέθηκαν από τη θεωρία
+            foreach (var existingVideo in existingVideos)
+            {
+                if (!videoUrls.Contains(existingVideo.VideoUrl))
+                {
+                    _context.TheoriaVideos.Remove(existingVideo);
+                }
+            }
+
+            // Προσθέτουμε μόνο videos που δεν υπάρχουν ήδη
+            foreach (var videoUrl in videoUrls)
+            {
+                var alreadyExists =
+                    existingVideos.Any(x =>
+                        x.VideoUrl == videoUrl);
+
+                if (alreadyExists)
+                {
+                    continue;
+                }
+
+                var uri = new Uri(videoUrl);
+
+                var path =
+                    Uri.UnescapeDataString(
+                        uri.AbsolutePath.TrimStart('/')
+                    );
+
+                var firstSlash = path.IndexOf('/');
+
+                var blobName =
+                    firstSlash >= 0
+                        ? path[(firstSlash + 1)..]
+                        : path;
+
+                var video = new msc_TheoriaVideo
+                {
+                    ThematologiaId = thematologiaId,
+                    TheoryDetId = theoryDetId,
+                    VideoUrl = videoUrl,
+                    BlobName = blobName,
+                    CreatedDate = DateTime.Now
+                };
+
+                _context.TheoriaVideos.Add(video);
+            }
         }
     }
 }

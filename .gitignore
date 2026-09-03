@@ -30,3 +30,6 @@ wwwroot/
 # Env
 .env
 .env.*
+
+# Local development settings
+/AngularAppQnA.Server/appsettings.Development.json

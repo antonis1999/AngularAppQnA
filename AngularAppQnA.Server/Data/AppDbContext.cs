@@ -30,6 +30,8 @@ namespace AngularAppQnA.Server.Data
         public virtual DbSet<QuizQuestionFlatDto> QuizQuestionFlatDto { get; set; }
         public DbSet<msc_PasswordResetToken> msc_PasswordResetTokens { get; set; }
         public DbSet<msc_AuditLog> msc_AuditLog { get; set; }
+        public DbSet<msc_TheoriaImage> TheoriaImages { get; set; }
+        public DbSet<msc_TheoriaVideo> TheoriaVideos { get; set; }
 
 
 
@@ -73,6 +75,25 @@ namespace AngularAppQnA.Server.Data
 
             modelBuilder.Entity<msc_Quiz_Results>()
                 .ToTable("msc_Quiz_Results");
+
+            modelBuilder.Entity<msc_TheoriaImage>(entity =>
+            {
+                entity.ToTable("msc_TheoriaImages");
+
+                entity.HasKey(x => x.Id);
+
+                entity.Property(x => x.ImageUrl)
+                    .HasMaxLength(1000)
+                    .IsRequired();
+
+                entity.Property(x => x.BlobName)
+                    .HasMaxLength(500);
+
+                entity.Property(x => x.CreatedDate)
+                    .HasDefaultValueSql("GETDATE()");
+            });
+            modelBuilder.Entity<msc_TheoriaVideo>()
+                .ToTable("msc_TheoriaVideo");
         }
 
 

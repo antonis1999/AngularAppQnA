@@ -75,7 +75,9 @@ export class MainpageComponent {
     if (data) {
       this.user = JSON.parse(data) as User;
       this.isAdmin = this.user.RoleId === 99;
-
+      this.activeSection = this.isAdmin
+        ? 'theory'
+        : 'presentation';
       if (this.isAdmin) {
         this.loadUsers();
       }

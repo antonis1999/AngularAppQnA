@@ -38,7 +38,9 @@
   <div class="main-panel">
 
     <div class="tab-menu">
-      <button [class.active]="activeSection === 'theory'" (click)="setSection('theory')">
+      <button *ngIf="isAdmin"
+              [class.active]="activeSection === 'theory'"
+              (click)="setSection('theory')">
         Αρχική
       </button>
 
@@ -64,8 +66,9 @@
 
     <div class="section-card">
 
-      <!-- ΑΡΧΙΚΗ -->
-      <div *ngIf="activeSection === 'theory'">
+    
+      <!-- ΑΡΧΙΚΗ - ΜΟΝΟ ADMIN -->
+      <div *ngIf="activeSection === 'theory' && isAdmin">
 
         <div *ngIf="isAdmin" class="form-section add-thematologia-panel">
           <label>Νέα Θεματολογία</label>
@@ -107,8 +110,8 @@
               </div>
 
               <!--<small>
-                {{ isAdmin ? 'Πατήστε για επεξεργασία' : 'Πατήστε για προβολή θεωριών' }}
-              </small>-->
+            {{ isAdmin ? 'Πατήστε για επεξεργασία' : 'Πατήστε για προβολή θεωριών' }}
+          </small>-->
 
               <div class="preview-theory-details"
                    *ngIf="!isAdmin && openedPreviewThematologiaId === topic.id">
