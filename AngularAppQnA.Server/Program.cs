@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Http.Features;
 
 internal class Program
 {
@@ -59,6 +60,10 @@ internal class Program
         builder.Services.AddScoped<AuditService>();
         builder.Services.AddScoped<BlobStorageService>();
         builder.Services.AddScoped<IEmailService, EmailService>();
+        builder.Services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = 500 * 1024 * 1024;
+        });
 
         // JWT Authentication
         string? jwtKey = builder.Configuration["Jwt:Key"];

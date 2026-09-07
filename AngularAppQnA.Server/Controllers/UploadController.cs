@@ -57,26 +57,37 @@ namespace AngularAppQnA.Server.Controllers
             });
         }
         [HttpPost("TheoryVideo")]
-        public async Task<IActionResult> UploadTheoryVideo(
+        public async Task<IActionResult> UploadTheoryVideo(   
             IFormFile file,
             int thematologiaId, 
             int theoryDetId)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("Δεν επιλέχθηκε video.");
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest("Δεν επιλέχθηκε video.");
 
-            var result =
-                await _blobStorageService.UploadVideoAsync(
+                var result = await _blobStorageService.UploadVideoAsync(
                     file,
                     thematologiaId,
                     theoryDetId
                 );
 
-            return Ok(new
+                return Ok(new
+                {
+                    videoUrl = result.VideoUrl,
+                    blobName = result.BlobName
+                });
+            }
+            catch (Exception ex)
             {
-                videoUrl = result.VideoUrl,
-                blobName = result.BlobName
-            });
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    inner = ex.InnerException?.Message,
+                    stack = ex.StackTrace
+                });
+            }
         }
     }
 }
