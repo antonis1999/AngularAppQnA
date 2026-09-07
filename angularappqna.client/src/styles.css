@@ -80,3 +80,30 @@ body {
     right: -7px;
     cursor: nwse-resize;
   }
+.two-images-layout {
+  position: relative;
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) 6px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+}
+
+.image-layout-slot {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-layout-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.image-layout-divider {
+  width: 6px;
+}

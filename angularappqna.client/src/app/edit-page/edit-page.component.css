@@ -12,6 +12,9 @@
   font-family: Inter, Arial, Helvetica, sans-serif;
   background: radial-gradient(circle at top left, rgba(214, 176, 104, 0.12), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #f4f1ea 45%, #eef2f6 100%);
   color: #172033;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .main-panel {
@@ -23,6 +26,8 @@
   border: 1px solid rgba(218, 223, 232, 0.9);
   box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
   backdrop-filter: blur(14px);
+  width: 100%;
+  overflow: hidden;
 }
 
 /* HEADER */
@@ -476,6 +481,61 @@ quill-editor {
   overflow-y: auto !important;
 }
 
+.theory-quill-wrapper {
+  width: 100%;
+  min-width: 0;
+}
+
+:host ::ng-deep .ql-editor p {
+  max-width: 100%;
+}
+
+:host ::ng-deep .ql-editor img + img,
+:host ::ng-deep .theory-content img + img {
+  margin-left: 0;
+}
+
+:host ::ng-deep .image-resize-overlay {
+  position: absolute;
+  z-index: 99999;
+  pointer-events: none;
+  border: 2px solid #3b82f6;
+}
+
+:host ::ng-deep .image-resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #3b82f6;
+  pointer-events: auto;
+}
+
+  :host ::ng-deep .image-resize-handle.top-left {
+    top: -6px;
+    left: -6px;
+    cursor: nwse-resize;
+  }
+
+  :host ::ng-deep .image-resize-handle.top-right {
+    top: -6px;
+    right: -6px;
+    cursor: nesw-resize;
+  }
+
+  :host ::ng-deep .image-resize-handle.bottom-left {
+    bottom: -6px;
+    left: -6px;
+    cursor: nesw-resize;
+  }
+
+  :host ::ng-deep .image-resize-handle.bottom-right {
+    right: -6px;
+    bottom: -6px;
+    cursor: nwse-resize;
+  }
+
 /* QUIZ LAYOUT */
 
 .quiz-editor-layout {
@@ -523,6 +583,7 @@ quill-editor {
     border-left-color: #c59a4a;
     color: #172033;
   }
+
 .difficulty-mode-switch {
   display: flex;
   padding: 5px;
@@ -724,6 +785,7 @@ quill-editor {
 .add-question-main-btn {
   align-self: flex-start;
 }
+
 .quiz-settings-card {
   margin-bottom: 24px;
   padding: 22px;
@@ -789,12 +851,14 @@ quill-editor {
     .quiz-settings-row button:active {
       transform: scale(.98);
     }
+
 .quiz-settings-info {
   margin: 0 0 14px;
   color: #6b7280;
   font-size: 13px;
   line-height: 1.6;
 }
+
 .quiz-count-box {
   height: 46px;
   display: flex;
@@ -822,19 +886,20 @@ quill-editor {
     font-size: 13px;
     font-weight: 800;
   }
+
 .difficulty-settings-card {
   margin-top: 18px;
 }
 
-.difficulty-settings-card label {
-  display: block;
-  margin-top: 16px;
-  margin-bottom: 10px;
-  font-size: 14px;
-  font-weight: 800;
-  color: #1f2937;
-  text-align: center;
-}
+  .difficulty-settings-card label {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #1f2937;
+    text-align: center;
+  }
 
 .quiz-difficulty-select {
   width: 100%;
@@ -849,10 +914,12 @@ quill-editor {
   outline: none;
   transition: 0.2s ease;
 }
+
   .quiz-difficulty-select:focus {
     border-color: #c59a45;
     box-shadow: 0 0 0 4px rgba(197, 154, 69, 0.14);
   }
+
 .new-save {
   height: 46px;
   padding: 0 37px;
@@ -892,6 +959,7 @@ quill-editor {
   .new-save::-moz-focus-inner {
     border: 0;
   }
+
 .suggestions-btn {
   height: 44px;
   padding: 0 22px;
@@ -909,6 +977,7 @@ quill-editor {
     background: #fff3d8;
     transform: translateY(-1px);
   }
+
 .suggestions-overlay {
   position: fixed;
   inset: 0;
@@ -1045,6 +1114,7 @@ quill-editor {
   background: #d5b26b;
   border-radius: 20px;
 }
+
 .suggestion-main-line {
   display: flex;
   align-items: center;
@@ -1134,6 +1204,7 @@ quill-editor {
     grid-template-columns: 1fr;
   }
 }
+
 .excel-action-btn {
   border: 1px solid #d7dde8;
   background: #ffffff;
@@ -1161,6 +1232,7 @@ quill-editor {
   .import-btn:hover {
     background: #1b2436;
   }
+
 .theory-number {
   display: inline-flex;
   align-items: center;
@@ -1169,18 +1241,6 @@ quill-editor {
   margin-right: 6px;
   font-weight: 800;
   color: #0f766e;
-}
-
-.page {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-.main-panel {
-  width: 100%;
-  max-width: 1040px;
-  overflow: hidden;
 }
 
 .section-card,
@@ -1198,27 +1258,19 @@ quill-editor {
   max-width: 100%;
   min-width: 0;
   margin-top: 12px;
-  overflow-wrap: anywhere;
-  word-wrap: break-word;
-  word-break: normal;
-}
-.theory-content {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  margin-top: 12px;
-  overflow-wrap: anywhere;
-  word-wrap: break-word;
-  word-break: normal;
   overflow-x: hidden;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  word-break: normal;
 }
 
 :host ::ng-deep .theory-content img {
-  display: block;
+  display: inline-block;
+  vertical-align: top;
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  margin: 18px auto;
+  margin: 8px 8px 8px 0;
 }
 
 :host ::ng-deep .theory-content * {
@@ -1238,11 +1290,12 @@ quill-editor {
 }
 
 :host ::ng-deep .ql-editor img {
-  display: block;
+  display: inline-block;
+  vertical-align: top;
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  margin: 18px auto;
+  margin: 8px 8px 8px 0;
   border-radius: 10px;
   cursor: pointer;
   transition: outline 0.15s ease;
@@ -1271,4 +1324,3 @@ quill-editor {
     align-self: flex-end;
   }
 }
-

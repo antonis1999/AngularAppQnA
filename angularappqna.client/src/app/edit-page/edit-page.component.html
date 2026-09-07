@@ -98,11 +98,13 @@
                    [(ngModel)]="newTheoryHeader"
                    placeholder="Τίτλος θεωρίας">
 
-            <quill-editor [(ngModel)]="newTheoryDetails"
-                          [modules]="quillModules"
-                          placeholder="Γράψε τις λεπτομέρειες της θεωρίας..."
-                          (onEditorCreated)="onNewTheoryEditorCreated($event)">
-            </quill-editor>
+            <div class="theory-quill-wrapper">
+              <quill-editor [(ngModel)]="newTheoryDetails"
+                            [modules]="quillModules"
+                            placeholder="Γράψε τις λεπτομέρειες της θεωρίας..."
+                            (onEditorCreated)="onNewTheoryEditorCreated($event)">
+              </quill-editor>
+            </div>
 
             <button class="save-btn" (click)="addTheoryToSelected()">
               Αποθήκευση Θεωρίας
@@ -133,6 +135,10 @@
                 </div>
 
                 <div class="theory-content"
+                     *ngIf="!(
+                     editingTheoryId === theory.Id &&
+                     editingTheoryDetId === theory.DetId
+                     )"
                      [innerHTML]="theory.Details">
                 </div>
 
@@ -142,11 +148,13 @@
                   <input type="text"
                          [(ngModel)]="editingTheoryHeader"
                          placeholder="Επεξεργασία τίτλου θεωρίας">
-                  <quill-editor [(ngModel)]="editingTheoryDetails"
-                                [modules]="quillModules"
-                                placeholder="Επεξεργασία λεπτομερειών θεωρίας..."
-                                (onEditorCreated)="onEditingTheoryEditorCreated($event)">
-                  </quill-editor>
+                  <div class="theory-quill-wrapper">
+                    <quill-editor [(ngModel)]="editingTheoryDetails"
+                                  [modules]="quillModules"
+                                  placeholder="Επεξεργασία λεπτομερειών θεωρίας..."
+                                  (onEditorCreated)="onEditingTheoryEditorCreated($event)">
+                    </quill-editor>
+                  </div>
 
                   <button class="update-topic-btn"
                           (click)="updateTheoria()">
