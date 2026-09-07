@@ -33,3 +33,4 @@ wwwroot/
 
 # Local development settings
 /AngularAppQnA.Server/appsettings.Development.json
+AngularAppQnA.Server/appsettings.json
