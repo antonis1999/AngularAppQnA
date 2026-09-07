@@ -9,6 +9,8 @@ namespace AngularAppQnA.Server.Services
     public class EmailService : IEmailService
     {
         private readonly EmailSettings _emailSettings;
+        public string smtpUser = Environment.GetEnvironmentVariable("SMTP_USERNAME");
+        public string smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
 
         public EmailService(
             IOptions<EmailSettings> emailSettings)
@@ -33,10 +35,10 @@ namespace AngularAppQnA.Server.Services
 
             smtpClient.UseDefaultCredentials = false;
 
-            smtpClient.Credentials =
-                new NetworkCredential(
-                    _emailSettings.Username,
-                    _emailSettings.Password);
+            smtpClient.Credentials 
+                = new NetworkCredential(
+                smtpUser,
+                smtpPassword);
 
             using var message = new MailMessage();
 
@@ -223,4 +225,3 @@ namespace AngularAppQnA.Server.Services
         }
     }
 }
-//
