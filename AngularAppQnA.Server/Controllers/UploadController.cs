@@ -57,15 +57,30 @@ namespace AngularAppQnA.Server.Controllers
             });
         }
         [HttpPost("TheoryVideo")]
-        public async Task<IActionResult> UploadTheoryVideo(   
-            IFormFile file,
-            int thematologiaId, 
-            int theoryDetId)
+        public async Task<IActionResult> UploadTheoryVideo(
+     IFormFile file,
+     int thematologiaId,
+     int theoryDetId)
         {
             try
             {
-                if (file == null || file.Length == 0)
-                    return BadRequest("Δεν επιλέχθηκε video.");
+                if (file == null)
+                {
+                    return BadRequest(new
+                    {
+                        step = "FileValidation",
+                        message = "Το file είναι null."
+                    });
+                }
+
+                if (file.Length == 0)
+                {
+                    return BadRequest(new
+                    {
+                        step = "FileValidation",
+                        message = "Το video έχει μέγεθος 0."
+                    });
+                }
 
                 var result = await _blobStorageService.UploadVideoAsync(
                     file,
@@ -75,6 +90,10 @@ namespace AngularAppQnA.Server.Controllers
 
                 return Ok(new
                 {
+                    success = true,
+                    fileName = file.FileName,
+                    fileSize = file.Length,
+                    contentType = file.ContentType,
                     videoUrl = result.VideoUrl,
                     blobName = result.BlobName
                 });
@@ -83,9 +102,10 @@ namespace AngularAppQnA.Server.Controllers
             {
                 return StatusCode(500, new
                 {
+                    success = false,
                     message = ex.Message,
-                    inner = ex.InnerException?.Message,
-                    stack = ex.StackTrace
+                    innerMessage = ex.InnerException?.Message,
+                    exceptionType = ex.GetType().FullName
                 });
             }
         }

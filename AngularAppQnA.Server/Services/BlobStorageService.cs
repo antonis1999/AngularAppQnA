@@ -146,12 +146,27 @@ namespace AngularAppQnA.Server.Services
                     ContentType = contentType
                 };
 
-            await blobClient.UploadAsync(
-                stream,
-                new BlobUploadOptions
-                {
-                    HttpHeaders = headers
-                });
+            try
+            {
+                await blobClient.UploadAsync(
+                    stream,
+                    new BlobUploadOptions
+                    {
+                        HttpHeaders = headers
+                    });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(
+                    $"Αποτυχία Azure Video Upload. " +
+                    $"BlobName: {blobName}, " +
+                    $"Extension: {extension}, " +
+                    $"ContentType: {contentType}, " +
+                    $"FileSize: {file.Length} bytes. " +
+                    $"Azure Error: {ex.Message}",
+                    ex
+                );
+            }
 
             return (
                 blobClient.Uri.ToString(),
