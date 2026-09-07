@@ -42,16 +42,92 @@ export class PresentationComponent
   private timerInterval:
     ReturnType<typeof setInterval> | null = null;
 
+  private playingVideos =
+    new Set<HTMLVideoElement>();
+
+  private readonly onVideoPlay =
+    (event: Event): void => {
+      const video =
+        event.target as HTMLVideoElement;
+
+      if (!this.isPresentationVideo(video)) {
+        return;
+      }
+
+      this.playingVideos.add(video);
+    };
+
+  private readonly onVideoPause =
+    (event: Event): void => {
+      const video =
+        event.target as HTMLVideoElement;
+
+      if (!this.isPresentationVideo(video)) {
+        return;
+      }
+
+      this.playingVideos.delete(video);
+    };
+
+  private readonly onVideoEnded =
+    (event: Event): void => {
+      const video =
+        event.target as HTMLVideoElement;
+
+      if (!this.isPresentationVideo(video)) {
+        return;
+      }
+
+      this.playingVideos.delete(video);
+    };
+
   constructor(
     private http: HttpClient
   ) { }
 
   ngOnInit(): void {
     this.loadThematologies();
+
+    document.addEventListener(
+      'play',
+      this.onVideoPlay,
+      true
+    );
+
+    document.addEventListener(
+      'pause',
+      this.onVideoPause,
+      true
+    );
+
+    document.addEventListener(
+      'ended',
+      this.onVideoEnded,
+      true
+    );
   }
 
   ngOnDestroy(): void {
     this.clearSlideTimer();
+    this.stopCurrentVideos();
+
+    document.removeEventListener(
+      'play',
+      this.onVideoPlay,
+      true
+    );
+
+    document.removeEventListener(
+      'pause',
+      this.onVideoPause,
+      true
+    );
+
+    document.removeEventListener(
+      'ended',
+      this.onVideoEnded,
+      true
+    );
   }
 
   get totalSlides(): number {
@@ -111,7 +187,9 @@ export class PresentationComponent
 
   startPresentation(): void {
     if (!this.selectedThematologiaId) {
-      console.warn('Δεν έχει επιλεγεί θεματολογία.');
+      console.warn(
+        'Δεν έχει επιλεγεί θεματολογία.'
+      );
       return;
     }
 
@@ -124,12 +202,6 @@ export class PresentationComponent
 
     this.selectedThematologiaTitle =
       selectedThematologia?.Title ?? '';
-
-    console.log(
-      'Έναρξη παρουσίασης:',
-      this.selectedThematologiaId,
-      this.selectedThematologiaTitle
-    );
 
     this.loadTheories();
   }
@@ -157,6 +229,7 @@ export class PresentationComponent
         }
       });
   }
+
   startSlideTimer(): void {
     this.clearSlideTimer();
 
@@ -164,10 +237,14 @@ export class PresentationComponent
       this.slideDuration;
 
     this.isTimerPaused = false;
+    this.playingVideos.clear();
 
     this.timerInterval = setInterval(
       () => {
-        if (this.isTimerPaused) {
+        if (
+          this.isTimerPaused ||
+          this.playingVideos.size > 0
+        ) {
           return;
         }
 
@@ -205,6 +282,41 @@ export class PresentationComponent
     }
   }
 
+  private isPresentationVideo(
+    video: HTMLVideoElement
+  ): boolean {
+    const viewer =
+      this.presentationViewer
+        ?.nativeElement;
+
+    return !!viewer &&
+      viewer.contains(video);
+  }
+
+  private stopCurrentVideos(): void {
+    const viewer =
+      this.presentationViewer
+        ?.nativeElement;
+
+    if (!viewer) {
+      this.playingVideos.clear();
+      return;
+    }
+
+    const videos =
+      viewer.querySelectorAll<HTMLVideoElement>(
+        'video'
+      );
+
+    videos.forEach(video => {
+      if (!video.paused) {
+        video.pause();
+      }
+    });
+
+    this.playingVideos.clear();
+  }
+
   nextSlide(): void {
     if (
       this.currentSlideIndex >=
@@ -213,21 +325,22 @@ export class PresentationComponent
       return;
     }
 
+    this.stopCurrentVideos();
+
     this.currentSlideIndex++;
     this.resetSlideTimer();
 
-    if (
+    this.isTimerPaused =
       this.currentSlideIndex ===
-      this.totalSlides - 1
-    ) {
-      this.isTimerPaused = true;
-    }
+      this.totalSlides - 1;
   }
 
   previousSlide(): void {
     if (this.currentSlideIndex <= 0) {
       return;
     }
+
+    this.stopCurrentVideos();
 
     this.currentSlideIndex--;
     this.isTimerPaused = false;
@@ -242,6 +355,8 @@ export class PresentationComponent
       return;
     }
 
+    this.stopCurrentVideos();
+
     this.currentSlideIndex = index;
 
     this.isTimerPaused =
@@ -251,6 +366,7 @@ export class PresentationComponent
   }
 
   restartPresentation(): void {
+    this.stopCurrentVideos();
     this.currentSlideIndex = 0;
     this.startSlideTimer();
   }
@@ -300,6 +416,7 @@ export class PresentationComponent
   }
 
   async closePresentation(): Promise<void> {
+    this.stopCurrentVideos();
     this.clearSlideTimer();
 
     if (document.fullscreenElement) {
@@ -318,6 +435,7 @@ export class PresentationComponent
     this.remainingSeconds =
       this.slideDuration;
     this.isTimerPaused = false;
+    this.playingVideos.clear();
   }
 
   @HostListener(
