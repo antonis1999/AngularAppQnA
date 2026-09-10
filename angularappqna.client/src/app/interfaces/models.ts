@@ -51,6 +51,15 @@ export interface QuizTheory {
 export interface QuizOption {
   Answer: string;
   IsCorrect: boolean;
+  MatchLeft?: string | null;
+  MatchRight?: string | null;
+  CategoryName?: string | null;
+}
+
+export interface QuestionMedia {
+  MediaUrl: string;
+  BlobName?: string | null;
+  MediaType: 'image' | 'video';
 }
 
 export interface QuizQuestionView {
@@ -58,12 +67,17 @@ export interface QuizQuestionView {
   Question: string;
   Options: QuizOption[];
   Difficulty: number;
+  QuestionType: number;
+  Media: QuestionMedia[];
 }
 
 export interface ExistingQuizAnswer {
   AId: number;
   Answer: string;
   IsCorrect: boolean;
+  MatchLeft?: string | null;
+  MatchRight?: string | null;
+  CategoryName?: string | null;
 }
 
 export interface ExistingQuizQuestion {
@@ -74,12 +88,17 @@ export interface ExistingQuizQuestion {
   Username: string;
   CreateDate: string;
   Difficulty: number;
+  QuestionType: number;
   Answers: ExistingQuizAnswer[];
+  Media: QuestionMedia[];
 }
 
 export interface UpdateQuizAnswerRequest {
   Answer: string;
   IsCorrect: boolean;
+  MatchLeft?: string | null;
+  MatchRight?: string | null;
+  CategoryName?: string | null;
 }
 
 export interface UpdateQuizQuestionRequest {
@@ -88,13 +107,18 @@ export interface UpdateQuizQuestionRequest {
   QId: number;
   Question: string;
   Difficulty: number;
+  QuestionType: number;
   Answers: UpdateQuizAnswerRequest[];
+  Media: QuestionMedia[];
 }
 
 export interface QuizPreviewAnswer {
   AId: number;
   Answer: string;
   IsCorrect: boolean;
+  MatchLeft?: string | null;
+  MatchRight?: string | null;
+  CategoryName?: string | null;
 }
 
 export interface QuizPreviewQuestion {
@@ -104,6 +128,7 @@ export interface QuizPreviewQuestion {
   Question: string;
   Answers: QuizPreviewAnswer[];
   Difficulty: number;
+  QuestionType: number;
   Details?: string;
 }
 
@@ -128,31 +153,49 @@ export interface QuizAttemptDetail {
   TotalTimeSeconds: number;
   CreateDate: string;
 }
+
 export interface UploadEditorImageResponse {
   IsSuccess?: boolean;
-  Message?: string;  
+  Message?: string;
   ImageUrl?: string;
   BlobName?: string;
 }
+
+export interface MatchingPairProgress {
+  leftAId: number;
+  rightAId: number;
+}
+
+export interface CategorizationAssignmentProgress {
+  answerId: number;
+  categoryName: string;
+}
+
+export interface QuizProgressAnswer {
+  questionId: number;
+  answerId: number | null;
+  orderedAnswerIds?: number[];
+  matchingPairs?: MatchingPairProgress[];
+  categorizationAssignments?: CategorizationAssignmentProgress[];
+}
+
 export interface QuizProgress {
   thematologiaId: number;
-
   questions: QuizPreviewQuestion[];
   currentQuestionIndex: number;
   selectedAnswerId: number | null;
-
-  answers: {
-    questionId: number;
-    answerId: number | null;
-  }[];
-
+  answers: QuizProgressAnswer[];
   questionTimes: number[];
-
   timeLeft: number;
   quizStartTime: number;
   questionStartTime: number;
-
   showReview: boolean;
-
+  currentOrderingAnswerIds?: number[];
+  currentMatchingPairs?: MatchingPairProgress[];
+  currentMatchingRightAnswerIds?: number[];
+  selectedMatchingLeftId?: number | null;
+  currentCategorizationAssignments?: CategorizationAssignmentProgress[];
+  currentCategorizationCardIds?: number[];
+  selectedCategorizationCardId?: number | null;
   savedAt: number;
 }

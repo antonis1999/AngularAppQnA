@@ -33,6 +33,8 @@ namespace AngularAppQnA.Server.Data
         public DbSet<msc_TheoriaImage> TheoriaImages { get; set; }
         public DbSet<msc_TheoriaVideo> TheoriaVideos { get; set; }
 
+        public DbSet<msc_QuestionMedia> msc_QuestionMedia { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -92,8 +94,12 @@ namespace AngularAppQnA.Server.Data
                 entity.Property(x => x.CreatedDate)
                     .HasDefaultValueSql("GETDATE()");
             });
+
             modelBuilder.Entity<msc_TheoriaVideo>()
                 .ToTable("msc_TheoriaVideo");
+
+            modelBuilder.Entity<msc_QuestionMedia>()
+        .ToTable("msc_QuestionMedia");
         }
 
 

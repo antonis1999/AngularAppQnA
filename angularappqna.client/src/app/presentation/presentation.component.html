@@ -1,3 +1,4 @@
+
 <section class="presentation-entry"
          *ngIf="!isPresentationStarted">
 
@@ -57,6 +58,7 @@
         </span>
 
         <div>
+
           <small>
             Επιλεγμένη θεματολογία
           </small>
@@ -64,6 +66,7 @@
           <strong>
             {{ selectedThematologiaTitle }}
           </strong>
+
         </div>
 
       </div>
@@ -94,14 +97,10 @@
 </section>
 
 
-<!-- =====================================================
-     FULLSCREEN ΠΑΡΟΥΣΙΑΣΗ
-===================================================== -->
 <section #presentationViewer
          class="presentation-viewer"
          *ngIf="isPresentationStarted">
 
-  <!-- Επάνω μπάρα -->
   <header class="viewer-toolbar">
 
     <div class="viewer-title">
@@ -118,7 +117,6 @@
 
     <div class="viewer-actions">
 
-      <!-- Timer -->
       <div class="slide-timer"
            [class.paused]="isTimerPaused">
 
@@ -161,7 +159,6 @@
 
       </div>
 
-      <!-- Pause / Play -->
       <button type="button"
               class="toolbar-button pause-button"
               (click)="toggleTimer()">
@@ -174,7 +171,6 @@
 
       </button>
 
-      <!-- Fullscreen -->
       <button type="button"
               class="toolbar-button fscr-button"
               (click)="toggleFullscreen()">
@@ -187,7 +183,6 @@
 
       </button>
 
-      <!-- Exit -->
       <button type="button"
               class="toolbar-button exit-button"
               (click)="closePresentation()">
@@ -205,7 +200,6 @@
   </header>
 
 
-  <!-- Συνολική πρόοδος παρουσίασης -->
   <div class="presentation-progress">
 
     <div class="presentation-progress-value"
@@ -213,6 +207,7 @@
     </div>
 
   </div>
+
 
   <main class="slide-stage">
 
@@ -247,6 +242,7 @@
       </div>
 
     </article>
+
 
     <article class="slide slide-theory"
              *ngIf="
@@ -288,15 +284,18 @@
 
       </header>
 
+
       <div class="theory-content">
 
         <div class="theory-details"
              [innerHTML]="
                theories[currentSlideIndex - 1]?.Details
-             ">
+             "
+             (click)="onTheoryContentClick($event)">
         </div>
 
       </div>
+
 
       <footer class="theory-footer">
 
@@ -313,6 +312,7 @@
       </footer>
 
     </article>
+
 
     <article class="slide slide-finish"
              *ngIf="currentSlideIndex === theories.length + 1"
@@ -360,9 +360,6 @@
   </main>
 
 
-  <!-- =================================================
-       ΚΑΤΩ ΠΛΟΗΓΗΣΗ
-  ================================================== -->
   <footer class="viewer-navigation">
 
     <button type="button"
@@ -394,9 +391,9 @@
         <button type="button"
                 class="slide-indicator"
                 *ngFor="
-                let item of slideItems;
-                let index = index
-              "
+                  let item of slideItems;
+                  let index = index
+                "
                 [class.active]="index === currentSlideIndex"
                 [class.completed]="index < currentSlideIndex"
                 (click)="goToSlide(index)">
@@ -424,4 +421,30 @@
 
   </footer>
 
+
+  <div class="image-modal"
+       *ngIf="selectedImageUrl"
+       (click)="closeImageModal()">
+
+    <div class="image-modal-content"
+         (click)="$event.stopPropagation()">
+
+      <button type="button"
+              class="image-modal-close"
+              aria-label="Κλείσιμο εικόνας"
+              (click)="closeImageModal()">
+
+        ✕
+
+      </button>
+
+      <img [src]="selectedImageUrl"
+           class="image-modal-image"
+           alt="Μεγεθυμένη εικόνα">
+
+    </div>
+
+  </div>
+
 </section>
+

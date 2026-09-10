@@ -1,3 +1,4 @@
+
 :host {
   --presentation-primary: #465a78;
   --presentation-primary-dark: #2f3f59;
@@ -51,7 +52,6 @@
 .entry-header h1 {
   margin: 0;
   color: var(--presentation-text);
-  /* font-size: clamp(38px, 5vw, 58px);*/
   font-size: 26px;
   font-weight: 550;
   line-height: 1.08;
@@ -231,8 +231,6 @@
   position: fixed;
   inset: 0;
   z-index: 99999;
-  /*width: 100vw;*/
-  /* height: 100dvh;*/
   height: fit-content;
   height: 75dvh;
   padding: 20px 30px 24px;
@@ -455,7 +453,6 @@
   border: 1px solid rgba(70, 90, 120, 0.11);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.97);
-  /*box-shadow: 0 24px 65px rgba(37, 43, 53, 0.13);*/
   animation: slideEnter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -579,11 +576,13 @@
     font-weight: 900;
     letter-spacing: -7px;
   }
+
 .slide-cover,
 .slide-finish {
   align-items: center;
   justify-content: center;
 }
+
 
 /* =====================================================
    THEORY SLIDE
@@ -635,7 +634,6 @@
   font-size: clamp(31px, 4vw, 43px);
   font-weight: 900;
   line-height: 1.12;
- /* letter-spacing: -1.7px;*/
 }
 
 .theory-content {
@@ -648,6 +646,7 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(70, 90, 120, 0.35) transparent;
 }
+
   .theory-content::-webkit-scrollbar {
     width: 8px;
   }
@@ -674,7 +673,7 @@
   line-height: 1.75;
   overflow-wrap: break-word;
   padding-bottom: 40px;
-} 
+}
 
   .theory-details ::ng-deep p {
     margin: 0 0 18px;
@@ -718,7 +717,15 @@
     border-radius: 14px;
     object-fit: contain;
     box-shadow: 0 14px 35px rgba(37, 43, 53, 0.12);
+    cursor: zoom-in;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   }
+
+    .theory-details ::ng-deep img:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 42px rgba(37, 43, 53, 0.18);
+      opacity: 0.96;
+    }
 
 .theory-footer {
   flex-shrink: 0;
@@ -739,12 +746,103 @@
 
 
 /* =====================================================
+   IMAGE MODAL
+===================================================== */
+
+.image-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 999999;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 20, 28, 0.88);
+  backdrop-filter: blur(6px);
+  cursor: zoom-out;
+  animation: imageModalFadeIn 0.2s ease;
+}
+
+.image-modal-content {
+  position: relative;
+  width: auto;
+  max-width: 95%;
+  max-height: 95%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  animation: imageModalZoomIn 0.25s ease;
+}
+
+.image-modal-image {
+  display: block;
+  max-width: 100%;
+  max-height: calc(75dvh - 70px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.image-modal-close {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  z-index: 2;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  color: #ffffff;
+  background: rgba(25, 30, 40, 0.92);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+  .image-modal-close:hover {
+    transform: scale(1.08);
+    background: #a74646;
+  }
+
+@keyframes imageModalFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes imageModalZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+/* =====================================================
    FINISH SLIDE
 ===================================================== */
 
 .slide-finish {
   padding: 40px 55px 55px 55px;
-  /*padding: 55px;*/
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -820,6 +918,7 @@
 /* =====================================================
    ΚΑΤΩ ΠΛΟΗΓΗΣΗ
 ===================================================== */
+
 .viewer-navigation {
   position: relative;
   z-index: 20;
@@ -936,11 +1035,14 @@
     width: 28px;
     background: var(--presentation-accent);
   }
+
+
 /* =====================================================
    RESPONSIVE
 ===================================================== */
 
 @media (max-width: 900px) {
+
   .viewer-toolbar {
     align-items: flex-start;
   }
@@ -965,9 +1067,29 @@
   .cover-decoration {
     display: none;
   }
+
+  .slide-stage {
+    align-items: stretch;
+  }
+
+  .slide {
+    width: 100%;
+    max-height: 100%;
+  }
+
+  .theory-header {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .theory-title {
+    text-align: left;
+  }
 }
 
+
 @media (max-width: 700px) {
+
   .presentation-entry {
     padding: 40px 16px;
   }
@@ -1048,23 +1170,28 @@
   .primary-action {
     width: 100%;
   }
-}
-@media (max-width: 900px) {
-  .slide-stage {
-    align-items: stretch;
+
+  .image-modal {
+    padding: 18px;
   }
 
-  .slide {
-    width: 100%;
+  .image-modal-content {
+    max-width: 100%;
     max-height: 100%;
   }
 
-  .theory-header {
-    grid-template-columns: 80px minmax(0, 1fr);
-    gap: 16px;
+  .image-modal-image {
+    max-height: calc(75dvh - 50px);
+    border-radius: 10px;
   }
 
-  .theory-title {
-    text-align: left;
+  .image-modal-close {
+    top: 8px;
+    right: 8px;
+    width: 42px;
+    height: 42px;
+    background: rgba(25, 30, 40, 0.88);
   }
 }
+
+

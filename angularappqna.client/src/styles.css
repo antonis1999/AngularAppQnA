@@ -107,3 +107,74 @@ body {
 .image-layout-divider {
   width: 6px;
 }
+.image-resize-overlay {
+  position: absolute;
+  z-index: 999999;
+  box-sizing: border-box;
+  border: 2px solid #465a78;
+  pointer-events: none;
+}
+
+.image-resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #465a78;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+  .image-resize-handle.top-left {
+    top: -7px;
+    left: -7px;
+    cursor: nwse-resize;
+  }
+
+  .image-resize-handle.top-right {
+    top: -7px;
+    right: -7px;
+    cursor: nesw-resize;
+  }
+
+  .image-resize-handle.bottom-left {
+    bottom: -7px;
+    left: -7px;
+    cursor: nesw-resize;
+  }
+
+  .image-resize-handle.bottom-right {
+    right: -7px;
+    bottom: -7px;
+    cursor: nwse-resize;
+  }
+
+.image-delete-button {
+  position: absolute;
+  top: -17px;
+  right: -17px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 20;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+  .image-delete-button:hover {
+    background: #b91c1c;
+    transform: scale(1.08);
+  }

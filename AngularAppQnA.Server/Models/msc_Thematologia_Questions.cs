@@ -9,5 +9,6 @@
         public string? Username { get; set; }
         public int? Difficulty { get; set; }
         public DateTime CreateDate { get; set; } = DateTime.Now;
+        public int QuestionType { get; set; } = 1;
     }
 }

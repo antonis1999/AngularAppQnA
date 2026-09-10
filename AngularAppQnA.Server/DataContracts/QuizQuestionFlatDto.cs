@@ -10,6 +10,8 @@
 
     public int? Difficulty { get; set; }
 
+    public int QuestionType { get; set; }
+
     public string? Details { get; set; }
 
     public int AId { get; set; }
@@ -17,4 +19,10 @@
     public string Answer { get; set; } = string.Empty;
 
     public bool IsCorrect { get; set; }
+
+    public string? MatchLeft { get; set; }
+
+    public string? MatchRight { get; set; }
+    public string? CategoryName { get; set; }
+
 }

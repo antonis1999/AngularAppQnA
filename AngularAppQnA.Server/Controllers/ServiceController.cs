@@ -210,7 +210,7 @@ namespace AngularAppQnA.Server.Controllers
         }
 
         [HttpGet("GetTheoriaByThematologia")]
-      
+
         public async Task<List<msc_Thematologia_Theoria>> GetTheoriaByThematologia(int thematologiaId)
         {
             try
@@ -429,12 +429,16 @@ namespace AngularAppQnA.Server.Controllers
         }
         [HttpGet("GetQuestionsByTheoria/{id}/{detId}")]
         [Authorize(Roles = "99")]
-        public async Task<ActionResult<List<object>>> GetQuestionsByTheoria(int id, int detId)
+        public async Task<ActionResult<List<object>>> GetQuestionsByTheoria(
+     int id,
+     int detId)
         {
             try
             {
                 var questions = await _context.msc_Thematologia_Question
-                    .Where(q => q.Id == id && q.DetId == detId)
+                    .Where(q =>
+                        q.Id == id &&
+                        q.DetId == detId)
                     .Select(q => new
                     {
                         Id = q.Id,
@@ -442,19 +446,42 @@ namespace AngularAppQnA.Server.Controllers
                         QId = q.QId,
                         Question = q.Question,
                         Difficulty = q.Difficulty,
+                        QuestionType = q.QuestionType,
                         Username = q.Username,
                         CreateDate = q.CreateDate,
 
                         Answers = _context.msc_Thematologia_Answers
-                        .Where(a => a.Id == q.Id && a.DetId == q.DetId && a.QId == q.QId)
-                        .Select(a => new
-                        {
-                            AId = a.AId,
-                            Answer = a.Answer,
-                            IsCorrect = a.IsCorrect
-                        })
-                        .ToList()
+                            .Where(a =>
+                                a.Id == q.Id &&
+                                a.DetId == q.DetId &&
+                                a.QId == q.QId)
+                            .OrderBy(a => a.AId)
+                            .Select(a => new
+                            {
+                                AId = a.AId,
+                                Answer = a.Answer,
+                                IsCorrect = a.IsCorrect,
+                                MatchLeft = a.MatchLeft,
+                                MatchRight = a.MatchRight,
+                                CategoryName = a.CategoryName
+                            })
+                            .ToList(),
+
+                        Media = _context.msc_QuestionMedia
+                            .Where(m =>
+                                m.ThematologiaId == q.Id &&
+                                m.TheoryDetId == q.DetId &&
+                                m.QId == q.QId)
+                            .OrderBy(m => m.Id)
+                            .Select(m => new
+                            {
+                                MediaUrl = m.MediaUrl,
+                                BlobName = m.BlobName,
+                                MediaType = m.MediaType
+                            })
+                            .ToList()
                     })
+                    .OrderBy(q => q.QId)
                     .ToListAsync();
 
                 return Ok(questions);
@@ -463,8 +490,10 @@ namespace AngularAppQnA.Server.Controllers
             {
                 return StatusCode(500, new
                 {
+                    IsSuccess = false,
                     Message = "An error occurred while fetching questions.",
-                    Error = ex.Message
+                    Error = ex.Message,
+                    InnerError = ex.InnerException?.Message
                 });
             }
         }
@@ -478,11 +507,81 @@ namespace AngularAppQnA.Server.Controllers
                 foreach (var q in request.Questions)
                 {
                     var validAnswers = q.Answers
-                        .Where(a => !string.IsNullOrWhiteSpace(a.Text))
+                        .Where(a =>
+                            q.QuestionType == 4
+                                ? !string.IsNullOrWhiteSpace(a.MatchLeft) &&
+                                  !string.IsNullOrWhiteSpace(a.MatchRight)
+
+                            : q.QuestionType == 5
+                                ? !string.IsNullOrWhiteSpace(a.Text) &&
+                                  !string.IsNullOrWhiteSpace(a.CategoryName)
+
+                            : !string.IsNullOrWhiteSpace(a.Text)
+                        )
                         .ToList();
 
                     if (!validAnswers.Any())
+                    {
                         continue;
+                    }
+
+                    if (q.QuestionType == 3 && validAnswers.Count < 2)
+                    {
+                        return BadRequest(new
+                        {
+                            IsSuccess = false,
+                            Message = "Η ερώτηση Σειρά πρέπει να έχει τουλάχιστον 2 βήματα."
+                        });
+                    }
+
+                    if (q.QuestionType == 4 && validAnswers.Count < 2)
+                    {
+                        return BadRequest(new
+                        {
+                            IsSuccess = false,
+                            Message = "Η ερώτηση Αντιστοίχισης πρέπει να έχει τουλάχιστον 2 ολοκληρωμένα ζευγάρια."
+                        });
+                    }
+
+                    if (q.QuestionType == 5)
+                    {
+                        if (validAnswers.Count < 2)
+                        {
+                            return BadRequest(new
+                            {
+                                IsSuccess = false,
+                                Message = "Η ερώτηση Κατηγοριοποίησης πρέπει να έχει τουλάχιστον 2 κάρτες."
+                            });
+                        }
+
+                        var categoryCount = validAnswers
+                            .Select(a => a.CategoryName!.Trim())
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .Count();
+
+                        if (categoryCount < 2)
+                        {
+                            return BadRequest(new
+                            {
+                                IsSuccess = false,
+                                Message = "Η ερώτηση Κατηγοριοποίησης πρέπει να έχει τουλάχιστον 2 διαφορετικές κατηγορίες."
+                            });
+                        }
+                    }
+
+                    if (
+                        q.QuestionType != 3 &&
+                        q.QuestionType != 4 &&
+                        q.QuestionType != 5 &&
+                        !validAnswers.Any(a => a.IsCorrect)
+                    )
+                    {
+                        return BadRequest(new
+                        {
+                            IsSuccess = false,
+                            Message = "Επέλεξε έγκυρη σωστή απάντηση."
+                        });
+                    }
 
                     int nextQId =
                         (_context.msc_Thematologia_Question
@@ -498,11 +597,13 @@ namespace AngularAppQnA.Server.Controllers
                         QId = nextQId,
                         Question = q.QuestionText,
                         Difficulty = q.Difficulty <= 0 ? 1 : q.Difficulty,
+                        QuestionType = q.QuestionType <= 0 ? 1 : q.QuestionType,
                         Username = "admin",
                         CreateDate = DateTime.Now
                     };
 
                     _context.msc_Thematologia_Question.Add(question);
+
                     await _context.SaveChangesAsync();
 
                     int nextAId =
@@ -521,14 +622,65 @@ namespace AngularAppQnA.Server.Controllers
                             DetId = request.TheoriaDetId,
                             QId = question.QId,
                             AId = nextAId,
-                            Answer = a.Text,
-                            IsCorrect = a.IsCorrect,
+
+                            Answer =
+                                q.QuestionType == 4
+                                    ? ""
+                                    : a.Text.Trim(),
+
+                            IsCorrect =
+                                q.QuestionType == 3 ||
+                                q.QuestionType == 4 ||
+                                q.QuestionType == 5
+                                    ? false
+                                    : a.IsCorrect,
+
+                            MatchLeft =
+                                q.QuestionType == 4
+                                    ? a.MatchLeft?.Trim()
+                                    : null,
+
+                            MatchRight =
+                                q.QuestionType == 4
+                                    ? a.MatchRight?.Trim()
+                                    : null,
+
+                            CategoryName =
+                                q.QuestionType == 5
+                                    ? a.CategoryName?.Trim()
+                                    : null,
+
                             Username = "admin",
                             CreateDate = DateTime.Now
                         };
 
                         _context.msc_Thematologia_Answers.Add(answer);
+
                         nextAId++;
+                    }
+
+                    if (q.Media != null && q.Media.Any())
+                    {
+                        foreach (var mediaItem in q.Media)
+                        {
+                            if (string.IsNullOrWhiteSpace(mediaItem.MediaUrl))
+                            {
+                                continue;
+                            }
+
+                            var media = new msc_QuestionMedia
+                            {
+                                ThematologiaId = request.ThematologiaId,
+                                TheoryDetId = request.TheoriaDetId,
+                                QId = question.QId,
+                                MediaUrl = mediaItem.MediaUrl,
+                                BlobName = mediaItem.BlobName,
+                                MediaType = mediaItem.MediaType,
+                                CreatedDate = DateTime.Now
+                            };
+
+                            _context.msc_QuestionMedia.Add(media);
+                        }
                     }
 
                     await _context.SaveChangesAsync();
@@ -553,7 +705,8 @@ namespace AngularAppQnA.Server.Controllers
         }
         [HttpPost("UpdateQuestion")]
         [Authorize(Roles = "99")]
-        public async Task<ActionResult> UpdateQuestion([FromBody] Thematologia_UpdateQuestionRequest request)
+        public async Task<ActionResult> UpdateQuestion(
+            [FromBody] Thematologia_UpdateQuestionRequest request)
         {
             try
             {
@@ -567,37 +720,241 @@ namespace AngularAppQnA.Server.Controllers
                 {
                     return NotFound(new
                     {
+                        IsSuccess = false,
                         Message = "Question not found."
                     });
                 }
 
-                question.Question = request.Question;
-                question.Difficulty = request.Difficulty <= 0 ? 1 : request.Difficulty;
-
-                var oldAnswers = await _context.msc_Thematologia_Answers
+                var validAnswers = request.Answers
                     .Where(a =>
-                        a.Id == request.Id &&
-                        a.DetId == request.DetId &&
-                        a.QId == request.QId)
-                    .ToListAsync();
+                        request.QuestionType == 4
+                            ? !string.IsNullOrWhiteSpace(a.MatchLeft) &&
+                              !string.IsNullOrWhiteSpace(a.MatchRight)
 
-                _context.msc_Thematologia_Answers.RemoveRange(oldAnswers);
+                        : request.QuestionType == 5
+                            ? !string.IsNullOrWhiteSpace(a.Answer) &&
+                              !string.IsNullOrWhiteSpace(a.CategoryName)
+
+                        : !string.IsNullOrWhiteSpace(a.Answer)
+                    )
+                    .ToList();
+
+                if (!validAnswers.Any())
+                {
+                    return BadRequest(new
+                    {
+                        IsSuccess = false,
+                        Message = "Η ερώτηση πρέπει να έχει τουλάχιστον μία έγκυρη απάντηση."
+                    });
+                }
+
+                if (request.QuestionType == 3 && validAnswers.Count < 2)
+                {
+                    return BadRequest(new
+                    {
+                        IsSuccess = false,
+                        Message = "Η ερώτηση Σειρά πρέπει να έχει τουλάχιστον 2 βήματα."
+                    });
+                }
+
+                if (request.QuestionType == 4 && validAnswers.Count < 2)
+                {
+                    return BadRequest(new
+                    {
+                        IsSuccess = false,
+                        Message = "Η ερώτηση Αντιστοίχισης πρέπει να έχει τουλάχιστον 2 ολοκληρωμένα ζευγάρια."
+                    });
+                }
+
+                if (request.QuestionType == 5)
+                {
+                    if (validAnswers.Count < 2)
+                    {
+                        return BadRequest(new
+                        {
+                            IsSuccess = false,
+                            Message = "Η ερώτηση Κατηγοριοποίησης πρέπει να έχει τουλάχιστον 2 κάρτες."
+                        });
+                    }
+
+                    var categoryCount = validAnswers
+                        .Select(a => a.CategoryName!.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Count();
+
+                    if (categoryCount < 2)
+                    {
+                        return BadRequest(new
+                        {
+                            IsSuccess = false,
+                            Message = "Η ερώτηση Κατηγοριοποίησης πρέπει να έχει τουλάχιστον 2 διαφορετικές κατηγορίες."
+                        });
+                    }
+                }
+
+                if (
+                    request.QuestionType != 3 &&
+                    request.QuestionType != 4 &&
+                    request.QuestionType != 5 &&
+                    !validAnswers.Any(a => a.IsCorrect)
+                )
+                {
+                    return BadRequest(new
+                    {
+                        IsSuccess = false,
+                        Message = "Επέλεξε έγκυρη σωστή απάντηση."
+                    });
+                }
+
+                question.Question = request.Question;
+                question.QuestionType =
+                    request.QuestionType <= 0
+                        ? 1
+                        : request.QuestionType;
+                question.Difficulty =
+                    request.Difficulty <= 0
+                        ? 1
+                        : request.Difficulty;
+
+                var oldAnswers =
+                    await _context.msc_Thematologia_Answers
+                        .Where(a =>
+                            a.Id == request.Id &&
+                            a.DetId == request.DetId &&
+                            a.QId == request.QId)
+                        .ToListAsync();
+
+                if (oldAnswers.Any())
+                {
+                    _context.msc_Thematologia_Answers
+                        .RemoveRange(oldAnswers);
+                }
 
                 int nextAId = 1;
 
-                foreach (var answer in request.Answers)
+                foreach (var answer in validAnswers)
                 {
-                    _context.msc_Thematologia_Answers.Add(new msc_Thematologia_Answers
-                    {
-                        Id = request.Id,
-                        DetId = request.DetId,
-                        QId = request.QId,
-                        AId = nextAId,
-                        Answer = answer.Answer,
-                        IsCorrect = answer.IsCorrect
-                    });
+                    var newAnswer =
+                        new msc_Thematologia_Answers
+                        {
+                            Id = request.Id,
+                            DetId = request.DetId,
+                            QId = request.QId,
+                            AId = nextAId,
+
+                            Answer =
+                                request.QuestionType == 4
+                                    ? ""
+                                    : answer.Answer.Trim(),
+
+                            IsCorrect =
+                                request.QuestionType == 3 ||
+                                request.QuestionType == 4 ||
+                                request.QuestionType == 5
+                                    ? false
+                                    : answer.IsCorrect,
+
+                            MatchLeft =
+                                request.QuestionType == 4
+                                    ? answer.MatchLeft?.Trim()
+                                    : null,
+
+                            MatchRight =
+                                request.QuestionType == 4
+                                    ? answer.MatchRight?.Trim()
+                                    : null,
+
+                            CategoryName =
+                                request.QuestionType == 5
+                                    ? answer.CategoryName?.Trim()
+                                    : null,
+
+                            Username = "admin",
+                            CreateDate = DateTime.Now
+                        };
+
+                    _context.msc_Thematologia_Answers
+                        .Add(newAnswer);
 
                     nextAId++;
+                }
+
+                var oldMedia =
+                    await _context.msc_QuestionMedia
+                        .Where(m =>
+                            m.ThematologiaId == request.Id &&
+                            m.TheoryDetId == request.DetId &&
+                            m.QId == request.QId)
+                        .ToListAsync();
+
+                var requestMedia =
+                    request.Media ??
+                    new List<UpdateQuestionMediaRequest>();
+
+                var removedMedia =
+                    oldMedia
+                        .Where(old =>
+                            !requestMedia.Any(current =>
+                                (
+                                    !string.IsNullOrWhiteSpace(old.BlobName) &&
+                                    !string.IsNullOrWhiteSpace(current.BlobName) &&
+                                    old.BlobName == current.BlobName
+                                )
+                                ||
+                                old.MediaUrl == current.MediaUrl
+                            )
+                        )
+                        .ToList();
+
+                foreach (var removed in removedMedia)
+                {
+                    if (string.IsNullOrWhiteSpace(removed.BlobName))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        await _blobStorageService.DeleteBlobAsync(
+                            removed.BlobName
+                        );
+                    }
+                    catch (Exception blobEx)
+                    {
+                        Console.WriteLine(
+                            $"Blob delete failed: " +
+                            $"{removed.BlobName} - " +
+                            $"{blobEx.Message}"
+                        );
+                    }
+                }
+
+                if (oldMedia.Any())
+                {
+                    _context.msc_QuestionMedia
+                        .RemoveRange(oldMedia);
+                }
+
+                foreach (var mediaItem in requestMedia)
+                {
+                    if (string.IsNullOrWhiteSpace(mediaItem.MediaUrl))
+                    {
+                        continue;
+                    }
+
+                    var media =
+                        new msc_QuestionMedia
+                        {
+                            ThematologiaId = request.Id,
+                            TheoryDetId = request.DetId,
+                            QId = request.QId,
+                            MediaUrl = mediaItem.MediaUrl,
+                            BlobName = mediaItem.BlobName,
+                            MediaType = mediaItem.MediaType,
+                            CreatedDate = DateTime.Now
+                        };
+
+                    _context.msc_QuestionMedia.Add(media);
                 }
 
                 await _context.SaveChangesAsync();
@@ -612,15 +969,19 @@ namespace AngularAppQnA.Server.Controllers
             {
                 return StatusCode(500, new
                 {
-                    Message = "An error occurred while updating question.",
-                    Error = ex.Message
+                    IsSuccess = false,
+                    Message =
+                        "An error occurred while updating question.",
+                    Error = ex.Message,
+                    InnerError =
+                        ex.InnerException?.Message
                 });
             }
         }
+
         [HttpPost("DeleteQuestion/{id}/{detId}/{qId}")]
         [Authorize(Roles = "99")]
         public async Task<ActionResult> DeleteQuestion(
-            
             int id,
             int detId,
             int qId)
@@ -637,6 +998,7 @@ namespace AngularAppQnA.Server.Controllers
                 {
                     return NotFound(new
                     {
+                        IsSuccess = false,
                         Message = "Question not found."
                     });
                 }
@@ -648,6 +1010,13 @@ namespace AngularAppQnA.Server.Controllers
                         a.QId == qId)
                     .ToListAsync();
 
+                var media = await _context.msc_QuestionMedia
+                    .Where(m =>
+                        m.ThematologiaId == id &&
+                        m.TheoryDetId == detId &&
+                        m.QId == qId)
+                    .ToListAsync();
+
                 var oldValues = new
                 {
                     Question = new
@@ -656,7 +1025,8 @@ namespace AngularAppQnA.Server.Controllers
                         question.DetId,
                         question.QId,
                         question.Question,
-                        question.Difficulty
+                        question.Difficulty,
+                        question.QuestionType
                     },
 
                     Answers = answers.Select(a => new
@@ -666,12 +1036,57 @@ namespace AngularAppQnA.Server.Controllers
                         a.QId,
                         a.AId,
                         a.Answer,
-                        a.IsCorrect
+                        a.IsCorrect,
+                        a.MatchLeft,
+                        a.MatchRight,
+                        a.CategoryName
+                    }).ToList(),
+
+                    Media = media.Select(m => new
+                    {
+                        m.Id,
+                        m.ThematologiaId,
+                        m.TheoryDetId,
+                        m.QId,
+                        m.MediaUrl,
+                        m.BlobName,
+                        m.MediaType
                     }).ToList()
                 };
 
-                _context.msc_Thematologia_Answers.RemoveRange(answers);
-                _context.msc_Thematologia_Question.Remove(question);
+                foreach (var mediaItem in media)
+                {
+                    if (!string.IsNullOrWhiteSpace(mediaItem.BlobName))
+                    {
+                        try
+                        {
+                            await _blobStorageService.DeleteBlobAsync(
+                                mediaItem.BlobName
+                            );
+                        }
+                        catch (Exception blobEx)
+                        {
+                            Console.WriteLine(
+                                $"Blob delete failed: {mediaItem.BlobName} - {blobEx.Message}"
+                            );
+                        }
+                    }
+                }
+
+                if (answers.Any())
+                {
+                    _context.msc_Thematologia_Answers
+                        .RemoveRange(answers);
+                }
+
+                if (media.Any())
+                {
+                    _context.msc_QuestionMedia
+                        .RemoveRange(media);
+                }
+
+                _context.msc_Thematologia_Question
+                    .Remove(question);
 
                 await _context.SaveChangesAsync();
 
@@ -693,19 +1108,22 @@ namespace AngularAppQnA.Server.Controllers
             {
                 return StatusCode(500, new
                 {
+                    IsSuccess = false,
                     Message = "An error occurred while deleting question.",
-                    Error = ex.Message
+                    Error = ex.Message,
+                    InnerError = ex.InnerException?.Message
                 });
             }
         }
         [HttpGet("GetRandomQuizQuestions/{id}")]
-      
         public async Task<ActionResult> GetRandomQuizQuestions(int id)
         {
             try
             {
                 var data = await _context.Set<QuizQuestionFlatDto>()
-                    .FromSqlInterpolated($"EXEC msc_GetRandomQuizQuestions @ThematologiaId = {id}")
+                    .FromSqlInterpolated(
+                        $"EXEC msc_GetRandomQuizQuestions @ThematologiaId = {id}"
+                    )
                     .ToListAsync();
 
                 if (data == null || !data.Any())
@@ -725,7 +1143,8 @@ namespace AngularAppQnA.Server.Controllers
                         x.QId,
                         x.Question,
                         x.Difficulty,
-                        x.Details
+                        x.Details,
+                        x.QuestionType
                     })
                     .Select(g => new
                     {
@@ -735,13 +1154,20 @@ namespace AngularAppQnA.Server.Controllers
                         g.Key.Question,
                         g.Key.Difficulty,
                         g.Key.Details,
+                        g.Key.QuestionType,
 
-                        Answers = g.Select(a => new
-                        {
-                            a.AId,
-                            a.Answer,
-                            a.IsCorrect
-                        }).ToList()
+                        Answers = g
+                            .OrderBy(a => a.AId)
+                            .Select(a => new
+                            {
+                                a.AId,
+                                a.Answer,
+                                a.IsCorrect,
+                                a.MatchLeft,
+                                a.MatchRight,
+                                a.CategoryName
+                            })
+                            .ToList()
                     })
                     .ToList();
 
@@ -1188,7 +1614,8 @@ namespace AngularAppQnA.Server.Controllers
                                 CreateDate = DateTime.Now,
                                 Username = "admin",
                                 Question = row.Question,
-                                Difficulty = difficulty
+                                Difficulty = difficulty,
+                                QuestionType = 1
                             };
                             _context.msc_Thematologia_Question.Add(newRow);
 
@@ -1403,35 +1830,35 @@ namespace AngularAppQnA.Server.Controllers
                 return ret;
             }
         }
-  
-       /* [HttpGet("GetQuizSuggestions/{thematologiaId}")]
-        public async Task<ActionResult> GetQuizSuggestions(int thematologiaId)
-        {
-            var allQuestions = await _context.Thematologia_Question
-                .Where(q => q.Id == thematologiaId)
-                .ToListAsync();
 
-            if (!allQuestions.Any())
-            {
-                return Ok(new
-                {
-                    IsSuccess = false,
-                    Message = "Δεν υπάρχουν ερωτήσεις για αυτή τη θεματολογία."
-                });
-            }
+        /* [HttpGet("GetQuizSuggestions/{thematologiaId}")]
+         public async Task<ActionResult> GetQuizSuggestions(int thematologiaId)
+         {
+             var allQuestions = await _context.Thematologia_Question
+                 .Where(q => q.Id == thematologiaId)
+                 .ToListAsync();
 
-            var suggestions = new List<object>();
+             if (!allQuestions.Any())
+             {
+                 return Ok(new
+                 {
+                     IsSuccess = false,
+                     Message = "Δεν υπάρχουν ερωτήσεις για αυτή τη θεματολογία."
+                 });
+             }
 
-            suggestions.Add(CreateSuggestion(allQuestions, 1, "Εύκολο"));
-            suggestions.Add(CreateSuggestion(allQuestions, 2, "Μεσαίο"));
-            suggestions.Add(CreateSuggestion(allQuestions, 3, "Δύσκολο"));
+             var suggestions = new List<object>();
 
-            return Ok(new
-            {
-                IsSuccess = true,
-                Suggestions = suggestions
-            });
-        }*/
+             suggestions.Add(CreateSuggestion(allQuestions, 1, "Εύκολο"));
+             suggestions.Add(CreateSuggestion(allQuestions, 2, "Μεσαίο"));
+             suggestions.Add(CreateSuggestion(allQuestions, 3, "Δύσκολο"));
+
+             return Ok(new
+             {
+                 IsSuccess = true,
+                 Suggestions = suggestions
+             });
+         }*/
         [HttpPost("UpdateQuizSettings")]
         [Authorize(Roles = "99")]
         public async Task<IActionResult> UpdateQuizSettings([FromBody] UpdateQuizSettingsRequest request)
@@ -1891,7 +2318,7 @@ namespace AngularAppQnA.Server.Controllers
             };
         }
         private async Task SyncTheoryVideos(
-    
+
             int thematologiaId,
             int theoryDetId,
             string? details)

@@ -7,19 +7,25 @@
     </div>
 
     <div class="modal-tabs">
-      <button [class.active]="adminEditTab === 'theory'" (click)="setAdminEditTab('theory')">
+      <button [class.active]="adminEditTab === 'theory'"
+              (click)="setAdminEditTab('theory')">
         Θεματολογία
       </button>
 
-      <button [class.active]="adminEditTab === 'quiz'" (click)="setAdminEditTab('quiz')">
+      <button [class.active]="adminEditTab === 'quiz'"
+              (click)="setAdminEditTab('quiz')">
         Επεξεργασία Quiz
       </button>
 
-      <button type="button" class="excel-action-btn" (click)="downloadQuizExcelTemplate()">
+      <button type="button"
+              class="excel-action-btn"
+              (click)="downloadQuizExcelTemplate()">
         Λήψη Excel Template
       </button>
 
-      <button type="button" class="excel-action-btn import-btn" (click)="openQuizExcelImport()">
+      <button type="button"
+              class="excel-action-btn import-btn"
+              (click)="openQuizExcelImport()">
         Εισαγωγή Excel
       </button>
 
@@ -32,6 +38,7 @@
 
     <div class="section-card">
 
+      <!-- ΘΕΩΡΙΑ -->
       <div *ngIf="adminEditTab === 'theory'" class="form-section">
 
         <div class="topics-header">
@@ -45,6 +52,7 @@
         <div class="topic-card" *ngIf="selectedThematologia as item">
 
           <div class="topic-top">
+
             <div class="select-topic-btn topic-title-display">
               <span>{{ item.Title }}</span>
 
@@ -56,6 +64,7 @@
             </div>
 
             <div class="topic-actions">
+
               <button class="edit-topic-btn thematologia-edit-btn"
                       (click)="startEditThematologia(item)">
                 Edit
@@ -66,6 +75,7 @@
                       (click)="deleteThematologia(item, $event)">
                 ×
               </button>
+
             </div>
           </div>
 
@@ -76,14 +86,17 @@
                    [(ngModel)]="editingThematologiaTitle"
                    placeholder="Επεξεργασία header θεματολογίας">
 
-            <input type="date" [(ngModel)]="editingFromDate">
+            <input type="date"
+                   [(ngModel)]="editingFromDate">
 
-            <input type="date" [(ngModel)]="editingToDate">
+            <input type="date"
+                   [(ngModel)]="editingToDate">
 
             <button class="update-topic-btn"
                     (click)="updateThematologia(item)">
               Ενημέρωση Θεματολογίας
             </button>
+
           </div>
 
           <div *ngIf="editingThematologiaId === item.Id"
@@ -99,29 +112,38 @@
                    placeholder="Τίτλος θεωρίας">
 
             <div class="theory-quill-wrapper">
+
               <quill-editor [(ngModel)]="newTheoryDetails"
                             [modules]="quillModules"
                             placeholder="Γράψε τις λεπτομέρειες της θεωρίας..."
                             (onEditorCreated)="onNewTheoryEditorCreated($event)">
               </quill-editor>
+
             </div>
 
-            <button class="save-btn" (click)="addTheoryToSelected()">
+            <button class="save-btn"
+                    (click)="addTheoryToSelected()">
               Αποθήκευση Θεωρίας
             </button>
 
-            <div class="theory-list-inside" *ngIf="selectedTheories.length > 0">
+            <div class="theory-list-inside"
+                 *ngIf="selectedTheories.length > 0">
 
               <div class="inner-theory-card"
                    *ngFor="let theory of selectedTheories; let i = index">
 
                 <div class="topic-top">
+
                   <h4>
-                    <span class="theory-number">{{ i + 1 }}.</span>
+                    <span class="theory-number">
+                      {{ i + 1 }}.
+                    </span>
+
                     {{ theory.Header }}
                   </h4>
 
                   <div class="theory-actions">
+
                     <button class="edit-topic-btn theory-icon-btn"
                             (click)="startEditTheory(theory)">
                       <img src="edit.png" alt="Edit">
@@ -131,35 +153,43 @@
                             (click)="deleteTheoria(theory)">
                       <img src="delete.png" alt="Delete">
                     </button>
+
                   </div>
                 </div>
 
                 <div class="theory-content"
                      *ngIf="!(
-                     editingTheoryId === theory.Id &&
-                     editingTheoryDetId === theory.DetId
+                       editingTheoryId === theory.Id &&
+                       editingTheoryDetId === theory.DetId
                      )"
                      [innerHTML]="theory.Details">
                 </div>
 
                 <div class="edit-theory-row"
-                     *ngIf="editingTheoryId === theory.Id && editingTheoryDetId === theory.DetId">
+                     *ngIf="
+                       editingTheoryId === theory.Id &&
+                       editingTheoryDetId === theory.DetId
+                     ">
 
                   <input type="text"
                          [(ngModel)]="editingTheoryHeader"
                          placeholder="Επεξεργασία τίτλου θεωρίας">
+
                   <div class="theory-quill-wrapper">
+
                     <quill-editor [(ngModel)]="editingTheoryDetails"
                                   [modules]="quillModules"
                                   placeholder="Επεξεργασία λεπτομερειών θεωρίας..."
                                   (onEditorCreated)="onEditingTheoryEditorCreated($event)">
                     </quill-editor>
+
                   </div>
 
                   <button class="update-topic-btn"
                           (click)="updateTheoria()">
                     Ενημέρωση Θεωρίας
                   </button>
+
                 </div>
 
               </div>
@@ -172,13 +202,17 @@
 
       </div>
 
-      <div *ngIf="adminEditTab === 'quiz'" class="quiz-editor-layout">
+      <!-- QUIZ -->
+      <div *ngIf="adminEditTab === 'quiz'"
+           class="quiz-editor-layout">
 
+        <!-- ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ -->
         <div class="quiz-left-column">
 
           <h3>{{ selectedThematologia?.Title }}</h3>
 
-          <div class="empty-theory" *ngIf="selectedTheories.length === 0">
+          <div class="empty-theory"
+               *ngIf="selectedTheories.length === 0">
             Δεν υπάρχουν θεωρίες.
           </div>
 
@@ -187,14 +221,20 @@
                (click)="selectQuizTheory(theory)"
                [class.active]="selectedQuizTheory === theory">
 
-            <span class="theory-number">{{ i + 1 }}.</span>
+            <span class="theory-number">
+              {{ i + 1 }}.
+            </span>
+
             {{ theory.Header }}
 
           </div>
 
+          <!-- ΡΥΘΜΙΣΕΙΣ ΑΡΙΘΜΟΥ ΕΡΩΤΗΣΕΩΝ -->
           <div class="quiz-settings-card">
+
             <p class="quiz-settings-info">
-              Επιλέξτε πόσες τυχαίες ερωτήσεις θα εμφανίζονται σε κάθε εκτέλεση του quiz.
+              Επιλέξτε πόσες τυχαίες ερωτήσεις θα εμφανίζονται
+              σε κάθε εκτέλεση του quiz.
             </p>
 
             <label>
@@ -202,21 +242,30 @@
             </label>
 
             <div class="quiz-settings-row">
+
               <div class="quiz-count-box">
+
                 <input type="number"
                        min="1"
                        [max]="totalQuizQuestions"
                        [(ngModel)]="quizQuestionCount">
 
-                <span>/ {{ totalQuizQuestions }} διαθέσιμες</span>
+                <span>
+                  / {{ totalQuizQuestions }} διαθέσιμες
+                </span>
+
               </div>
+
             </div>
+
           </div>
 
+          <!-- ΡΥΘΜΙΣΕΙΣ ΔΥΣΚΟΛΙΑΣ -->
           <div class="quiz-settings-card difficulty-settings-card">
 
             <small>
-              Επιλέξτε τη συνολική δυσκολία που θα έχει κάθε εκτέλεση του quiz.
+              Επιλέξτε τη συνολική δυσκολία που θα έχει κάθε
+              εκτέλεση του quiz.
             </small>
 
             <div class="difficulty-mode-switch">
@@ -236,14 +285,24 @@
             </div>
 
             <div *ngIf="useQuizDifficulty">
+
               <select class="quiz-difficulty-select"
                       [(ngModel)]="quizDifficultyPercent">
 
-                <option [ngValue]="1">Εύκολο</option>
-                <option [ngValue]="2">Μεσαίο</option>
-                <option [ngValue]="3">Δύσκολο</option>
+                <option [ngValue]="1">
+                  Εύκολο
+                </option>
+
+                <option [ngValue]="2">
+                  Μεσαίο
+                </option>
+
+                <option [ngValue]="3">
+                  Δύσκολο
+                </option>
 
               </select>
+
             </div>
 
             <button type="button"
@@ -251,26 +310,35 @@
                     (click)="saveQuizSettings()">
               Αποθήκευση ρυθμίσεων Quiz
             </button>
+
           </div>
 
         </div>
 
+        <!-- ΔΕΞΙΑ ΣΤΗΛΗ -->
         <div class="quiz-right-column">
 
           <h3>Quiz Editor</h3>
 
-          <div *ngIf="!selectedQuizTheory" class="empty-theory">
+          <div *ngIf="!selectedQuizTheory"
+               class="empty-theory">
             Επιλέξτε μία θεωρία από αριστερά.
           </div>
 
-          <div *ngIf="selectedQuizTheory" class="selected-theory-box">
+          <div *ngIf="selectedQuizTheory"
+               class="selected-theory-box">
 
-            <small>Επιλεγμένη θεωρία</small>
+            <small>
+              Επιλεγμένη θεωρία
+            </small>
 
-            <h4>{{ selectedQuizTheory.Header }}</h4>
+            <h4>
+              {{ selectedQuizTheory.Header }}
+            </h4>
 
             <div class="quiz-question-form">
 
+              <!-- ΥΠΑΡΧΟΥΣΕΣ ΕΡΩΤΗΣΕΙΣ -->
               <div class="existing-questions-card"
                    *ngIf="existingQuestions.length > 0">
 
@@ -284,13 +352,26 @@
                   <div class="existing-question-top">
 
                     <div class="question-content">
+
                       <label>
                         Ερώτηση {{ qi + 1 }}
                       </label>
 
-                      <p class="existing-question-title">
-                        {{ q.Question }}
-                      </p>
+                      <div class="existing-question-title quiz-question-preview"
+                           [innerHTML]="q.Question">
+                      </div>
+
+                      <small class="question-type-label">
+                        {{
+                          q.QuestionType === 1 ? 'Πολλαπλής επιλογής' :
+                          q.QuestionType === 2 ? 'Σωστό / Λάθος' :
+                          q.QuestionType === 3 ? 'Σειρά' :
+                          q.QuestionType === 4 ? 'Αντιστοίχιση' :
+                          q.QuestionType === 5 ? 'Κατηγοριοποίηση' :
+                          'Πολλαπλής επιλογής'
+                        }}
+                      </small>
+
                     </div>
 
                     <div class="question-actions">
@@ -298,65 +379,207 @@
                       <button type="button"
                               class="question-icon-btn edit-icon-btn"
                               (click)="editExistingQuestion(q)">
-                        <img src="/edit.png" alt="Edit">
+
+                        <img src="/edit.png"
+                             alt="Edit">
+
                       </button>
 
                       <button type="button"
                               class="question-icon-btn delete-icon-btn"
                               (click)="deleteExistingQuestion(q)">
-                        <img src="/delete.png" alt="Delete">
+
+                        <img src="/delete.png"
+                             alt="Delete">
+
                       </button>
 
                     </div>
 
                   </div>
 
+                  <!-- ΥΠΑΡΧΟΥΣΕΣ ΑΠΑΝΤΗΣΕΙΣ -->
                   <div class="existing-answer-row"
                        *ngFor="let a of q.Answers">
 
+                    <span class="ordering-step-number"
+                          *ngIf="q.QuestionType === 3">
+                      {{ q.Answers.indexOf(a) + 1 }}
+                    </span>
+
                     <input type="radio"
+                           *ngIf="q.QuestionType !== 3 && q.QuestionType !== 4 && q.QuestionType !== 5"
                            disabled
                            [checked]="a.IsCorrect">
 
-                    <span class="existing-answer-text">
+                    <span class="existing-answer-text"
+                          *ngIf="q.QuestionType !== 4 && q.QuestionType !== 5">
                       {{ a.Answer }}
                     </span>
 
+                    <div class="matching-existing-pair"
+                         *ngIf="q.QuestionType === 4">
+                      <span>{{ a.MatchLeft }}</span>
+                      <strong>↔</strong>
+                      <span>{{ a.MatchRight }}</span>
+                    </div>
+
+                    <div class="categorization-existing-pair"
+                         *ngIf="q.QuestionType === 5">
+                      <span>{{ a.Answer }}</span>
+                      <strong>→</strong>
+                      <span>{{ a.CategoryName }}</span>
+                    </div>
+
                   </div>
 
+                  <!-- EDIT ΥΠΑΡΧΟΥΣΑΣ ΕΡΩΤΗΣΗΣ -->
                   <div class="quiz-question-card"
                        *ngIf="editingQuestion?.QId === q.QId">
 
-                    <label>Επεξεργασία ερώτησης</label>
+                    <label>
+                      Επεξεργασία ερώτησης
+                    </label>
 
-                    <textarea [(ngModel)]="editingQuestionText"
-                              placeholder="Γράψτε την ερώτηση...">
-                    </textarea>
+                    <div class="theory-quill-wrapper quiz-quill-wrapper">
 
-                    <label>Βαθμός δυσκολίας</label>
+                      <quill-editor [(ngModel)]="editingQuestionText"
+                                    [modules]="quizQuillModules"
+                                    placeholder="Γράψτε την ερώτηση..."
+                                    (onEditorCreated)="onEditingQuestionEditorCreated($event)">
+                      </quill-editor>
+
+                    </div>
+
+                    <label>
+                      Τύπος ερώτησης
+                    </label>
+
+                    <select [(ngModel)]="editingQuestionType"
+                            (ngModelChange)="onEditingQuestionTypeChange()">
+
+                      <option [ngValue]="1">
+                        Πολλαπλής επιλογής
+                      </option>
+
+                      <option [ngValue]="2">
+                        Σωστό / Λάθος
+                      </option>
+
+                      <option [ngValue]="3">
+                        Σειρά
+                      </option>
+
+                      <option [ngValue]="4">
+                        Αντιστοίχιση
+                      </option>
+
+                      <option [ngValue]="5">
+                        Κατηγοριοποίηση
+                      </option>
+
+                    </select>
+
+                    <label>
+                      Βαθμός δυσκολίας
+                    </label>
 
                     <select [(ngModel)]="editingQuestionDifficulty">
-                      <option [ngValue]="1">Εύκολη</option>
-                      <option [ngValue]="2">Δύσκολη</option>
+
+                      <option [ngValue]="1">
+                        Εύκολη
+                      </option>
+
+                      <option [ngValue]="2">
+                        Δύσκολη
+                      </option>
+
                     </select>
 
                     <div class="answers-header">
-                      Απαντήσεις
+                      {{
+                        editingQuestionType === 3
+                          ? 'Σωστή σειρά βημάτων'
+                          : editingQuestionType === 4
+                            ? 'Ζευγάρια αντιστοίχισης'
+                            : editingQuestionType === 5
+                              ? 'Κάρτες και κατηγορίες'
+                              : 'Απαντήσεις'
+                      }}
                     </div>
 
+                    <small *ngIf="editingQuestionType === 3"
+                           class="ordering-admin-help">
+                      Γράψε τα βήματα με τη σωστή σειρά. Στο quiz θα εμφανιστούν ανακατεμένα.
+                    </small>
+
+                    <small *ngIf="editingQuestionType === 4"
+                           class="ordering-admin-help">
+                      Κάθε γραμμή είναι ένα σωστό ζευγάρι. Η δεξιά στήλη θα ανακατεύεται στο quiz.
+                    </small>
+
+                    <small *ngIf="editingQuestionType === 5"
+                           class="ordering-admin-help">
+                      Γράψε την κάρτα και τη σωστή κατηγορία. Ίδιο όνομα κατηγορίας σημαίνει ίδιο drop zone.
+                    </small>
+
                     <div class="answer-row"
+                         [class.matching-answer-row]="editingQuestionType === 4"
+                         [class.categorization-answer-row]="editingQuestionType === 5"
                          *ngFor="let a of editingQuestionAnswers; let ai = index">
 
-                      <input type="radio"
-                             [checked]="a.IsCorrect"
-                             (change)="selectCorrectExistingAnswer(a)">
+                      <span class="ordering-step-number"
+                            *ngIf="editingQuestionType === 3">
+                        {{ ai + 1 }}
+                      </span>
 
-                      <input type="text"
-                             [(ngModel)]="a.Answer"
-                             placeholder="Απάντηση {{ ai + 1 }}">
+                      <ng-container *ngIf="editingQuestionType === 4; else nonMatchingEditAnswer">
+                        <div class="matching-admin-pair">
+                          <input type="text"
+                                 [(ngModel)]="a.MatchLeft"
+                                 [placeholder]="'Αριστερά ' + (ai + 1)">
+
+                          <span class="matching-admin-arrow">↔</span>
+
+                          <input type="text"
+                                 [(ngModel)]="a.MatchRight"
+                                 [placeholder]="'Δεξιά ' + (ai + 1)">
+                        </div>
+                      </ng-container>
+
+                      <ng-template #nonMatchingEditAnswer>
+                        <ng-container *ngIf="editingQuestionType === 5; else normalEditAnswer">
+                          <div class="categorization-admin-pair">
+                            <input type="text"
+                                   [(ngModel)]="a.Answer"
+                                   [placeholder]="'Κάρτα ' + (ai + 1)">
+
+                            <span class="categorization-admin-arrow">→</span>
+
+                            <input type="text"
+                                   [(ngModel)]="a.CategoryName"
+                                   placeholder="Κατηγορία">
+                          </div>
+                        </ng-container>
+                      </ng-template>
+
+                      <ng-template #normalEditAnswer>
+                        <input type="radio"
+                               *ngIf="editingQuestionType !== 3"
+                               [checked]="a.IsCorrect"
+                               (change)="selectCorrectExistingAnswer(a)">
+
+                        <input type="text"
+                               [(ngModel)]="a.Answer"
+                               [readonly]="editingQuestionType === 2"
+                               [placeholder]="editingQuestionType === 3
+                                 ? 'Βήμα ' + (ai + 1)
+                                 : 'Απάντηση ' + (ai + 1)">
+                      </ng-template>
 
                       <button type="button"
                               class="delete-answer-btn"
+                              *ngIf="editingQuestionType !== 2"
                               (click)="removeExistingAnswer(ai)">
                         ✕
                       </button>
@@ -365,8 +588,9 @@
 
                     <button type="button"
                             class="add-answer-btn"
+                            *ngIf="editingQuestionType !== 2"
                             (click)="addExistingAnswer()">
-                      + Προσθήκη απάντησης
+                      {{ editingQuestionType === 4 ? '+ Προσθήκη ζεύγους' : editingQuestionType === 5 ? '+ Προσθήκη κάρτας' : '+ Προσθήκη απάντησης' }}
                     </button>
 
                     <button type="button"
@@ -387,26 +611,74 @@
 
               </div>
 
+              <!-- ΠΡΟΣΘΗΚΗ ΝΕΑΣ ΕΡΩΤΗΣΗΣ -->
               <button type="button"
                       class="save-quiz-btn add-question-main-btn"
                       (click)="addQuizQuestion()">
                 + Προσθήκη ερώτησης
               </button>
 
+              <!-- ΝΕΕΣ ΕΡΩΤΗΣΕΙΣ -->
               <div class="quiz-question-card"
                    *ngFor="let q of quizQuestions; let qi = index">
 
-                <label>Ερώτηση {{ qi + 1 }}</label>
+                <label>
+                  Ερώτηση {{ qi + 1 }}
+                </label>
 
-                <textarea [(ngModel)]="q.Question"
-                          placeholder="Γράψτε την ερώτηση...">
-                </textarea>
+                <div class="theory-quill-wrapper quiz-quill-wrapper">
 
-                <label>Βαθμός δυσκολίας</label>
+                  <quill-editor [(ngModel)]="q.Question"
+                                [modules]="quizQuillModules"
+                                placeholder="Γράψτε την ερώτηση..."
+                                (onEditorCreated)="onNewQuestionEditorCreated($event, q)">
+                  </quill-editor>
+
+                </div>
+
+                <label>
+                  Τύπος ερώτησης
+                </label>
+
+                <select [(ngModel)]="q.QuestionType"
+                        (ngModelChange)="onQuestionTypeChange(q)">
+
+                  <option [ngValue]="1">
+                    Πολλαπλής επιλογής
+                  </option>
+
+                  <option [ngValue]="2">
+                    Σωστό / Λάθος
+                  </option>
+
+                  <option [ngValue]="3">
+                    Σειρά
+                  </option>
+
+                  <option [ngValue]="4">
+                    Αντιστοίχιση
+                  </option>
+
+                  <option [ngValue]="5">
+                    Κατηγοριοποίηση
+                  </option>
+
+                </select>
+
+                <label>
+                  Βαθμός δυσκολίας
+                </label>
 
                 <select [(ngModel)]="q.Difficulty">
-                  <option [ngValue]="1">Εύκολη</option>
-                  <option [ngValue]="2">Δύσκολη</option>
+
+                  <option [ngValue]="1">
+                    Εύκολη
+                  </option>
+
+                  <option [ngValue]="2">
+                    Δύσκολη
+                  </option>
+
                 </select>
 
                 <button type="button"
@@ -416,22 +688,89 @@
                 </button>
 
                 <div class="answers-header">
-                  Απαντήσεις
+                  {{
+                    q.QuestionType === 3
+                      ? 'Σωστή σειρά βημάτων'
+                      : q.QuestionType === 4
+                        ? 'Ζευγάρια αντιστοίχισης'
+                        : q.QuestionType === 5
+                          ? 'Κάρτες και κατηγορίες'
+                          : 'Απαντήσεις'
+                  }}
                 </div>
 
+                <small *ngIf="q.QuestionType === 3"
+                       class="ordering-admin-help">
+                  Γράψε τα βήματα με τη σωστή σειρά. Στο quiz θα εμφανιστούν ανακατεμένα.
+                </small>
+
+                <small *ngIf="q.QuestionType === 4"
+                       class="ordering-admin-help">
+                  Κάθε γραμμή είναι ένα σωστό ζευγάρι. Η δεξιά στήλη θα ανακατεύεται στο quiz.
+                </small>
+
+                <small *ngIf="q.QuestionType === 5"
+                       class="ordering-admin-help">
+                  Γράψε την κάρτα και τη σωστή κατηγορία. Ίδιο όνομα κατηγορίας σημαίνει ίδιο drop zone.
+                </small>
+
                 <div class="answer-row"
+                     [class.matching-answer-row]="q.QuestionType === 4"
+                     [class.categorization-answer-row]="q.QuestionType === 5"
                      *ngFor="let option of q.Options; let ai = index">
 
-                  <input type="radio"
-                         [checked]="option.IsCorrect"
-                         (change)="selectCorrectAnswer(q, option)">
+                  <span class="ordering-step-number"
+                        *ngIf="q.QuestionType === 3">
+                    {{ ai + 1 }}
+                  </span>
 
-                  <input type="text"
-                         [(ngModel)]="option.Answer"
-                         placeholder="Απάντηση {{ ai + 1 }}">
+                  <ng-container *ngIf="q.QuestionType === 4; else nonMatchingNewAnswer">
+                    <div class="matching-admin-pair">
+                      <input type="text"
+                             [(ngModel)]="option.MatchLeft"
+                             [placeholder]="'Αριστερά ' + (ai + 1)">
+
+                      <span class="matching-admin-arrow">↔</span>
+
+                      <input type="text"
+                             [(ngModel)]="option.MatchRight"
+                             [placeholder]="'Δεξιά ' + (ai + 1)">
+                    </div>
+                  </ng-container>
+
+                  <ng-template #nonMatchingNewAnswer>
+                    <ng-container *ngIf="q.QuestionType === 5; else normalNewAnswer">
+                      <div class="categorization-admin-pair">
+                        <input type="text"
+                               [(ngModel)]="option.Answer"
+                               [placeholder]="'Κάρτα ' + (ai + 1)">
+
+                        <span class="categorization-admin-arrow">→</span>
+
+                        <input type="text"
+                               [(ngModel)]="option.CategoryName"
+                               placeholder="Κατηγορία">
+                      </div>
+                    </ng-container>
+                  </ng-template>
+
+                  <ng-template #normalNewAnswer>
+                    <input type="radio"
+                           *ngIf="q.QuestionType !== 3"
+                           [checked]="option.IsCorrect"
+                           (change)="selectCorrectAnswer(q, option)">
+
+                    <input type="text"
+                           [(ngModel)]="option.Answer"
+                           [readonly]="q.QuestionType === 2"
+                           [placeholder]="q.QuestionType === 3
+                             ? 'Βήμα ' + (ai + 1)
+                             : 'Απάντηση ' + (ai + 1)">
+                  </ng-template>
 
                   <button type="button"
                           class="delete-answer-btn"
+                          *ngIf="q.QuestionType !== 2"
                           (click)="removeAnswer(q, ai)">
                     ✕
                   </button>
@@ -440,8 +779,9 @@
 
                 <button type="button"
                         class="add-answer-btn"
+                        *ngIf="q.QuestionType !== 2"
                         (click)="addAnswer(q)">
-                  + Προσθήκη απάντησης
+                  {{ q.QuestionType === 4 ? '+ Προσθήκη ζεύγους' : q.QuestionType === 5 ? '+ Προσθήκη κάρτας' : '+ Προσθήκη απάντησης' }}
                 </button>
 
                 <button type="button"
@@ -462,18 +802,24 @@
 
     </div>
 
-    <div class="suggestions-overlay" *ngIf="showQuizSuggestionsPopup">
+    <!-- QUIZ SUGGESTIONS -->
+    <div class="suggestions-overlay"
+         *ngIf="showQuizSuggestionsPopup">
 
       <div class="suggestions-popup">
 
         <div class="suggestions-header">
-          <h3>Προτεινόμενα Quiz</h3>
+
+          <h3>
+            Προτεινόμενα Quiz
+          </h3>
 
           <button type="button"
                   class="suggestions-close"
                   (click)="closeQuizSuggestions()">
             ✕
           </button>
+
         </div>
 
         <div class="suggestion-card"
@@ -482,14 +828,18 @@
           <div class="suggestion-main-line">
 
             <div>
+
               <h4>
                 Προτεινόμενο Quiz {{ i + 1 }}
               </h4>
 
               <p>
                 {{ s.DifficultyName || s.difficultyName }}
-                με {{ s.QuestionCount || s.questionCount }} ερωτήσεις
+                με
+                {{ s.QuestionCount || s.questionCount }}
+                ερωτήσεις
               </p>
+
             </div>
 
             <div class="suggestion-actions">
@@ -516,7 +866,10 @@
             <div class="suggestion-question"
                  *ngFor="let q of (s.Questions || s.questions); let qi = index">
 
-              <strong>{{ qi + 1 }}.</strong>
+              <strong>
+                {{ qi + 1 }}.
+              </strong>
+
               {{ q.Question || q.question }}
 
             </div>

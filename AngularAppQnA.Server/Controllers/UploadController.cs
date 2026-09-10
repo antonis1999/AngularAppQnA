@@ -22,45 +22,59 @@ namespace AngularAppQnA.Server.Controllers
 
         [HttpPost("TheoryImage")]
         public async Task<IActionResult> UploadTheoryImage(
-       IFormFile file,
-       int thematologiaId,
-       int theoryDetId)
+            IFormFile file,
+            int thematologiaId,
+            int theoryDetId)
         {
             if (file == null || file.Length == 0)
             {
                 return BadRequest("Δεν επιλέχθηκε εικόνα.");
             }
 
-            var result = await _blobStorageService.UploadImageAsync(
-                file,
-                thematologiaId,
-                theoryDetId);
-
-            var image = new msc_TheoriaImage
+            try
             {
-                ThematologiaId = thematologiaId,
-                TheoryDetId = theoryDetId,
+                var result = await _blobStorageService.UploadImageAsync(
+                    file,
+                    thematologiaId,
+                    theoryDetId);
 
-                ImageUrl = result.ImageUrl,
-                BlobName = result.BlobName,
+                var image = new msc_TheoriaImage
+                {
+                    ThematologiaId = thematologiaId,
+                    TheoryDetId = theoryDetId,
+                    ImageUrl = result.ImageUrl,
+                    BlobName = result.BlobName,
+                    CreatedDate = DateTime.Now
+                };
 
-                CreatedDate = DateTime.Now
-            };
+                _context.TheoriaImages.Add(image);
 
-            _context.TheoriaImages.Add(image);
+                await _context.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+                return Ok(new
+                {
+                    success = true,
+                    imageUrl = result.ImageUrl,
+                    blobName = result.BlobName
+                });
+            }
+            catch (Exception ex)
             {
-                imageUrl = result.ImageUrl
-            });
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = ex.Message,
+                    innerMessage = ex.InnerException?.Message,
+                    exceptionType = ex.GetType().FullName
+                });
+            }
         }
+
         [HttpPost("TheoryVideo")]
         public async Task<IActionResult> UploadTheoryVideo(
-     IFormFile file,
-     int thematologiaId,
-     int theoryDetId)
+            IFormFile file,
+            int thematologiaId,
+            int theoryDetId)
         {
             try
             {
@@ -85,8 +99,7 @@ namespace AngularAppQnA.Server.Controllers
                 var result = await _blobStorageService.UploadVideoAsync(
                     file,
                     thematologiaId,
-                    theoryDetId
-                );
+                    theoryDetId);
 
                 return Ok(new
                 {
@@ -96,6 +109,106 @@ namespace AngularAppQnA.Server.Controllers
                     contentType = file.ContentType,
                     videoUrl = result.VideoUrl,
                     blobName = result.BlobName
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = ex.Message,
+                    innerMessage = ex.InnerException?.Message,
+                    exceptionType = ex.GetType().FullName
+                });
+            }
+        }
+
+        [HttpPost("QuestionImage")]
+        public async Task<IActionResult> UploadQuestionImage(
+            IFormFile file,
+            int thematologiaId,
+            int theoryDetId)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Δεν επιλέχθηκε εικόνα."
+                    });
+                }
+
+                var result = await _blobStorageService.UploadImageAsync(
+                    file,
+                    thematologiaId,
+                    theoryDetId);
+
+                return Ok(new
+                {
+                    success = true,
+                    imageUrl = result.ImageUrl,
+                    mediaUrl = result.ImageUrl,
+                    blobName = result.BlobName,
+                    mediaType = "image"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = ex.Message,
+                    innerMessage = ex.InnerException?.Message,
+                    exceptionType = ex.GetType().FullName
+                });
+            }
+        }
+
+        [HttpPost("QuestionVideo")]
+        public async Task<IActionResult> UploadQuestionVideo(
+            IFormFile file,
+            int thematologiaId,
+            int theoryDetId)
+        {
+            try
+            {
+                if (file == null)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Το file είναι null."
+                    });
+                }
+
+                if (file.Length == 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Το video έχει μέγεθος 0."
+                    });
+                }
+
+                var result = await _blobStorageService.UploadVideoAsync(
+                    file,
+                    thematologiaId,
+                    theoryDetId);
+
+                return Ok(new
+                {
+                    success = true,
+                    fileName = file.FileName,
+                    fileSize = file.Length,
+                    contentType = file.ContentType,
+
+                    videoUrl = result.VideoUrl,
+                    mediaUrl = result.VideoUrl,
+
+                    blobName = result.BlobName,
+                    mediaType = "video"
                 });
             }
             catch (Exception ex)

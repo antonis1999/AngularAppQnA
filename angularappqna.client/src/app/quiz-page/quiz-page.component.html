@@ -1,53 +1,78 @@
+```
 <div class="page">
 
   <div class="user-panel logo-wrapper quiz-logo">
-
     <div class="brand" (click)="'/mainpage'">
-      <img src="/safety.png" class="brand-icon" alt="Safety">
+      <img src="/safety.png"
+           class="brand-icon"
+           alt="Safety">
+
       <div>
         <span>
-          <img src="logo-mas.webp" class="logo-mas" />
+          <img src="logo-mas.webp"
+               class="logo-mas" />
         </span>
+
         <span>SAFETY CAMPAIGN</span>
       </div>
     </div>
   </div>
 
-
   <div class="quiz-page">
 
-    <!-- QUIZ -->
-    <div class="quiz-card" *ngIf="!showReview && !quizFinished">
+    <div class="quiz-card"
+         *ngIf="!showReview && !quizFinished">
 
       <div class="quiz-top">
-        <button type="button" class="quiz-back-btn" (click)="GoBack()">
+
+        <button type="button"
+                class="quiz-back-btn"
+                (click)="GoBack()">
           ← Πίσω
         </button>
 
         <div class="quiz-progress-text">
           Ερώτηση {{ currentQuestionIndex + 1 }} / {{ questions.length }}
         </div>
+
       </div>
 
       <div class="quiz-progress-bar">
-        <div class="quiz-progress-fill" [style.width.%]="progressPercent"></div>
+        <div class="quiz-progress-fill"
+             [style.width.%]="progressPercent">
+        </div>
       </div>
 
       <div class="timer-wrapper">
+
         <div class="timer-header">
           <span>Χρόνος που απομένει</span>
           <span>{{ timeLeft }}s</span>
         </div>
 
         <div class="timer-bar">
-          <div class="timer-fill" [style.width.%]="(timeLeft / 15) * 100"></div>
+          <div class="timer-fill"
+               [style.width.%]="(timeLeft / 15) * 100">
+          </div>
         </div>
+
       </div>
 
-      <div class="quiz-question-area" *ngIf="currentQuestion">
-        <h2>{{ currentQuestion.Question }}</h2>
+      <div class="quiz-question-area"
+           *ngIf="currentQuestion">
 
-        <div class="quiz-answers">
+        <div class="quiz-rich-question"
+             [innerHTML]="currentQuestion.Question">
+        </div>
+
+        <div class="quiz-answers"
+             *ngIf="
+               currentQuestion.QuestionType !== 2 &&
+               currentQuestion.QuestionType !== 3 &&
+               currentQuestion.QuestionType !== 4 &&
+               currentQuestion.QuestionType !== 5
+             ">
+
           <label class="quiz-answer-option"
                  *ngFor="let answer of currentQuestion.Answers"
                  [class.disabled]="timeLeft <= 0"
@@ -59,9 +84,190 @@
                    [disabled]="timeLeft <= 0"
                    (change)="selectAnswer(answer.AId)">
 
-            <span>{{ answer.Answer }}</span>
+            <span>
+              {{ answer.Answer }}
+            </span>
+
           </label>
+
         </div>
+
+        <div class="true-false-answers"
+             *ngIf="currentQuestion.QuestionType === 2">
+
+          <button type="button"
+                  class="true-false-btn"
+                  *ngFor="let answer of currentQuestion.Answers"
+                  [class.selected]="selectedAnswerId === answer.AId"
+                  [class.disabled]="timeLeft <= 0"
+                  [disabled]="timeLeft <= 0"
+                  (click)="selectAnswer(answer.AId)">
+
+            {{ answer.Answer }}
+
+          </button>
+
+        </div>
+
+        <div class="ordering-area"
+             *ngIf="currentQuestion.QuestionType === 3">
+
+          <div class="ordering-instruction">
+            Σύρε τα βήματα και βάλε τα στη σωστή σειρά.
+          </div>
+
+          <div class="ordering-list">
+
+            <div class="ordering-item"
+                 *ngFor="let answer of orderingAnswers; let i = index"
+                 draggable="true"
+                 [class.disabled]="timeLeft <= 0"
+                 [class.dragging]="draggedOrderingIndex === i"
+                 (dragstart)="onOrderingDragStart(i, $event)"
+                 (dragover)="onOrderingDragOver($event)"
+                 (drop)="onOrderingDrop(i, $event)"
+                 (dragend)="onOrderingDragEnd()">
+
+              <div class="ordering-position">
+                {{ i + 1 }}
+              </div>
+
+              <div class="ordering-text">
+                {{ answer.Answer }}
+              </div>
+
+              <div class="ordering-handle"
+                   aria-hidden="true">
+                ⋮⋮
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="matching-area"
+             *ngIf="currentQuestion.QuestionType === 4">
+
+          <div class="matching-instruction">
+            Επίλεξε πρώτα ένα στοιχείο αριστερά και μετά τη σωστή αντιστοίχιση δεξιά.
+          </div>
+
+          <div class="matching-board">
+
+            <div class="matching-column">
+              <div class="matching-column-title">
+                Αριστερά
+              </div>
+
+              <button type="button"
+                      class="matching-card matching-left-card"
+                      *ngFor="let answer of currentQuestion.Answers"
+                      [class.selected]="selectedMatchingLeftId === answer.AId"
+                      [class.matched]="getMatchedRightId(answer.AId) !== null"
+                      [disabled]="timeLeft <= 0"
+                      (click)="selectMatchingLeft(answer.AId)">
+
+                <span class="matching-card-text">
+                  {{ answer.MatchLeft }}
+                </span>
+
+                <span class="matching-status"
+                      *ngIf="getMatchedRightId(answer.AId) !== null">
+                  {{ getMatchedRightText(answer.AId) }}
+                </span>
+
+                <span class="matching-dot"></span>
+
+              </button>
+            </div>
+
+            <div class="matching-column">
+              <div class="matching-column-title">
+                Δεξιά
+              </div>
+
+              <button type="button"
+                      class="matching-card matching-right-card"
+                      *ngFor="let answer of matchingRightAnswers"
+                      [class.matched]="isMatchingRightUsed(answer.AId)"
+                      [disabled]="timeLeft <= 0 || selectedMatchingLeftId === null"
+                      (click)="selectMatchingRight(answer.AId)">
+
+                <span class="matching-dot"></span>
+
+                <span class="matching-card-text">
+                  {{ answer.MatchRight }}
+                </span>
+
+              </button>
+            </div>
+
+          </div>
+
+          <button type="button"
+                  class="matching-clear-btn"
+                  *ngIf="selectedMatchingLeftId !== null"
+                  (click)="removeMatchingPair(selectedMatchingLeftId)">
+            Καθαρισμός επιλογής
+          </button>
+
+        </div>
+
+        <div class="categorization-area"
+             *ngIf="currentQuestion.QuestionType === 5">
+
+          <div class="categorization-instruction">
+            Σύρε κάθε κάρτα στη σωστή κατηγορία ή επίλεξε πρώτα την κάρτα και μετά την κατηγορία.
+          </div>
+
+          <div class="categorization-unassigned"
+               *ngIf="getUnassignedCategorizationCards().length > 0">
+
+            <button type="button"
+                    class="categorization-card"
+                    *ngFor="let answer of getUnassignedCategorizationCards()"
+                    draggable="true"
+                    [class.selected]="selectedCategorizationCardId === answer.AId"
+                    [disabled]="timeLeft <= 0"
+                    (dragstart)="onCategorizationDragStart(answer.AId, $event)"
+                    (dragend)="onCategorizationDragEnd()"
+                    (click)="selectCategorizationCard(answer.AId)">
+              {{ answer.Answer }}
+            </button>
+
+          </div>
+
+          <div class="categorization-board">
+
+            <button type="button"
+                    class="categorization-zone"
+                    *ngFor="let category of categorizationCategories"
+                    [class.ready]="selectedCategorizationCardId !== null"
+                    [disabled]="timeLeft <= 0"
+                    (dragover)="onCategorizationDragOver($event)"
+                    (drop)="onCategorizationDrop(category, $event)"
+                    (click)="selectCategorizationCategory(category)">
+
+              <span class="categorization-zone-title">
+                {{ category }}
+              </span>
+
+              <span class="categorization-zone-items">
+                <span class="categorization-zone-card"
+                      *ngFor="let card of getCardsForCategory(category)"
+                      (click)="selectCategorizationCard(card.AId); $event.stopPropagation()">
+                  {{ card.Answer }}
+                </span>
+              </span>
+
+            </button>
+
+          </div>
+
+        </div>
+
       </div>
 
       <div class="quiz-actions">
@@ -74,81 +280,161 @@
 
         <button type="button"
                 class="quiz-next-btn"
-                [disabled]="selectedAnswerId === null"
+                [disabled]="!canGoNext"
                 (click)="nextQuestion()">
-          {{ currentQuestionIndex === questions.length - 1 ? 'Έλεγχος απαντήσεων' : 'Επόμενη' }}
+
+          {{
+            currentQuestionIndex === questions.length - 1
+              ? 'Έλεγχος απαντήσεων'
+              : 'Επόμενη'
+          }}
+
         </button>
 
       </div>
 
     </div>
 
-    <!-- REVIEW -->
-    <div class="quiz-card" *ngIf="showReview && !quizFinished">
+
+    <div class="quiz-card"
+         *ngIf="showReview && !quizFinished">
 
       <div class="quiz-result">
-        <h2>Έλεγχος απαντήσεων</h2>
-        <p>Δες τις απαντήσεις σου πριν την τελική υποβολή.</p>
+
+        <h2>
+          Έλεγχος απαντήσεων
+        </h2>
+
+        <p>
+          Δες τις απαντήσεις σου πριν την τελική υποβολή.
+        </p>
+
       </div>
 
       <div class="review-list">
-        <div class="review-item" *ngFor="let q of questions; let i = index">
-          <div class="quiz-quest">Ερώτηση {{ i + 1 }}</div>
 
-          <p class="review-question">
-            {{ q.Question }}
-          </p>
+        <div class="review-item"
+             *ngFor="let q of questions; let i = index">
+
+          <div class="quiz-quest">
+            Ερώτηση {{ i + 1 }}
+          </div>
+
+          <div class="review-question quiz-rich-question"
+               [innerHTML]="q.Question">
+          </div>
 
           <p class="review-answer">
-            <span class="rev-title">Απάντησες:</span>
-            <strong>{{ getSelectedAnswerText(q) }}</strong>
+
+            <span class="rev-title">
+              {{
+                q.QuestionType === 3
+                  ? 'Η σειρά σου:'
+                  : q.QuestionType === 4
+                    ? 'Οι αντιστοιχίσεις σου:'
+                    : q.QuestionType === 5
+                      ? 'Η κατηγοριοποίησή σου:'
+                      : 'Απάντησες:'
+              }}
+            </span>
+
+            <strong>
+              {{ getSelectedAnswerText(q) }}
+            </strong>
+
           </p>
+
         </div>
+
       </div>
 
       <div class="quiz-actions">
-        <button type="button" class="quiz-next-btn" (click)="submitAnswers()">
+
+        <button type="button"
+                class="quiz-next-btn"
+                (click)="submitAnswers()">
           Υποβολή απαντήσεων
         </button>
+
       </div>
 
     </div>
 
-    <!-- RESULTS -->
-    <div class="quiz-card" *ngIf="quizFinished">
+
+    <div class="quiz-card"
+         *ngIf="quizFinished">
 
       <div class="quiz-result">
-        <h2>Το Quiz ολοκληρώθηκε</h2>
+
+        <h2>
+          Το Quiz ολοκληρώθηκε
+        </h2>
 
         <p>
           Σκορ: {{ score }} / {{ questions.length }}
         </p>
+
       </div>
 
       <div class="review-list">
+
         <div class="review-item"
              *ngFor="let q of questions; let i = index"
              [class.correct]="isQuestionCorrect(q)"
              [class.wrong]="!isQuestionCorrect(q)">
 
-          <div class="quiz-quest">Ερώτηση {{ i + 1 }}</div>
+          <div class="quiz-quest">
+            Ερώτηση {{ i + 1 }}
+          </div>
 
-          <p class="review-question">
-            {{ q.Question }}
-          </p>
+          <div class="review-question quiz-rich-question"
+               [innerHTML]="q.Question">
+          </div>
 
           <p class="review-answer">
-            <span class="rev-title">Η απάντησή σου:</span>
-            <strong>{{ getSelectedAnswerText(q) }}</strong>
+
+            <span class="rev-title">
+              {{
+                q.QuestionType === 3
+                  ? 'Η σειρά σου:'
+                  : q.QuestionType === 4
+                    ? 'Οι αντιστοιχίσεις σου:'
+                    : q.QuestionType === 5
+                      ? 'Η κατηγοριοποίησή σου:'
+                      : 'Η απάντησή σου:'
+              }}
+            </span>
+
+            <strong>
+              {{ getSelectedAnswerText(q) }}
+            </strong>
+
           </p>
 
-          <p class="review-answer" *ngIf="!isQuestionCorrect(q)">
-            <span class="rev-title-correct">Σωστή απάντηση:</span>
-            <strong style="color: black; ">{{ getCorrectAnswerText(q) }}</strong>
+          <p class="review-answer"
+             *ngIf="!isQuestionCorrect(q)">
+
+            <span class="rev-title-correct">
+              {{
+                q.QuestionType === 3
+                  ? 'Σωστή σειρά:'
+                  : q.QuestionType === 4
+                    ? 'Σωστές αντιστοιχίσεις:'
+                    : q.QuestionType === 5
+                      ? 'Σωστή κατηγοριοποίηση:'
+                      : 'Σωστή απάντηση:'
+              }}
+            </span>
+
+            <strong style="color: black;">
+              {{ getCorrectAnswerText(q) }}
+            </strong>
+
           </p>
 
           <div class="review-details"
                *ngIf="shouldShowDetails(q)">
+
             <div class="review-details-title">
               Επεξήγηση θεωρίας
             </div>
@@ -156,18 +442,27 @@
             <div class="review-details-text"
                  [innerHTML]="getTheoryDetails(q)">
             </div>
+
           </div>
 
         </div>
+
       </div>
 
       <div class="quiz-actions">
-        <button type="button" class="quiz-back-btn" (click)="GoBack()">
+
+        <button type="button"
+                class="quiz-back-btn"
+                (click)="GoBack()">
           ← Πίσω
         </button>
+
       </div>
 
     </div>
 
   </div>
+
 </div>
+
+```

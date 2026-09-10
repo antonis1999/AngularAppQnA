@@ -39,6 +39,8 @@ export class PresentationComponent
   remainingSeconds: number = 30;
   isTimerPaused: boolean = false;
 
+  selectedImageUrl: string | null = null;
+
   private timerInterval:
     ReturnType<typeof setInterval> | null = null;
 
@@ -216,6 +218,7 @@ export class PresentationComponent
           this.theories = result ?? [];
           this.currentSlideIndex = 0;
           this.isPresentationStarted = true;
+          this.selectedImageUrl = null;
 
           setTimeout(() => {
             this.startSlideTimer();
@@ -317,7 +320,42 @@ export class PresentationComponent
     this.playingVideos.clear();
   }
 
+  onTheoryContentClick(
+    event: MouseEvent
+  ): void {
+    const target =
+      event.target as HTMLElement;
+
+    if (
+      target.tagName.toLowerCase() !== 'img'
+    ) {
+      return;
+    }
+
+    const image =
+      target as HTMLImageElement;
+
+    if (!image.src) {
+      return;
+    }
+
+    this.openImageModal(image.src);
+  }
+
+  openImageModal(
+    imageUrl: string
+  ): void {
+    this.selectedImageUrl = imageUrl;
+    this.isTimerPaused = true;
+  }
+
+  closeImageModal(): void {
+    this.selectedImageUrl = null;
+  }
+
   nextSlide(): void {
+    this.closeImageModal();
+
     if (
       this.currentSlideIndex >=
       this.totalSlides - 1
@@ -336,6 +374,8 @@ export class PresentationComponent
   }
 
   previousSlide(): void {
+    this.closeImageModal();
+
     if (this.currentSlideIndex <= 0) {
       return;
     }
@@ -348,6 +388,8 @@ export class PresentationComponent
   }
 
   goToSlide(index: number): void {
+    this.closeImageModal();
+
     if (
       index < 0 ||
       index >= this.totalSlides
@@ -366,8 +408,11 @@ export class PresentationComponent
   }
 
   restartPresentation(): void {
+    this.closeImageModal();
     this.stopCurrentVideos();
+
     this.currentSlideIndex = 0;
+
     this.startSlideTimer();
   }
 
@@ -416,6 +461,7 @@ export class PresentationComponent
   }
 
   async closePresentation(): Promise<void> {
+    this.closeImageModal();
     this.stopCurrentVideos();
     this.clearSlideTimer();
 
@@ -432,9 +478,12 @@ export class PresentationComponent
 
     this.isPresentationStarted = false;
     this.currentSlideIndex = 0;
+
     this.remainingSeconds =
       this.slideDuration;
+
     this.isTimerPaused = false;
+
     this.playingVideos.clear();
   }
 
@@ -446,6 +495,14 @@ export class PresentationComponent
     event: KeyboardEvent
   ): void {
     if (!this.isPresentationStarted) {
+      return;
+    }
+
+    if (this.selectedImageUrl) {
+      if (event.key === 'Escape') {
+        this.closeImageModal();
+      }
+
       return;
     }
 
@@ -481,3 +538,4 @@ export class PresentationComponent
     }
   }
 }
+
