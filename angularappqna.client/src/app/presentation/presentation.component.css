@@ -727,6 +727,14 @@
       opacity: 0.96;
     }
 
+  .theory-details ::ng-deep video {
+    display: block;
+    max-width: 100%;
+    margin: 0 auto;
+    border-radius: 14px;
+    box-shadow: 0 14px 35px rgba(37, 43, 53, 0.12);
+  }
+
 .theory-footer {
   flex-shrink: 0;
   padding-top: 16px;
