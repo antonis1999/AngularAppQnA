@@ -1414,8 +1414,13 @@ namespace AngularAppQnA.Server.Controllers
             ws.Cell(1, 4).Value = "ΑΠΑΝΤΗΣΕΙΣ (Διαχωρισμός με ;)";
             ws.Cell(1, 5).Value = "ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ(Δήλωση με αριθμό)";
             ws.Cell(1, 6).Value = "ΒΑΘΜΟΣ ΔΥΣΚΟΛΙΑΣ(1 ή 2)";
+            ws.Cell(1, 7).Value = "QUESTION TYPE(1-5)";
+            ws.Cell(1, 8).Value = "ORDER POSITION (Διαχωρισμός με ;)";
+            ws.Cell(1, 9).Value = "MATCH LEFT (Διαχωρισμός με ;)";
+            ws.Cell(1, 10).Value = "MATCH RIGHT (Διαχωρισμός με ;)";
+            ws.Cell(1, 11).Value = "CATEGORY NAME (Διαχωρισμός με ;)";
 
-            var header = ws.Range(1, 1, 1, 6);
+            var header = ws.Range(1, 1, 1, 11);
 
             header.Style.Font.Bold = true;
             header.Style.Font.FontSize = 12;
@@ -1433,9 +1438,19 @@ namespace AngularAppQnA.Server.Controllers
             ws.Column(4).Width = 70;
             ws.Column(5).Width = 40;
             ws.Column(6).Width = 25;
+            ws.Column(7).Width = 22;
+            ws.Column(8).Width = 38;
+            ws.Column(9).Width = 55;
+            ws.Column(10).Width = 55;
+            ws.Column(11).Width = 45;
+
             ws.Column(2).Style.Alignment.WrapText = true;
             ws.Column(3).Style.Alignment.WrapText = true;
             ws.Column(4).Style.Alignment.WrapText = true;
+            ws.Column(8).Style.Alignment.WrapText = true;
+            ws.Column(9).Style.Alignment.WrapText = true;
+            ws.Column(10).Style.Alignment.WrapText = true;
+            ws.Column(11).Style.Alignment.WrapText = true;
 
             ws.SheetView.FreezeRows(1);
 
@@ -1447,43 +1462,88 @@ namespace AngularAppQnA.Server.Controllers
 
             guide.Cell(3, 1).Value = "1. Συμπληρώνεις τα δεδομένα στο sheet 'Quiz Template'.";
             guide.Cell(4, 1).Value = "2. Κάθε γραμμή είναι μία ερώτηση.";
-            guide.Cell(5, 1).Value = "3. Οι απαντήσεις γράφονται όλες στο ίδιο κελί και χωρίζονται με ;";
-            guide.Cell(6, 1).Value = "4. Η σωστή απάντηση δηλώνεται με αριθμό. Π.χ. 1 σημαίνει η πρώτη απάντηση.";
-            guide.Cell(7, 1).Value = "5. Η θεματολογία δεν γράφεται στο Excel. Επιλέγεται από την εφαρμογή.";
+            guide.Cell(5, 1).Value = "3. Οι στήλες που δεν αφορούν το συγκεκριμένο Question Type μένουν κενές και αγνοούνται.";
+            guide.Cell(6, 1).Value = "4. Question Type: 1 = Multiple Choice, 2 = True / False, 3 = Ordering, 4 = Matching, 5 = Categorization.";
+            guide.Cell(7, 1).Value = "5. Multiple Choice: χρησιμοποιεί ΑΠΑΝΤΗΣΕΙΣ και ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ.";
+            guide.Cell(8, 1).Value = "6. True / False: δημιουργούνται αυτόματα οι απαντήσεις Σωστό / Λάθος. ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ 1 = Σωστό, 2 = Λάθος.";
+            guide.Cell(9, 1).Value = "7. Ordering: ΑΠΑΝΤΗΣΕΙΣ και ORDER POSITION πρέπει να έχουν ίδιο πλήθος τιμών. Π.χ. Α;Β;Γ και 2;1;3.";
+            guide.Cell(10, 1).Value = "8. Matching: MATCH LEFT και MATCH RIGHT πρέπει να έχουν ίδιο πλήθος τιμών.";
+            guide.Cell(11, 1).Value = "9. Categorization: ΑΠΑΝΤΗΣΕΙΣ και CATEGORY NAME πρέπει να έχουν ίδιο πλήθος τιμών και τουλάχιστον 2 διαφορετικές κατηγορίες.";
+            guide.Cell(12, 1).Value = "10. Η θεματολογία δεν γράφεται στο Excel. Επιλέγεται από την εφαρμογή.";
+            guide.Cell(13, 1).Value = "11. Αν το QUESTION TYPE μείνει κενό, θεωρείται Multiple Choice (1).";
 
-            guide.Cell(9, 1).Value = "Παράδειγμα:";
-            guide.Cell(9, 1).Style.Font.Bold = true;
+            guide.Cell(15, 1).Value = "Παραδείγματα:";
+            guide.Cell(15, 1).Style.Font.Bold = true;
 
-            guide.Cell(11, 1).Value = "ΘΕΩΡΙΑ";
-            guide.Cell(11, 2).Value = "ΛΕΠΤΟΜΕΡΕΙΕΣ ΘΕΩΡΙΑΣ";
-            guide.Cell(11, 3).Value = "ΕΡΩΤΗΣΗ";
-            guide.Cell(11, 4).Value = "ΑΠΑΝΤΗΣΕΙΣ (Διαχωρισμός με ;)";
-            guide.Cell(11, 5).Value = "ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ(Δήλωση με αριθμό)";
-            guide.Cell(11, 6).Value = "ΒΑΘΜΟΣ ΔΥΣΚΟΛΙΑΣ";
-            guide.Cell(12, 1).Value = "Πρόληψη";
-            guide.Cell(12, 2).Value = "Οι έξοδοι κινδύνου και οι διάδρομοι διαφυγής πρέπει να είναι πάντα ελεύθεροι.";
-            guide.Cell(12, 3).Value = "Ποιος είναι ο βασικός στόχος της πρόληψης στον χώρο εργασίας;";
-            guide.Cell(12, 4).Value = "Η αποφυγή ατυχημάτων;Η ταχύτερη ολοκλήρωση των εργασιών;Η μείωση των διαλειμμάτων";
-            guide.Cell(12, 5).Value = "1";
-            guide.Cell(12, 6).Value = "1";
+            for (int col = 1; col <= 11; col++)
+            {
+                guide.Cell(17, col).Value = ws.Cell(1, col).Value;
+            }
 
-            var guideHeader = guide.Range(11, 1, 11, 6);
+            guide.Cell(18, 1).Value = "Πρόληψη";
+            guide.Cell(18, 2).Value = "Βασικές αρχές πρόληψης.";
+            guide.Cell(18, 3).Value = "Ποιος είναι ο βασικός στόχος της πρόληψης;";
+            guide.Cell(18, 4).Value = "Η αποφυγή ατυχημάτων;Η ταχύτερη εργασία;Η μείωση των διαλειμμάτων";
+            guide.Cell(18, 5).Value = "1";
+            guide.Cell(18, 6).Value = "1";
+            guide.Cell(18, 7).Value = "1";
+
+            guide.Cell(19, 1).Value = "Ασφάλεια";
+            guide.Cell(19, 2).Value = "Έλεγχος βασικών γνώσεων.";
+            guide.Cell(19, 3).Value = "Η έξοδος κινδύνου πρέπει να είναι πάντα ελεύθερη.";
+            guide.Cell(19, 5).Value = "1";
+            guide.Cell(19, 6).Value = "1";
+            guide.Cell(19, 7).Value = "2";
+
+            guide.Cell(20, 1).Value = "Πυρασφάλεια";
+            guide.Cell(20, 2).Value = "Σωστή ακολουθία ενεργειών.";
+            guide.Cell(20, 3).Value = "Βάλε τα βήματα στη σωστή σειρά.";
+            guide.Cell(20, 4).Value = "Πήγαινε στο σημείο συγκέντρωσης;Ενεργοποίησε τον συναγερμό;Κατευθύνσου στην έξοδο;Ενημέρωσε τον υπεύθυνο";
+            guide.Cell(20, 6).Value = "2";
+            guide.Cell(20, 7).Value = "3";
+            guide.Cell(20, 8).Value = "4;1;3;2";
+
+            guide.Cell(21, 1).Value = "Κίνδυνοι";
+            guide.Cell(21, 2).Value = "Αντιστοίχιση κινδύνου και ενέργειας.";
+            guide.Cell(21, 3).Value = "Αντιστοίχισε τον κίνδυνο με τη σωστή ενέργεια.";
+            guide.Cell(21, 6).Value = "2";
+            guide.Cell(21, 7).Value = "4";
+            guide.Cell(21, 9).Value = "Βρεγμένο πάτωμα;Γυμνό καλώδιο;Εμπόδιο στον διάδρομο";
+            guide.Cell(21, 10).Value = "Τοποθέτησε πινακίδα;Κλείσε το ρεύμα;Απομάκρυνε το εμπόδιο";
+
+            guide.Cell(22, 1).Value = "ΜΑΠ";
+            guide.Cell(22, 2).Value = "Κατηγοριοποίηση αντικειμένων.";
+            guide.Cell(22, 3).Value = "Τοποθέτησε κάθε κάρτα στη σωστή κατηγορία.";
+            guide.Cell(22, 4).Value = "Βρεγμένο πάτωμα;Γυμνό καλώδιο;Κράνος ασφαλείας;Γάντια εργασίας";
+            guide.Cell(22, 6).Value = "1";
+            guide.Cell(22, 7).Value = "5";
+            guide.Cell(22, 11).Value = "Κίνδυνος;Κίνδυνος;Προστασία;Προστασία";
+
+            var guideHeader = guide.Range(17, 1, 17, 11);
             guideHeader.Style.Font.Bold = true;
             guideHeader.Style.Fill.BackgroundColor = XLColor.FromHtml("#D9EAF7");
             guideHeader.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             guideHeader.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
             guideHeader.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 
-            var exampleRow = guide.Range(12, 1, 12, 5);
-            exampleRow.Style.Font.Italic = true;
-            exampleRow.Style.Font.FontColor = XLColor.Gray;
-            exampleRow.Style.Fill.BackgroundColor = XLColor.FromHtml("#F7F9FC");
+            var exampleRows = guide.Range(18, 1, 22, 11);
+            exampleRows.Style.Font.Italic = true;
+            exampleRows.Style.Font.FontColor = XLColor.Gray;
+            exampleRows.Style.Fill.BackgroundColor = XLColor.FromHtml("#F7F9FC");
+            exampleRows.Style.Alignment.WrapText = true;
 
             guide.Columns().AdjustToContents();
             guide.Column(2).Width = 60;
             guide.Column(3).Width = 55;
             guide.Column(4).Width = 75;
+            guide.Column(5).Width = 35;
             guide.Column(6).Width = 25;
+            guide.Column(7).Width = 20;
+            guide.Column(8).Width = 40;
+            guide.Column(9).Width = 55;
+            guide.Column(10).Width = 55;
+            guide.Column(11).Width = 45;
+
             using var stream = new MemoryStream();
             workbook.SaveAs(stream);
 
@@ -1496,11 +1556,12 @@ namespace AngularAppQnA.Server.Controllers
         [HttpPost("ImportQuizExcel/{thematologiaId}")]
         [Authorize(Roles = "99")]
         public async Task<BasicResponse> ImportQuizExcel(
-            int thematologiaId,
-            IFormFile file)
+    int thematologiaId,
+    IFormFile file)
         {
             BasicResponse ret = new BasicResponse();
             string log = "";
+
             try
             {
                 if (file == null || file.Length == 0)
@@ -1529,49 +1590,309 @@ namespace AngularAppQnA.Server.Controllers
                 }
 
                 using var stream = file.OpenReadStream();
+                using var workbook = new XLWorkbook(stream);
 
-                var mapper = new ExcelMapper(stream)
+                var ws = workbook.Worksheet(1);
+
+                var rows = new List<(
+                    int ExcelRowNumber,
+                    string Theory,
+                    string TheoryDetails,
+                    string Question,
+                    string Answers,
+                    int? CorrectAnswer,
+                    int? Difficulty,
+                    int QuestionType,
+                    string OrderPosition,
+                    string MatchLeft,
+                    string MatchRight,
+                    string CategoryName
+                )>();
+
+                int lastRowNumber = ws.LastRowUsed()?.RowNumber() ?? 1;
+
+                for (int rowNumber = 2; rowNumber <= lastRowNumber; rowNumber++)
                 {
-                    HeaderRow = true
-                };
+                    string theory = ws.Cell(rowNumber, 1).GetString().Trim();
+                    string theoryDetails = ws.Cell(rowNumber, 2).GetString().Trim();
+                    string question = ws.Cell(rowNumber, 3).GetString().Trim();
+                    string answers = ws.Cell(rowNumber, 4).GetString().Trim();
+                    string correctAnswerText = ws.Cell(rowNumber, 5).GetString().Trim();
+                    string difficultyText = ws.Cell(rowNumber, 6).GetString().Trim();
+                    string questionTypeText = ws.Cell(rowNumber, 7).GetString().Trim();
+                    string orderPosition = ws.Cell(rowNumber, 8).GetString().Trim();
+                    string matchLeft = ws.Cell(rowNumber, 9).GetString().Trim();
+                    string matchRight = ws.Cell(rowNumber, 10).GetString().Trim();
+                    string categoryName = ws.Cell(rowNumber, 11).GetString().Trim();
 
-                var rows = mapper
-                     .Fetch<QuizImportRow>()
-                     .Where(x =>
-                        !string.IsNullOrWhiteSpace(x.Theory) ||
-                        !string.IsNullOrWhiteSpace(x.TheoryDetails) ||
-                        !string.IsNullOrWhiteSpace(x.Question) ||
-                        !string.IsNullOrWhiteSpace(x.Answers))
-                    .ToList();
+                    bool rowIsEmpty =
+                        string.IsNullOrWhiteSpace(theory) &&
+                        string.IsNullOrWhiteSpace(theoryDetails) &&
+                        string.IsNullOrWhiteSpace(question) &&
+                        string.IsNullOrWhiteSpace(answers) &&
+                        string.IsNullOrWhiteSpace(correctAnswerText) &&
+                        string.IsNullOrWhiteSpace(difficultyText) &&
+                        string.IsNullOrWhiteSpace(questionTypeText) &&
+                        string.IsNullOrWhiteSpace(orderPosition) &&
+                        string.IsNullOrWhiteSpace(matchLeft) &&
+                        string.IsNullOrWhiteSpace(matchRight) &&
+                        string.IsNullOrWhiteSpace(categoryName);
 
-                string aaa = JsonConvert.SerializeObject(rows);
-
-                if (rows.Count > 0)
-                {
-                    // OK
-                    List<msc_Thematologia_Theoria> theories = await _context.msc_Thematologia_Theoria
-                        .Where(x => x.Id == thematologiaId).ToListAsync();
-
-
-
-                    //List<Thematologia_Answers> answers = await _context.Thematologia_Answers.Where(x => x.Id == thematologiaId).ToListAsync();
-
-                    foreach (QuizImportRow row in rows)
+                    if (rowIsEmpty)
                     {
-                        int detIdNew;
-                        List<msc_Thematologia_Answers> answersToAdd = new List<msc_Thematologia_Answers>();
+                        continue;
+                    }
 
-                        msc_Thematologia_Theoria theoryFound = theories.Where(x => x.Header.Trim() == row.Theory.Trim()).FirstOrDefault();
-                        if (theoryFound != null)
+                    int? correctAnswer = null;
+                    if (int.TryParse(correctAnswerText, out int correctAnswerParsed))
+                    {
+                        correctAnswer = correctAnswerParsed;
+                    }
+
+                    int? difficulty = null;
+                    if (int.TryParse(difficultyText, out int difficultyParsed))
+                    {
+                        difficulty = difficultyParsed;
+                    }
+
+                    int questionType = 1;
+
+                    if (!string.IsNullOrWhiteSpace(questionTypeText))
+                    {
+                        if (!int.TryParse(questionTypeText, out questionType))
                         {
-                            detIdNew = theoryFound.DetId;
+                            ret.IsSuccess = false;
+                            ret.Message =
+                                $"Γραμμή {rowNumber}: Το QUESTION TYPE πρέπει να είναι αριθμός από 1 έως 5.";
+                            return ret;
                         }
-                        else
+                    }
+
+                    rows.Add((
+                        rowNumber,
+                        theory,
+                        theoryDetails,
+                        question,
+                        answers,
+                        correctAnswer,
+                        difficulty,
+                        questionType,
+                        orderPosition,
+                        matchLeft,
+                        matchRight,
+                        categoryName
+                    ));
+                }
+
+                if (!rows.Any())
+                {
+                    ret.IsSuccess = false;
+                    ret.Message = "Το Excel δεν περιέχει δεδομένα.";
+                    return ret;
+                }
+
+                List<msc_Thematologia_Theoria> theories =
+                    await _context.msc_Thematologia_Theoria
+                        .Where(x => x.Id == thematologiaId)
+                        .ToListAsync();
+
+                foreach (var row in rows)
+                {
+                    if (string.IsNullOrWhiteSpace(row.Theory))
+                    {
+                        log += $"Γραμμή {row.ExcelRowNumber}: Λείπει η θεωρία.\n";
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(row.Question))
+                    {
+                        log += $"Γραμμή {row.ExcelRowNumber}: Λείπει η ερώτηση.\n";
+                        continue;
+                    }
+
+                    if (row.QuestionType < 1 || row.QuestionType > 5)
+                    {
+                        log += $"Γραμμή {row.ExcelRowNumber}: Το QUESTION TYPE πρέπει να είναι από 1 έως 5.\n";
+                        continue;
+                    }
+
+                    int difficulty = 1;
+
+                    if (row.Difficulty == 1 || row.Difficulty == 2)
+                    {
+                        difficulty = row.Difficulty.Value;
+                    }
+
+                    var normalAnswers = row.Answers
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Trim())
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .ToList();
+
+                    var orderPositionsText = row.OrderPosition
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Trim())
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .ToList();
+
+                    var matchLeftItems = row.MatchLeft
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Trim())
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .ToList();
+
+                    var matchRightItems = row.MatchRight
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Trim())
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .ToList();
+
+                    var categoryNames = row.CategoryName
+                        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Trim())
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .ToList();
+
+                    if (row.QuestionType == 1)
+                    {
+                        if (normalAnswers.Count < 2)
                         {
-                            detIdNew = theories.Count > 0
+                            log += $"Γραμμή {row.ExcelRowNumber}: Η Multiple Choice ερώτηση πρέπει να έχει τουλάχιστον 2 απαντήσεις.\n";
+                            continue;
+                        }
+
+                        if (!row.CorrectAnswer.HasValue ||
+                            row.CorrectAnswer.Value < 1 ||
+                            row.CorrectAnswer.Value > normalAnswers.Count)
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Η σωστή απάντηση πρέπει να είναι από 1 έως {normalAnswers.Count}.\n";
+                            continue;
+                        }
+                    }
+
+                    if (row.QuestionType == 2)
+                    {
+                        if (!row.CorrectAnswer.HasValue ||
+                            (row.CorrectAnswer.Value != 1 &&
+                             row.CorrectAnswer.Value != 2))
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Για True / False η σωστή απάντηση πρέπει να είναι 1 για Σωστό ή 2 για Λάθος.\n";
+                            continue;
+                        }
+                    }
+
+                    List<int> orderPositions = new List<int>();
+
+                    if (row.QuestionType == 3)
+                    {
+                        if (normalAnswers.Count < 2)
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Η Ordering ερώτηση πρέπει να έχει τουλάχιστον 2 βήματα.\n";
+                            continue;
+                        }
+
+                        if (orderPositionsText.Count != normalAnswers.Count)
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Οι τιμές ORDER POSITION πρέπει να είναι όσες και οι απαντήσεις.\n";
+                            continue;
+                        }
+
+                        bool invalidOrderPosition = false;
+
+                        foreach (string positionText in orderPositionsText)
+                        {
+                            if (!int.TryParse(positionText, out int position))
+                            {
+                                invalidOrderPosition = true;
+                                break;
+                            }
+
+                            orderPositions.Add(position);
+                        }
+
+                        if (invalidOrderPosition)
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Το ORDER POSITION πρέπει να περιέχει μόνο αριθμούς.\n";
+                            continue;
+                        }
+
+                        var expectedPositions =
+                            Enumerable.Range(1, normalAnswers.Count).ToList();
+
+                        var actualPositions =
+                            orderPositions
+                                .OrderBy(x => x)
+                                .ToList();
+
+                        if (!expectedPositions.SequenceEqual(actualPositions))
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Το ORDER POSITION πρέπει να περιέχει ακριβώς τις θέσεις 1 έως {normalAnswers.Count}, χωρίς διπλότυπα.\n";
+                            continue;
+                        }
+                    }
+
+                    if (row.QuestionType == 4)
+                    {
+                        if (matchLeftItems.Count < 2 ||
+                            matchRightItems.Count < 2)
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Η Matching ερώτηση πρέπει να έχει τουλάχιστον 2 ζευγάρια.\n";
+                            continue;
+                        }
+
+                        if (matchLeftItems.Count != matchRightItems.Count)
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: MATCH LEFT και MATCH RIGHT πρέπει να έχουν ίδιο πλήθος τιμών.\n";
+                            continue;
+                        }
+                    }
+
+                    if (row.QuestionType == 5)
+                    {
+                        if (normalAnswers.Count < 2)
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Η Categorization ερώτηση πρέπει να έχει τουλάχιστον 2 κάρτες.\n";
+                            continue;
+                        }
+
+                        if (categoryNames.Count != normalAnswers.Count)
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Τα CATEGORY NAME πρέπει να είναι όσα και οι απαντήσεις.\n";
+                            continue;
+                        }
+
+                        int distinctCategories = categoryNames
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .Count();
+
+                        if (distinctCategories < 2)
+                        {
+                            log += $"Γραμμή {row.ExcelRowNumber}: Η Categorization ερώτηση πρέπει να έχει τουλάχιστον 2 διαφορετικές κατηγορίες.\n";
+                            continue;
+                        }
+                    }
+
+                    int detIdNew;
+
+                    msc_Thematologia_Theoria theoryFound =
+                        theories
+                            .FirstOrDefault(x =>
+                                x.Header.Trim() ==
+                                row.Theory.Trim());
+
+                    if (theoryFound != null)
+                    {
+                        detIdNew = theoryFound.DetId;
+                    }
+                    else
+                    {
+                        detIdNew =
+                            theories.Count > 0
                                 ? theories.Max(x => x.DetId) + 1
                                 : 1;
-                            msc_Thematologia_Theoria newRow = new msc_Thematologia_Theoria()
+
+                        msc_Thematologia_Theoria newTheory =
+                            new msc_Thematologia_Theoria()
                             {
                                 Id = thematologiaId,
                                 DetId = detIdNew,
@@ -1580,285 +1901,223 @@ namespace AngularAppQnA.Server.Controllers
                                 Header = row.Theory,
                                 Details = row.TheoryDetails
                             };
-                            _context.msc_Thematologia_Theoria.Add(newRow);
-                            theories.Add(newRow);
 
-                            theoryFound = newRow;
-                        }
-                        // theoria done
+                        _context.msc_Thematologia_Theoria.Add(newTheory);
+                        theories.Add(newTheory);
 
-                        // Questions/Answers add --start
+                        theoryFound = newTheory;
+                    }
 
-                        List<msc_Thematologia_Question> questions = await _context.msc_Thematologia_Question
-                            .Where(x => x.Id == thematologiaId && x.DetId == detIdNew).ToListAsync();
+                    List<msc_Thematologia_Question> questions =
+                        await _context.msc_Thematologia_Question
+                            .Where(x =>
+                                x.Id == thematologiaId &&
+                                x.DetId == detIdNew)
+                            .ToListAsync();
 
-                        msc_Thematologia_Question questionFound = questions.Where(x => x.DetId == theoryFound.DetId && x.Question == row.Question).FirstOrDefault();
-                        if (questionFound != null)
+                    msc_Thematologia_Question questionFound =
+                        questions
+                            .FirstOrDefault(x =>
+                                x.DetId == theoryFound.DetId &&
+                                x.Question == row.Question);
+
+                    if (questionFound != null)
+                    {
+                        log += $"Γραμμή {row.ExcelRowNumber}: Η ερώτηση υπάρχει ήδη.\n";
+                        continue;
+                    }
+
+                    int qidNew =
+                        questions.Count > 0
+                            ? questions.Max(x => x.QId) + 1
+                            : 1;
+
+                    msc_Thematologia_Question newQuestion =
+                        new msc_Thematologia_Question()
                         {
-                            log += $"question No {rows.IndexOf(row) + 1} already exists";
-                            continue;
-                        }
-                        else
+                            Id = thematologiaId,
+                            DetId = detIdNew,
+                            QId = qidNew,
+                            CreateDate = DateTime.Now,
+                            Username = "admin",
+                            Question = row.Question,
+                            Difficulty = difficulty,
+                            QuestionType = row.QuestionType
+                        };
+
+                    _context.msc_Thematologia_Question.Add(newQuestion);
+
+                    List<msc_Thematologia_Answers> answersToAdd =
+                        new List<msc_Thematologia_Answers>();
+
+                    if (row.QuestionType == 1)
+                    {
+                        int aId = 1;
+
+                        foreach (string answer in normalAnswers)
                         {
-                            int qidNew = questions.Count > 0 ? questions.Max(x => x.QId + 1) : 1;
-                            int difficulty = 1;
-                            if (row.Difficulty == 1 || row.Difficulty == 2)
-                            {
-                                difficulty = row.Difficulty.Value;
-                            }
-                            msc_Thematologia_Question newRow = new msc_Thematologia_Question()
+                            answersToAdd.Add(
+                                new msc_Thematologia_Answers
+                                {
+                                    Id = thematologiaId,
+                                    DetId = detIdNew,
+                                    QId = newQuestion.QId,
+                                    AId = aId,
+                                    CreateDate = DateTime.Now,
+                                    Username = "admin",
+                                    Answer = answer,
+                                    IsCorrect =
+
+                                        row.CorrectAnswer == aId,
+                                    MatchLeft = null,
+                                    MatchRight = null,
+                                    CategoryName = null
+                                });
+
+                            aId++;
+                        }
+                    }
+                    else if (row.QuestionType == 2)
+                    {
+                        answersToAdd.Add(
+                            new msc_Thematologia_Answers
                             {
                                 Id = thematologiaId,
                                 DetId = detIdNew,
-                                QId = qidNew,
+                                QId = newQuestion.QId,
+                                AId = 1,
                                 CreateDate = DateTime.Now,
                                 Username = "admin",
-                                Question = row.Question,
-                                Difficulty = difficulty,
-                                QuestionType = 1
-                            };
-                            _context.msc_Thematologia_Question.Add(newRow);
+                                Answer = "Σωστό",
+                                IsCorrect = row.CorrectAnswer == 1,
+                                MatchLeft = null,
+                                MatchRight = null,
+                                CategoryName = null
+                            });
 
-
-                            var aa = row.Answers.Split(';', StringSplitOptions.RemoveEmptyEntries);
-                            if (aa.Length < (row.CorrectAnswer))
+                        answersToAdd.Add(
+                            new msc_Thematologia_Answers
                             {
-                                log += $"Correct answer for question No {rows.IndexOf(row) + 1} is not available";
-                                continue;
-                            }
-                            else
-                            {
-                                int cc = 1;
-                                foreach (var answer in aa)
+                                Id = thematologiaId,
+                                DetId = detIdNew,
+                                QId = newQuestion.QId,
+                                AId = 2,
+                                CreateDate = DateTime.Now,
+                                Username = "admin",
+                                Answer = "Λάθος",
+                                IsCorrect = row.CorrectAnswer == 2,
+                                MatchLeft = null,
+                                MatchRight = null,
+                                CategoryName = null
+                            });
+                    }
+                    else if (row.QuestionType == 3)
+                    {
+                        var orderedItems =
+                            normalAnswers
+                                .Select((answer, index) => new
                                 {
-                                    msc_Thematologia_Answers newAnswer = new msc_Thematologia_Answers
-                                    {
-                                        Id = thematologiaId,
-                                        DetId = detIdNew,
-                                        QId = newRow.QId,
-                                        AId = cc,
-                                        CreateDate = DateTime.Now,
-                                        Username = "admin",
-                                        Answer = answer,
-                                        IsCorrect = row.CorrectAnswer == cc
-                                    };
-                                    answersToAdd.Add(newAnswer);
-                                    cc++;
-                                }
-                            }
+                                    Answer = answer,
+                                    Position = orderPositions[index]
+                                })
+                                .OrderBy(x => x.Position)
+                                .ToList();
 
+                        int aId = 1;
+
+                        foreach (var item in orderedItems)
+                        {
+                            answersToAdd.Add(
+                                new msc_Thematologia_Answers
+                                {
+                                    Id = thematologiaId,
+                                    DetId = detIdNew,
+                                    QId = newQuestion.QId,
+                                    AId = aId,
+                                    CreateDate = DateTime.Now,
+                                    Username = "admin",
+                                    Answer = item.Answer,
+                                    IsCorrect = false,
+                                    MatchLeft = null,
+                                    MatchRight = null,
+                                    CategoryName = null
+                                });
+
+                            aId++;
                         }
-                        // Questions/Answers add --end
-                        if (answersToAdd.Count > 0)
-                            await _context.msc_Thematologia_Answers.AddRangeAsync(answersToAdd);
-
-                        await _context.SaveChangesAsync();
+                    }
+                    else if (row.QuestionType == 4)
+                    {
+                        for (int i = 0; i < matchLeftItems.Count; i++)
+                        {
+                            answersToAdd.Add(
+                                new msc_Thematologia_Answers
+                                {
+                                    Id = thematologiaId,
+                                    DetId = detIdNew,
+                                    QId = newQuestion.QId,
+                                    AId = i + 1,
+                                    CreateDate = DateTime.Now,
+                                    Username = "admin",
+                                    Answer = "",
+                                    IsCorrect = false,
+                                    MatchLeft = matchLeftItems[i],
+                                    MatchRight = matchRightItems[i],
+                                    CategoryName = null
+                                });
+                        }
+                    }
+                    else if (row.QuestionType == 5)
+                    {
+                        for (int i = 0; i < normalAnswers.Count; i++)
+                        {
+                            answersToAdd.Add(
+                                new msc_Thematologia_Answers
+                                {
+                                    Id = thematologiaId,
+                                    DetId = detIdNew,
+                                    QId = newQuestion.QId,
+                                    AId = i + 1,
+                                    CreateDate = DateTime.Now,
+                                    Username = "admin",
+                                    Answer = normalAnswers[i],
+                                    IsCorrect = false,
+                                    MatchLeft = null,
+                                    MatchRight = null,
+                                    CategoryName = categoryNames[i]
+                                });
+                        }
                     }
 
+                    if (answersToAdd.Count > 0)
+                    {
+                        await _context.msc_Thematologia_Answers
+                            .AddRangeAsync(answersToAdd);
+                    }
 
-                }
-                else
-                {
-                    ret.IsSuccess = false;
-                    ret.Message += "Δεν βρέθηκαν εγγραφές";
-                    return ret;
-                }
-
-
-
-                if (!rows.Any())
-                {
-                    ret.IsSuccess = false;
-                    ret.Message += "Το Excel δεν περιέχει δεδομένα.";
-                    return ret;
+                    await _context.SaveChangesAsync();
                 }
 
-                //var errors = new List<string>();
-
-                //for (int i = 0; i < rows.Count; i++)
-                //{
-                //    var row = rows[i];
-                //    int excelRowNumber = i + 2;
-
-                //    if (string.IsNullOrWhiteSpace(row.Theory))
-                //    {
-                //        errors.Add($"Γραμμή {excelRowNumber}: Λείπει η θεωρία.");
-                //    }
-
-                //    if (string.IsNullOrWhiteSpace(row.TheoryDetails))
-                //    {
-                //        errors.Add($"Γραμμή {excelRowNumber}: Λείπουν οι λεπτομέρειες θεωρίας.");
-                //    }
-
-                //    if (string.IsNullOrWhiteSpace(row.Question))
-                //    {
-                //        errors.Add($"Γραμμή {excelRowNumber}: Λείπει η ερώτηση.");
-                //    }
-
-                //    if (string.IsNullOrWhiteSpace(row.Answers))
-                //    {
-                //        errors.Add($"Γραμμή {excelRowNumber}: Λείπουν οι απαντήσεις.");
-                //        continue;
-                //    }
-
-                //    var answers = row.Answers
-                //        .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                //        .Select(x => x.Trim())
-                //        .Where(x => !string.IsNullOrWhiteSpace(x))
-                //        .ToList();
-
-                //    if (answers.Count < 2)
-                //    {
-                //        errors.Add($"Γραμμή {excelRowNumber}: Η ερώτηση πρέπει να έχει τουλάχιστον 2 απαντήσεις.");
-                //    }
-
-                //    if (row.CorrectAnswer <= 0)
-                //    {
-                //        errors.Add($"Γραμμή {excelRowNumber}: Η σωστή απάντηση πρέπει να είναι αριθμός.");
-                //    }
-                //    else if (row.CorrectAnswer > answers.Count)
-                //    {
-                //        errors.Add($"Γραμμή {excelRowNumber}: Η σωστή απάντηση πρέπει να είναι από 1 έως {answers.Count}.");
-                //    }
-                //}
-
-                //if (errors.Any())
-                //{
-                //    ret.IsSuccess = false;
-                //    ret.Message += string.Join("\n", errors);
-                //    return ret;
-                //}
-
-                //int nextDetId =
-                //    (_context.Thematologia_Theoria
-                //        .Where(x => x.Id == thematologiaId)
-                //        .Max(x => (int?)x.DetId) ?? 0) + 1;
-
-                //int insertedTheories = 0;
-                //int insertedQuestions = 0;
-                //int insertedAnswers = 0;
-
-                //var theoryGroups = rows.GroupBy(x => new
-                //{
-                //    Theory = x.Theory.Trim(),
-                //    TheoryDetails = x.TheoryDetails.Trim()
-                //});
-
-                //foreach (var theoryGroup in theoryGroups)
-                //{
-                //    int currentDetId = nextDetId;
-
-                //    var theory = new Thematologia_Theoria
-                //    {
-                //        Id = thematologiaId,
-                //        DetId = currentDetId,
-                //        Header = theoryGroup.Key.Theory,
-                //        Details = theoryGroup.Key.TheoryDetails,
-                //        Username = "Admin",
-                //        CreateDate = DateTime.Now
-                //    };
-
-                //    _context.Thematologia_Theoria.Add(theory);
-                //    insertedTheories++;
-
-                //    int nextQId = 1;
-
-                //    foreach (var row in theoryGroup)
-                //    {
-                //        var question = new Thematologia_Question
-                //        {
-                //            Id = thematologiaId,
-                //            DetId = currentDetId,
-                //            QId = nextQId,
-                //            Question = row.Question.Trim(),
-                //            Username = "Admin",
-                //            CreateDate = DateTime.Now
-                //        };
-
-                //        _context.Thematologia_Question.Add(question);
-                //        insertedQuestions++;
-
-                //        var answers = row.Answers
-                //            .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                //            .Select(x => x.Trim())
-                //            .Where(x => !string.IsNullOrWhiteSpace(x))
-                //            .ToList();
-
-                //        int nextAId = 1;
-
-                //        for (int i = 0; i < answers.Count; i++)
-                //        {
-                //            var answer = new Thematologia_Answers
-                //            {
-                //                Id = thematologiaId,
-                //                DetId = currentDetId,
-                //                QId = nextQId,
-                //                AId = nextAId,
-                //                Answer = answers[i],
-                //                IsCorrect = (i + 1) == row.CorrectAnswer,
-                //                Username = "Admin",
-                //                CreateDate = DateTime.Now
-                //            };
-
-                //            _context.Thematologia_Answers.Add(answer);
-                //            insertedAnswers++;
-                //            nextAId++;
-                //        }
-
-                //        nextQId++;
-                //    }
-
-                //    nextDetId++;
-                //}
-
-                await _context.SaveChangesAsync();
                 ret.IsSuccess = true;
-                //ret.Message =
-                //    $"Η εισαγωγή ολοκληρώθηκε. " +
-                //    $"Θεωρίες: {insertedTheories}, " +
-                //    $"Ερωτήσεις: {insertedQuestions}, " +
-                //    $"Απαντήσεις: {insertedAnswers}.";
-
-                ret.Message = string.IsNullOrEmpty(log) ? ret.Message : ret.Message += log;
+                ret.Message =
+                    string.IsNullOrWhiteSpace(log)
+                        ? ret.Message
+                        : log;
 
                 return ret;
             }
             catch (Exception ex)
             {
                 ret.IsSuccess = false;
-                ret.Message = ex.InnerException?.Message ?? ex.Message;
+                ret.Message =
+                    ex.InnerException?.Message ??
+                    ex.Message;
+
                 return ret;
             }
         }
 
-        /* [HttpGet("GetQuizSuggestions/{thematologiaId}")]
-         public async Task<ActionResult> GetQuizSuggestions(int thematologiaId)
-         {
-             var allQuestions = await _context.Thematologia_Question
-                 .Where(q => q.Id == thematologiaId)
-                 .ToListAsync();
 
-             if (!allQuestions.Any())
-             {
-                 return Ok(new
-                 {
-                     IsSuccess = false,
-                     Message = "Δεν υπάρχουν ερωτήσεις για αυτή τη θεματολογία."
-                 });
-             }
-
-             var suggestions = new List<object>();
-
-             suggestions.Add(CreateSuggestion(allQuestions, 1, "Εύκολο"));
-             suggestions.Add(CreateSuggestion(allQuestions, 2, "Μεσαίο"));
-             suggestions.Add(CreateSuggestion(allQuestions, 3, "Δύσκολο"));
-
-             return Ok(new
-             {
-                 IsSuccess = true,
-                 Suggestions = suggestions
-             });
-         }*/
         [HttpPost("UpdateQuizSettings")]
         [Authorize(Roles = "99")]
         public async Task<IActionResult> UpdateQuizSettings([FromBody] UpdateQuizSettingsRequest request)
