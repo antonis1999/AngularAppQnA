@@ -52,9 +52,30 @@
 
   <section class="login-area">
     <div class="login-card">
+      <!-- Εμφανίζεται όταν υπάρχει ενεργή σύνδεση -->
+      <div class="active-session" *ngIf="isLoggedIn">
+
+        <h2>Καλώς ήρθες ξανά!</h2>
+
+        <p>
+          Η σύνδεσή σου είναι ακόμη ενεργή.
+          Μπορείς να συνεχίσεις την εκπαίδευσή σου
+          χωρίς να συνδεθείς ξανά.
+        </p>
+
+        <button type="button"
+                class="login-btn"
+                (click)="continueToApp()">
+
+          <span>Συνέχεια στην εφαρμογή</span>
+          <span class="arrow">→</span>
+
+        </button>
+
+      </div>
       <!--<div class="login-chip">Είσοδος</div>-->
 
-      <div class="login-title-row">
+      <div class="login-title-row" *ngIf="!isLoggedIn">
         <h2>Ξεκίνα την εκπαίδευση</h2>
 
         <div class="title-actions">
@@ -68,7 +89,7 @@
         </div>
       </div>
 
-      <form>
+      <form *ngIf="!isLoggedIn">
         <input type="email"
                placeholder="π.χ. user@company.gr"
                [(ngModel)]="email"
@@ -247,10 +268,13 @@
       <h3>Admin είσοδος</h3>
       <p class="modal-subtitle">Συμπλήρωσε μόνο το PIN διαχειριστή.</p>
 
-      <label style="color: #909db1; font-weight: 550;">Email διαχειριστή</label>
+      <label>Email διαχειριστή</label>
+
       <input type="email"
-             value="admin@masoutis.gr"
-             disabled>
+             placeholder="Πληκτρολόγησε το email σου"
+             [(ngModel)]="adminEmail"
+             name="adminEmail"
+             autocomplete="username">
 
       <label>PIN</label>
       <input type="password"

@@ -7,6 +7,7 @@ import { NotificationService } from '../services/notification.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Ranking, Thematologia, User } from '../interfaces/models';
 import { PresentationComponent } from '../presentation/presentation.component';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-mainpage',
@@ -16,12 +17,12 @@ import { PresentationComponent } from '../presentation/presentation.component';
   styleUrl: './mainpage.component.css'
 })
 export class MainpageComponent {
-
-  constructor(
-    private route: ActivatedRoute,
-    private http: HttpClient,
-    private notificationService: NotificationService,
-    private router: Router
+    constructor(
+      private route: ActivatedRoute,
+      private http: HttpClient,
+      private notificationService: NotificationService,
+      private router: Router,
+      private authService: AuthService
   ) { }
 
   user: User | null = null;
@@ -50,6 +51,7 @@ export class MainpageComponent {
   showUserDetailsPopup = false;
   selectedUserId: number | null = null;
   userSearchText = '';
+  TitleSearchText = '';
   newPin = '';
   confirmPin = '';
   previewLoading = false;
@@ -95,8 +97,7 @@ export class MainpageComponent {
   }
 
   logout(): void {
-    localStorage.removeItem('currentUser');
-    window.location.href = '/';
+    this.authService.logout();
   }
 
   loadUsers(): void {
@@ -419,7 +420,17 @@ export class MainpageComponent {
       (u.Email ?? '').toLowerCase().includes(search)
     );
   }
+  get filteredTopics(): any[] {
+    if (!this.TitleSearchText.trim()) {
+      return this.topics;
+    }
 
+    const search = this.TitleSearchText.toLowerCase().trim();
+
+    return this.topics.filter(topic =>
+      (topic.title ?? '').toLowerCase().includes(search)
+    );
+  }
   get selectedPopupUser(): User | null {
     if (!this.selectedUserId) {
       return null;

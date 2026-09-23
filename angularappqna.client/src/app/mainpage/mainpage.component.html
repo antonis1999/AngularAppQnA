@@ -86,10 +86,17 @@
           Δεν υπάρχουν ακόμη διαθέσιμες θεματολογίες.
         </div>
 
+        <input type="text"
+               class="search-input"
+               placeholder="Πληκτρολογήστε Τίτλο..."
+               [(ngModel)]="TitleSearchText"
+               autocomplete="off"
+               name="thematologiaSearch">
+
         <div class="theory-list" *ngIf="topics.length > 0">
 
           <div class="theory-card clickable-theory-card"
-               *ngFor="let topic of topics; let i = index"
+               *ngFor="let topic of filteredTopics; let i = index"
                [class.expired-theory-card]="isAdmin && isExpiredThematologia(topic)"
                (click)="openEditPage(topic)">
 
@@ -110,11 +117,14 @@
               </div>
 
               <!--<small>
-            {{ isAdmin ? 'Πατήστε για επεξεργασία' : 'Πατήστε για προβολή θεωριών' }}
-          </small>-->
+          {{ isAdmin ? 'Πατήστε για επεξεργασία' : 'Πατήστε για προβολή θεωριών' }}
+        </small>-->
 
               <div class="preview-theory-details"
                    *ngIf="!isAdmin && openedPreviewThematologiaId === topic.id">
+
+                lo
+                If
 
                 <div class="empty-theory" *ngIf="previewTheories.length === 0">
                   Δεν υπάρχουν ακόμη διαθέσιμες θεωρίες για αυτή τη θεματολογία.

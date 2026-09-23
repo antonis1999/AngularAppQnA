@@ -3,7 +3,6 @@ import {
   HttpClient,
   HttpErrorResponse
 } from '@angular/common/http';
-import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoaderService } from '../services/loader.service';
@@ -12,9 +11,9 @@ import {
   LoginResponse
 } from '../interfaces/models';
 
-import {
-  NotificationService
-} from '../services/notification.service';
+import { NotificationService } from '../services/notification.service';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
 interface ForgotPinResponse {
   isSuccess?: boolean;
@@ -37,7 +36,7 @@ interface ForgotPinResponse {
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
 
   email = '';
   pin = '';
@@ -50,20 +49,38 @@ export class HomeComponent {
 
   showAdminPopup = false;
   adminPin = '';
+  adminEmail = '';
 
   showForgotPinPopup = false;
   forgotPinEmail = '';
   forgotPinErrorMessage = '';
   forgotPinSuccessMessage = '';
   isSendingForgotPin = false;
+  isLoggedIn = false;
 
   constructor(
     private http: HttpClient,
     private router: Router,
     private notificationService: NotificationService,
-    private loader: LoaderService
+    private loader: LoaderService,
+    private authService: AuthService
   ) { }
 
+  ngOnInit(): void {
+    this.isLoggedIn = this.authService.isAuthenticated();
+  }
+  continueToApp(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/mainpage']);
+      return;
+    }
+
+    this.isLoggedIn = false;
+
+    this.notificationService.warning(
+      'Η σύνδεσή σου έχει λήξει. Συνδέσου ξανά.'
+    );
+  }
   login(): void {
     if (!this.email.trim()) {
       this.notificationService.warning(
@@ -272,16 +289,25 @@ export class HomeComponent {
   }
 
   openAdminPopup(): void {
+    this.adminEmail = '';
     this.adminPin = '';
     this.showAdminPopup = true;
   }
 
   closeAdminPopup(): void {
     this.showAdminPopup = false;
+    this.adminEmail = '';
     this.adminPin = '';
   }
-
   adminLogin(): void {
+
+    if (!this.adminEmail.trim()) {
+      this.notificationService.warning(
+        'Συμπλήρωσε το email διαχειριστή.'
+      );
+      return;
+    }
+
     if (!this.adminPin.trim()) {
       this.notificationService.warning(
         'Συμπλήρωσε το PIN διαχειριστή.'
@@ -290,20 +316,21 @@ export class HomeComponent {
     }
 
     const body: LoginRequest = {
-      Email: 'admin@masoutis.gr',
+      Email: this.adminEmail.trim().toLowerCase(),
       Pin: this.adminPin.trim(),
-      Nickname: 'Admin',
-      StoreId: 2,
+      Nickname: '',
+      StoreId: 0,
       IsFirstLogin: false
     };
+
     this.loader.show();
+
     this.http
-      .post<LoginResponse>(
-        'api/Auth/login',
-        body
-      )
+      .post<LoginResponse>('api/Auth/login', body)
       .subscribe({
+
         next: (response: any) => {
+
           const isSuccess =
             response.isSuccess ??
             response.IsSuccess;
@@ -321,6 +348,21 @@ export class HomeComponent {
             response.Token;
 
           if (isSuccess && user && token) {
+
+            const roleId = Number(
+              user.RoleId ?? user.roleId
+            );
+
+            if (roleId !== 99) {
+              this.loader.hide();
+
+              this.notificationService.error(
+                'Δεν έχεις δικαιώματα διαχειριστή.'
+              );
+
+              return;
+            }
+
             localStorage.setItem(
               'currentUser',
               JSON.stringify(user)
@@ -330,6 +372,7 @@ export class HomeComponent {
               'token',
               token
             );
+
             this.loader.hide();
             this.closeAdminPopup();
 
@@ -337,33 +380,31 @@ export class HomeComponent {
               'Επιτυχία σύνδεσης'
             );
 
-            this.router.navigate([
-              '/mainpage'
-            ]);
+            this.router.navigate(['/mainpage']);
 
             return;
           }
+
           this.loader.hide();
+
           this.notificationService.error(
-            message ||
-            'Λάθος PIN διαχειριστή.'
+            message || 'Λάθος email ή PIN διαχειριστή.'
           );
         },
 
         error: (error: HttpErrorResponse) => {
+
           this.loader.hide();
+
           const message =
             error.error?.message ??
             error.error?.Message ??
             'Σφάλμα κατά τη σύνδεση διαχειριστή.';
 
-          this.notificationService.error(
-            message
-          );
+          this.notificationService.error(message);
         }
       });
   }
-
   getStoreId(): number {
     switch (this.selectedStore) {
       case 'store':

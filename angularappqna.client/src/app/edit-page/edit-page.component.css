@@ -51,22 +51,42 @@
   }
 
 .close-btn {
-  width: 38px;
-  height: 38px;
-  border: none;
-  border-radius: 13px;
-  background: #f4f6f9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 110px;
+  height: 42px;
+  padding: 0 18px;
+  background: #ffffff;
   color: #172033;
-  font-size: 24px;
-  line-height: 1;
+  border: 1px solid #e2e5eb;
+  border-bottom: 2px solid #d5a34c;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 3px 10px rgba(23, 32, 51, 0.05);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
   .close-btn:hover {
-    background: #fff1f2;
-    color: #dc2626;
-    transform: translateY(-1px);
+    background: #f8f9fc;
+    color: #172033;
+    border-color: #d5a34c;
+    box-shadow: 0 5px 14px rgba(23, 32, 51, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .close-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  .close-btn:focus-visible {
+    outline: 2px solid #d5a34c;
+    outline-offset: 3px;
   }
 
 
