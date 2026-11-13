@@ -47,7 +47,7 @@ export class HomeComponent implements OnInit {
 
   showHelpPopup = false;
 
-  showAdminPopup = false;
+  isAdminView = false;
   adminPin = '';
   adminEmail = '';
 
@@ -288,14 +288,8 @@ export class HomeComponent implements OnInit {
       });
   }
 
-  openAdminPopup(): void {
-    this.adminEmail = '';
-    this.adminPin = '';
-    this.showAdminPopup = true;
-  }
-
-  closeAdminPopup(): void {
-    this.showAdminPopup = false;
+  switchLoginView(): void {
+    this.isAdminView = !this.isAdminView;
     this.adminEmail = '';
     this.adminPin = '';
   }
@@ -374,7 +368,6 @@ export class HomeComponent implements OnInit {
             );
 
             this.loader.hide();
-            this.closeAdminPopup();
 
             this.notificationService.success(
               'Επιτυχία σύνδεσης'

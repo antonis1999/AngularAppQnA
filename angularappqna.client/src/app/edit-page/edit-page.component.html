@@ -1,44 +1,19 @@
 <div class="page">
+  <aside class="edit-sidebar">
+    <div class="sidebar-brand"><strong>Διαχείριση περιεχομένου</strong></div>
+    <nav class="modal-tabs" aria-label="Ενότητες διαχείρισης">
+      <button type="button" [class.active]="adminEditTab === 'theory'" (click)="setAdminEditTab('theory')">Θεματολογίες & θεωρίες</button>
+      <button type="button" [class.active]="adminEditTab === 'quiz'" (click)="setAdminEditTab('quiz')">Ερωτήσεις / Απαντήσεις</button>
+    </nav>
+    <div class="sidebar-excel">
+      <button type="button" class="excel-action-btn" (click)="downloadQuizExcelTemplate()">Λήψη Excel Template</button>
+      <button type="button" class="excel-action-btn import-btn" (click)="openQuizExcelImport()">Εισαγωγή Excel</button>
+      <input type="file" #quizExcelInput accept=".xlsx" hidden (change)="onQuizExcelSelected($event)" />
+    </div>
+    <button type="button" class="sidebar-back" (click)="goBack()">← Επιστροφή στην αρχική</button>
+  </aside>
   <div class="main-panel">
-
-    <div class="modal-header">
-      <h2>Διαχείριση Περιεχομένου</h2>
-
-      <button class="close-btn" (click)="goBack()">
-        <span>←</span>
-        <span>Επιστροφή</span>
-      </button>
-    </div>
-
-    <div class="modal-tabs">
-      <button [class.active]="adminEditTab === 'theory'"
-              (click)="setAdminEditTab('theory')">
-        Θεματολογία
-      </button>
-
-      <button [class.active]="adminEditTab === 'quiz'"
-              (click)="setAdminEditTab('quiz')">
-        Επεξεργασία Quiz
-      </button>
-
-      <button type="button"
-              class="excel-action-btn"
-              (click)="downloadQuizExcelTemplate()">
-        Λήψη Excel Template
-      </button>
-
-      <button type="button"
-              class="excel-action-btn import-btn"
-              (click)="openQuizExcelImport()">
-        Εισαγωγή Excel
-      </button>
-
-      <input type="file"
-             #quizExcelInput
-             accept=".xlsx"
-             hidden
-             (change)="onQuizExcelSelected($event)" />
-    </div>
+    <div class="modal-header"><div><small>ΔΙΑΧΕΙΡΙΣΗ</small><h2>{{ adminEditTab === 'theory' ? 'Θεματολογίες & θεωρίες' : 'Ερωτήσεις & απαντήσεις' }}</h2></div></div>
 
     <div class="section-card">
 
@@ -46,7 +21,7 @@
       <div *ngIf="adminEditTab === 'theory'" class="form-section">
 
         <div class="topics-header">
-          <h3>Επεξεργασία Θεματολογίας</h3>
+          <h3>Οργάνωση θεματολογίας</h3>
         </div>
 
         <div class="empty-theory" *ngIf="thematologies.length === 0">
@@ -115,6 +90,7 @@
                    [(ngModel)]="newTheoryHeader"
                    placeholder="Τίτλος θεωρίας">
 
+            <div class="editor-hint">Μορφοποίησε το κείμενο από τη γραμμή εργαλείων. Κάνε κλικ σε μια εικόνα για να επιλέξεις τη θέση της και σύρε τις γωνίες για αλλαγή μεγέθους.</div>
             <div class="theory-quill-wrapper">
 
               <quill-editor [(ngModel)]="newTheoryDetails"
@@ -179,6 +155,7 @@
                          [(ngModel)]="editingTheoryHeader"
                          placeholder="Επεξεργασία τίτλου θεωρίας">
 
+                  <div class="editor-hint">Κλικ σε εικόνα για τοποθέτηση δίπλα στο κείμενο ή σε ξεχωριστή γραμμή. Οι αλλαγές διατηρούνται με την αποθήκευση.</div>
                   <div class="theory-quill-wrapper">
 
                     <quill-editor [(ngModel)]="editingTheoryDetails"
@@ -212,117 +189,120 @@
 
         <!-- ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ -->
         <div class="quiz-left-column">
+          <div class="quiz-theory-picker">
 
-          <h3>{{ selectedThematologia?.Title }}</h3>
+            <h3>{{ selectedThematologia?.Title }}</h3>
 
-          <div class="empty-theory"
-               *ngIf="selectedTheories.length === 0">
-            Δεν υπάρχουν θεωρίες.
+            <div class="empty-theory"
+                 *ngIf="selectedTheories.length === 0">
+              Δεν υπάρχουν θεωρίες.
+            </div>
+
+            <div class="quiz-theory-item clickable-theory"
+                 *ngFor="let theory of selectedTheories; let i = index"
+                 (click)="selectQuizTheory(theory)"
+                 [class.active]="selectedQuizTheory === theory">
+
+              <span class="theory-number">
+                {{ i + 1 }}.
+              </span>
+
+              {{ theory.Header }}
+
+            </div>
+
           </div>
+          <div class="quiz-settings-group">
+            <!-- ΡΥΘΜΙΣΕΙΣ ΑΡΙΘΜΟΥ ΕΡΩΤΗΣΕΩΝ -->
+            <div class="quiz-settings-card">
 
-          <div class="quiz-theory-item clickable-theory"
-               *ngFor="let theory of selectedTheories; let i = index"
-               (click)="selectQuizTheory(theory)"
-               [class.active]="selectedQuizTheory === theory">
+              <p class="quiz-settings-info">
+                Επιλέξτε πόσες τυχαίες ερωτήσεις θα εμφανίζονται
+                σε κάθε εκτέλεση του quiz.
+              </p>
 
-            <span class="theory-number">
-              {{ i + 1 }}.
-            </span>
+              <label>
+                Αριθμός ερωτήσεων Quiz
+              </label>
 
-            {{ theory.Header }}
+              <div class="quiz-settings-row">
 
-          </div>
+                <div class="quiz-count-box">
 
-          <!-- ΡΥΘΜΙΣΕΙΣ ΑΡΙΘΜΟΥ ΕΡΩΤΗΣΕΩΝ -->
-          <div class="quiz-settings-card">
+                  <input type="number"
+                         min="1"
+                         [max]="totalQuizQuestions"
+                         [(ngModel)]="quizQuestionCount">
 
-            <p class="quiz-settings-info">
-              Επιλέξτε πόσες τυχαίες ερωτήσεις θα εμφανίζονται
-              σε κάθε εκτέλεση του quiz.
-            </p>
+                  <span>
+                    / {{ totalQuizQuestions }} διαθέσιμες
+                  </span>
 
-            <label>
-              Αριθμός ερωτήσεων Quiz
-            </label>
-
-            <div class="quiz-settings-row">
-
-              <div class="quiz-count-box">
-
-                <input type="number"
-                       min="1"
-                       [max]="totalQuizQuestions"
-                       [(ngModel)]="quizQuestionCount">
-
-                <span>
-                  / {{ totalQuizQuestions }} διαθέσιμες
-                </span>
+                </div>
 
               </div>
 
             </div>
 
-          </div>
+            <!-- ΡΥΘΜΙΣΕΙΣ ΔΥΣΚΟΛΙΑΣ -->
+            <div class="quiz-settings-card difficulty-settings-card">
 
-          <!-- ΡΥΘΜΙΣΕΙΣ ΔΥΣΚΟΛΙΑΣ -->
-          <div class="quiz-settings-card difficulty-settings-card">
+              <small>
+                Επιλέξτε τη συνολική δυσκολία που θα έχει κάθε
+                εκτέλεση του quiz.
+              </small>
 
-            <small>
-              Επιλέξτε τη συνολική δυσκολία που θα έχει κάθε
-              εκτέλεση του quiz.
-            </small>
+              <div class="difficulty-mode-switch">
 
-            <div class="difficulty-mode-switch">
+                <button type="button"
+                        [class.active]="!useQuizDifficulty"
+                        (click)="useQuizDifficulty = false">
+                  Τυχαίος Βαθμός
+                </button>
+
+                <button type="button"
+                        [class.active]="useQuizDifficulty"
+                        (click)="useQuizDifficulty = true">
+                  Βαθμός Δυσκολίας
+                </button>
+
+              </div>
+
+              <div *ngIf="useQuizDifficulty">
+
+                <select class="quiz-difficulty-select"
+                        [(ngModel)]="quizDifficultyPercent">
+
+                  <option [ngValue]="1">
+                    Εύκολο
+                  </option>
+
+                  <option [ngValue]="2">
+                    Μεσαίο
+                  </option>
+
+                  <option [ngValue]="3">
+                    Δύσκολο
+                  </option>
+
+                </select>
+
+              </div>
 
               <button type="button"
-                      [class.active]="!useQuizDifficulty"
-                      (click)="useQuizDifficulty = false">
-                Τυχαίος Βαθμός
-              </button>
-
-              <button type="button"
-                      [class.active]="useQuizDifficulty"
-                      (click)="useQuizDifficulty = true">
-                Βαθμός Δυσκολίας
+                      class="new-save"
+                      (click)="saveQuizSettings()">
+                Αποθήκευση ρυθμίσεων Quiz
               </button>
 
             </div>
-
-            <div *ngIf="useQuizDifficulty">
-
-              <select class="quiz-difficulty-select"
-                      [(ngModel)]="quizDifficultyPercent">
-
-                <option [ngValue]="1">
-                  Εύκολο
-                </option>
-
-                <option [ngValue]="2">
-                  Μεσαίο
-                </option>
-
-                <option [ngValue]="3">
-                  Δύσκολο
-                </option>
-
-              </select>
-
-            </div>
-
-            <button type="button"
-                    class="new-save"
-                    (click)="saveQuizSettings()">
-              Αποθήκευση ρυθμίσεων Quiz
-            </button>
-
           </div>
-
         </div>
 
         <!-- ΔΕΞΙΑ ΣΤΗΛΗ -->
         <div class="quiz-right-column">
 
-          <h3>Quiz Editor</h3>
+          <h3>Διαχείριση ερωτήσεων & απαντήσεων</h3>
 
           <div *ngIf="!selectedQuizTheory"
                class="empty-theory">

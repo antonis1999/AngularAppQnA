@@ -159,3 +159,19 @@
     display: none;
   }
 }
+
+
+:host { --corporate-navy:#112e51; --corporate-blue:#1768b5; --corporate-border:#e1e9f2; color:#1a3554; }
+:host { font-family:Inter,'Segoe UI',Arial,sans-serif; }
+:host input:not([type="checkbox"]):not([type="radio"]), :host select, :host textarea { border-radius:9px; font-size:13px; }
+:host button { font-family:inherit; transition:background .18s ease,box-shadow .18s ease; }
+:host button:focus-visible,:host a:focus-visible { outline:3px solid #58b6d4; outline-offset:2px; }
+
+
+.page { background:#f3f7fc !important; min-height:100vh; }
+.main-panel { max-width:1100px; }
+.quiz-details-section { background:white !important; border:1px solid #e1e9f2 !important; border-radius:14px !important; box-shadow:0 7px 24px rgba(18,48,81,.05) !important; padding:23px !important; }
+.quiz-details-section h1 { font-size:21px !important; color:#173657; }
+.details-table { border:1px solid #e2eaf3; border-radius:10px; overflow:hidden; }
+.details-row { font-size:13px; }
+.quiz-back-btn { border-radius:9px !important; }

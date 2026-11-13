@@ -199,3 +199,12 @@ export interface QuizProgress {
   selectedCategorizationCardId?: number | null;
   savedAt: number;
 }
+export interface CalendarEvent {
+  id: number;
+  title: string;
+  description: string | null;
+  eventDate: string;
+  startTime: string | null;
+  endTime: string | null;
+  createdAt: string;
+}

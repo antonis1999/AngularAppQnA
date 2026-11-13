@@ -64,6 +64,10 @@ class ResizableImageBlot extends BaseImageBlot {
         width.replace('px', '');
     }
 
+    const floatValue = node.style.float;
+    if (floatValue === 'left' || floatValue === 'right') {
+      formats['float'] = floatValue;
+    }
     return formats;
   }
 
@@ -71,6 +75,19 @@ class ResizableImageBlot extends BaseImageBlot {
 
     const node =
       this['domNode'] as HTMLElement;
+
+    if (name === 'float') {
+      if (value === 'left' || value === 'right') {
+        node.style.float = value;
+        node.style.display = 'block';
+        node.style.margin = value === 'left' ? '8px 18px 12px 0' : '8px 0 12px 18px';
+      } else {
+        node.style.removeProperty('float');
+        node.style.display = 'inline-block';
+        node.style.margin = '8px 8px 8px 0';
+      }
+      return;
+    }
 
     if (name === 'width') {
 
@@ -84,7 +101,7 @@ class ResizableImageBlot extends BaseImageBlot {
         const roundedWidth =
           Math.round(width);
 
-        node.style.display = 'inline-block';
+        node.style.display = node.style.float ? 'block' : 'inline-block';
         node.style.verticalAlign = 'top';
         node.style.maxWidth = '100%';
         node.style.width = `${roundedWidth}px`;
@@ -287,10 +304,38 @@ class ImageResizeManager {
     );
 
 
-    overlay.appendChild(
-      deleteButton
-    );
+    overlay.appendChild(deleteButton);
 
+    const placement = document.createElement('div');
+    placement.className = 'image-placement-controls';
+    placement.style.cssText = 'position:absolute;left:0;top:-46px;display:flex;gap:4px;padding:5px;background:#19364f;border-radius:7px;z-index:10000;white-space:nowrap;box-shadow:0 5px 16px #0003';
+    ([
+      { text: 'Αριστερά', value: 'left' },
+      { text: 'Δεξιά', value: 'right' },
+      { text: 'Κανονικά', value: '' }
+    ]).forEach(option => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = option.text;
+      button.title = 'Θέση εικόνας σε σχέση με το κείμενο';
+      button.style.cssText = 'background:white;color:#19364f;border:0;border-radius:4px;padding:6px 8px;font-size:11px;font-weight:700;cursor:pointer';
+      button.addEventListener('mousedown', event => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      button.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const blot: any = Quill.find(image);
+        if (blot) {
+          blot.format('float', option.value);
+          editor.update('user');
+        }
+        this.show(editor, image);
+      });
+      placement.appendChild(button);
+    });
+    overlay.appendChild(placement);
 
     document.body.appendChild(
       overlay
@@ -546,49 +591,18 @@ class QuillMediaManager {
           '';
 
 
-        const width =
-          Number(
-            rawWidth
-              .replace('px', '')
-              .trim()
-          );
-
-
-        if (
-          Number.isFinite(width) &&
-          width > 0
-        ) {
-
-          return {
-
-            ops: [
-              {
-                insert: {
-                  image: src
-                },
-
-                attributes: {
-                  width:
-                    String(
-                      Math.round(width)
-                    )
-                }
-              }
-            ]
-          };
+        const width = Number(rawWidth.replace('px', '').trim());
+        const floatValue = image.style.float;
+        const attributes: Record<string, string> = {};
+        if (floatValue === 'left' || floatValue === 'right') {
+          attributes['float'] = floatValue;
         }
+        if (Number.isFinite(width) && width > 0) {
+          attributes['width'] = String(Math.round(width));
+        }
+        return { ops: [{ insert: { image: src }, attributes }] };
 
 
-        return {
-
-          ops: [
-            {
-              insert: {
-                image: src
-              }
-            }
-          ]
-        };
       }
     );
 
@@ -967,8 +981,7 @@ class QuillMediaManager {
           );
 
 
-        image.style.display =
-          'inline-block';
+        image.style.display = image.style.float ? 'block' : 'inline-block';
 
         image.style.verticalAlign =
           'top';

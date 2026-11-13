@@ -35,7 +35,7 @@ namespace AngularAppQnA.Server.Data
 
         public DbSet<msc_QuestionMedia> msc_QuestionMedia { get; set; }
 
-
+        public DbSet<CalendarEvent> CalendarEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -100,6 +100,29 @@ namespace AngularAppQnA.Server.Data
 
             modelBuilder.Entity<msc_QuestionMedia>()
         .ToTable("msc_QuestionMedia");
+
+            modelBuilder.Entity<CalendarEvent>(entity =>
+            {
+                entity.ToTable("msc_CalendarEvents");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Title)
+                      .HasMaxLength(200)
+                      .IsRequired();
+
+                entity.Property(e => e.EventDate)
+                      .HasColumnType("date");
+
+                entity.Property(e => e.StartTime)
+                      .HasColumnType("time");
+
+                entity.Property(e => e.EndTime)
+                      .HasColumnType("time");
+
+                entity.Property(e => e.CreatedAt)
+                      .HasColumnType("datetime2");
+            });
         }
 
 

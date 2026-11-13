@@ -8,21 +8,25 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { Ranking, Thematologia, User } from '../interfaces/models';
 import { PresentationComponent } from '../presentation/presentation.component';
 import { AuthService } from '../services/auth.service';
+import { CalendarService } from '../services/calendar.service';
+import { CalendarEvent } from '../interfaces/models';
 
 @Component({
   selector: 'app-mainpage',
   standalone: true,
-  imports: [CommonModule, FormsModule, QuillModule,PresentationComponent],
+  imports: [CommonModule, FormsModule, QuillModule, PresentationComponent],
   templateUrl: './mainpage.component.html',
   styleUrl: './mainpage.component.css'
 })
 export class MainpageComponent {
-    constructor(
-      private route: ActivatedRoute,
-      private http: HttpClient,
-      private notificationService: NotificationService,
-      private router: Router,
-      private authService: AuthService
+  constructor(
+    private route: ActivatedRoute,
+    private http: HttpClient,
+    private notificationService: NotificationService,
+    private router: Router,
+    private authService: AuthService,
+    private calendarService: CalendarService
+
   ) { }
 
   user: User | null = null;
@@ -71,6 +75,35 @@ export class MainpageComponent {
     ]
   };
 
+  readonly calendarYear = new Date().getFullYear();
+
+
+  calendarMonth = new Date().getMonth();
+  selectedCalendarDate: Date | null = null;
+
+  calendarEvents: CalendarEvent[] = [];
+  calendarLoading = false;
+  showCalendarEventModal = false;
+  calendarEventTitle = '';
+  calendarEventDate = '';
+  calendarEventDescription = '';
+  calendarEventStartTime = '';
+  calendarEventEndTime = '';
+  calendarError = '';
+  calendarSaving = false;
+  deletingCalendarEventId: number | null = null;
+
+  readonly calendarWeekDays = [
+    'Δευ', 'Τρι', 'Τετ', 'Πεμ', 'Παρ', 'Σαβ', 'Κυρ'
+  ];
+
+  readonly calendarMonthNames = [
+    'Ιανουάριος', 'Φεβρουάριος', 'Μάρτιος',
+    'Απρίλιος', 'Μάιος', 'Ιούνιος',
+    'Ιούλιος', 'Αύγουστος', 'Σεπτέμβριος',
+    'Οκτώβριος', 'Νοέμβριος', 'Δεκέμβριος'
+  ];
+
   ngOnInit(): void {
     const data = localStorage.getItem('currentUser');
 
@@ -92,6 +125,177 @@ export class MainpageComponent {
         this.activeSection = 'ranking';
         this.selectedRankingThematologiaId = Number(params['thematologiaId']);
         this.loadRanking();
+      }
+    });
+  }
+
+  get calendarDays(): (Date | null)[] {
+    const firstDay = new Date(this.calendarYear, this.calendarMonth, 1);
+    const daysInMonth = new Date(
+      this.calendarYear,
+      this.calendarMonth + 1,
+      0
+    ).getDate();
+
+    const offset = (firstDay.getDay() + 6) % 7;
+
+    const days: (Date | null)[] = Array(offset).fill(null);
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(new Date(this.calendarYear, this.calendarMonth, day));
+    }
+
+    while (days.length % 7 !== 0) days.push(null);
+    return days;
+  }
+
+  changeCalendarMonth(direction: number): void {
+    const nextMonth = this.calendarMonth + direction;
+
+    if (nextMonth < 0 || nextMonth > 11) {
+      return;
+    }
+
+    this.calendarMonth = nextMonth;
+    this.selectedCalendarDate = null;
+  }
+
+  selectCalendarDate(date: Date): void {
+    this.selectedCalendarDate = date;
+  }
+
+  isCalendarToday(date: Date): boolean {
+    const today = new Date();
+
+    return date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate();
+  }
+
+  isCalendarSelected(date: Date): boolean {
+    return this.selectedCalendarDate !== null &&
+      date.getFullYear() === this.selectedCalendarDate.getFullYear() &&
+      date.getMonth() === this.selectedCalendarDate.getMonth() &&
+      date.getDate() === this.selectedCalendarDate.getDate();
+  }
+
+  loadCalendarEvents(): void {
+    this.calendarLoading = true;
+    this.calendarError = '';
+    this.calendarService.getEvents(this.calendarYear).subscribe({
+      next: (events) => {
+        this.calendarEvents = (events ?? []).map(event => ({
+          ...event,
+          id: event.id ?? (event as any).Id,
+          title: event.title ?? (event as any).Title,
+          description: event.description ?? (event as any).Description ?? null,
+          eventDate: event.eventDate ?? (event as any).EventDate,
+          startTime: event.startTime ?? (event as any).StartTime ?? null,
+          endTime: event.endTime ?? (event as any).EndTime ?? null
+        }));
+        this.calendarLoading = false;
+      },
+      error: (error) => {
+        console.error('Calendar GetEvents:', error);
+        this.calendarError = 'Δεν ήταν δυνατή η φόρτωση των δραστηριοτήτων.';
+        this.calendarLoading = false;
+      }
+    });
+  }
+
+  getEventsForDate(date: Date | null): CalendarEvent[] {
+    if (!date) return [];
+    const key = this.toCalendarDateString(date);
+    return this.calendarEvents.filter(event =>
+      typeof event.eventDate === 'string' && event.eventDate.substring(0, 10) === key
+    );
+  }
+
+  formatCalendarTime(time: string | null): string {
+    return time ? time.substring(0, 5) : '';
+  }
+
+  private toCalendarDateString(date: Date): string {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${date.getFullYear()}-${month}-${day}`;
+  }
+
+  openCalendarEventModal(date?: Date): void {
+    if (!this.isAdmin) return;
+    this.calendarEventTitle = '';
+    this.calendarEventDescription = '';
+    this.calendarEventStartTime = '';
+    this.calendarEventEndTime = '';
+    this.calendarEventDate = this.toCalendarDateString(
+      date ?? this.selectedCalendarDate ?? new Date(this.calendarYear, this.calendarMonth, 1)
+    );
+    this.showCalendarEventModal = true;
+  }
+
+  closeCalendarEventModal(): void {
+    if (!this.calendarSaving) this.showCalendarEventModal = false;
+  }
+
+  addCalendarEvent(): void {
+    if (!this.isAdmin || this.calendarSaving) return;
+    const title = this.calendarEventTitle.trim();
+    const eventDate = this.calendarEventDate;
+    if (!title || !eventDate) {
+      this.notificationService.warning('Συμπλήρωσε τίτλο και ημερομηνία.');
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || Number(eventDate.substring(0, 4)) !== this.calendarYear) {
+      this.notificationService.warning(`Επίλεξε ημερομηνία μέσα στο ${this.calendarYear}.`);
+      return;
+    }
+    if (this.calendarEventStartTime && this.calendarEventEndTime && this.calendarEventEndTime <= this.calendarEventStartTime) {
+      this.notificationService.warning('Η ώρα λήξης πρέπει να είναι μετά την ώρα έναρξης.');
+      return;
+    }
+
+    const body = {
+      title,
+      description: this.calendarEventDescription.trim() || null,
+      eventDate: `${eventDate}T00:00:00`,
+      startTime: this.calendarEventStartTime ? `${this.calendarEventStartTime}:00` : null,
+      endTime: this.calendarEventEndTime ? `${this.calendarEventEndTime}:00` : null
+    };
+
+    this.calendarSaving = true;
+    this.calendarService.addEvent(body).subscribe({
+      next: () => {
+        this.calendarSaving = false;
+        this.showCalendarEventModal = false;
+        this.calendarMonth = Number(eventDate.substring(5, 7)) - 1;
+        this.selectedCalendarDate = new Date(`${eventDate}T12:00:00`);
+        this.notificationService.success('Η δραστηριότητα αποθηκεύτηκε.');
+        this.loadCalendarEvents();
+      },
+      error: (error) => {
+        console.error('Calendar AddEvent:', error);
+        this.calendarSaving = false;
+        this.notificationService.error(`Αποτυχία αποθήκευσης (${error.status || 'δίκτυο'}).`);
+      }
+    });
+  }
+
+  deleteCalendarEvent(event: CalendarEvent, mouseEvent: MouseEvent): void {
+    mouseEvent.stopPropagation();
+    if (!this.isAdmin || this.deletingCalendarEventId !== null) return;
+    if (!window.confirm(`Να διαγραφεί η δραστηριότητα «${event.title}»;`)) return;
+
+    this.deletingCalendarEventId = event.id;
+    this.calendarService.deleteEvent(event.id).subscribe({
+      next: () => {
+        this.deletingCalendarEventId = null;
+        this.notificationService.success('Η δραστηριότητα διαγράφηκε.');
+        this.loadCalendarEvents();
+      },
+      error: (error) => {
+        console.error('Calendar DeleteEvent:', error);
+        this.deletingCalendarEventId = null;
+        this.notificationService.error(`Αποτυχία διαγραφής (${error.status || 'δίκτυο'}).`);
       }
     });
   }
@@ -198,7 +402,7 @@ export class MainpageComponent {
 
     this.openedPreviewThematologiaId = id;
 
-    
+
     this.previewTheories = [];
     this.previewLoading = true;
 
@@ -224,11 +428,15 @@ export class MainpageComponent {
       });
   }
 
-  setSection(section: string): void {
+  setSection(section: string) {
     this.activeSection = section;
 
     if (section === 'ranking') {
       this.loadRanking();
+    }
+
+    if (section === 'calendar') {
+      this.loadCalendarEvents();
     }
   }
 

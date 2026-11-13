@@ -1,72 +1,89 @@
 <div class="page">
-
- 
-
-  <div class="user-panel logo-wrapper">
-    <div>
-      <div class="brand">
-        <img src="/safety.png" class="brand-icon" alt="Safety">
-        <div>
-          <span>
-            <img src="logo-mas.webp" class="logo-mas" />
-          </span>
-          <span>SAFETY CAMPAIGN</span>
-        </div>
+  <aside class="training-sidebar">
+    <div class="sidebar-heading">
+      <span class="sidebar-shield">✦</span>
+      <div>
+        <strong>Πλατφόρμα εκπαίδευσης</strong>
+        <small>SAFETY CAMPAIGN</small>
       </div>
     </div>
 
+    <div class="sidebar-section-title">ΜΕΝΟΥ ΕΚΠΑΙΔΕΥΣΗΣ</div>
 
-    <div>
-      <!--<img src="admin.png" alt="User Icon" class="user-icon">-->
-
-      <div class="user-info">
-        <div>
-          <h2>{{ user?.Nickname || 'Χρήστης' }}</h2>
-          <p>{{ getStoreName(user?.StoreId) }}</p>
-        </div>
-
-        <button class="logout-btn" (click)="logout()">
-          Log Out
-        </button>
-      </div>
-    </div>
-
-
-
-  </div>
-
-  <div class="main-panel">
-
-    <div class="tab-menu">
+    <nav class="tab-menu" aria-label="Κύρια πλοήγηση">
       <button *ngIf="isAdmin"
+              type="button"
               [class.active]="activeSection === 'theory'"
               (click)="setSection('theory')">
         Αρχική
       </button>
 
-      <button [class.active]="activeSection === 'presentation'"
+      <button type="button"
+              [class.active]="activeSection === 'presentation'"
               (click)="setSection('presentation')">
-
         Παρουσίαση
-
       </button>
 
-      <button [class.active]="activeSection === 'quiz'" (click)="setSection('quiz')">
+      <button type="button"
+              [class.active]="activeSection === 'quiz'"
+              (click)="setSection('quiz')">
         {{ isAdmin ? 'Demo-Quiz' : 'Quiz' }}
       </button>
 
-      <button [class.active]="activeSection === 'ranking'" (click)="setSection('ranking')">
+      <button type="button"
+              [class.active]="activeSection === 'ranking'"
+              (click)="setSection('ranking')">
         Κατάταξη
       </button>
 
-      <button [class.active]="activeSection === 'settings'" (click)="setSection('settings')">
+      <button type="button"
+              [class.active]="activeSection === 'settings'"
+              (click)="setSection('settings')">
         Ρυθμίσεις
       </button>
+
+      <button type="button"
+              class="sidebar-placeholder"
+              disabled
+              title="Σύντομα διαθέσιμο">
+        Νέα 
+      </button>
+
+      <button type="button"
+              [class.active]="activeSection === 'calendar'"
+              (click)="setSection('calendar')">
+        Ημερολόγιο
+      </button>
+    </nav>
+    <div class="sidebar-footnote">Μαθαίνουμε · Παίζουμε · Κερδίζουμε</div>
+  </aside>
+
+
+
+
+  <header class="user-panel logo-wrapper">
+    <div class="brand">
+      <img src="/safety.png" class="brand-icon" alt="Safety Campaign">
+      <div class="brand-text">
+        <img src="logo-mas.webp" class="logo-mas" alt="Μασούτης - Οικονομικά και Ελληνικά">
+        <span class="brand-subtitle">SAFETY CAMPAIGN</span>
+      </div>
     </div>
+    <details class="account-menu">
+      <summary class="account-summary">
+        <span class="account-avatar">{{ (user?.Nickname || 'A').charAt(0).toUpperCase() }}</span>
+        <span class="account-name"><strong>{{ user?.Nickname || 'Χρήστης' }}</strong><small>{{ getStoreName(user?.StoreId) }}</small></span>
+        <span class="account-chevron">⌄</span>
+      </summary>
+      <div class="account-dropdown"><button type="button" (click)="logout()">Log Out</button></div>
+    </details>
+  </header>
+
+  <div class="main-panel">
 
     <div class="section-card">
 
-    
+
       <!-- ΑΡΧΙΚΗ - ΜΟΝΟ ADMIN -->
       <div *ngIf="activeSection === 'theory' && isAdmin">
 
@@ -86,19 +103,27 @@
           Δεν υπάρχουν ακόμη διαθέσιμες θεματολογίες.
         </div>
 
-        <input type="text"
-               class="search-input"
-               placeholder="Πληκτρολογήστε Τίτλο..."
-               [(ngModel)]="TitleSearchText"
-               autocomplete="off"
-               name="thematologiaSearch">
+        <div class="topic-search-field">
+          <span aria-hidden="true">⌕</span>
+          <input type="search"
+                 class="search-input"
+                 placeholder="Αναζήτηση θεματολογίας..."
+                 [(ngModel)]="TitleSearchText"
+                 autocomplete="off"
+                 name="thematologiaSearch"
+                 aria-label="Αναζήτηση θεματολογίας">
+        </div>
 
+        <div class="topics-heading" *ngIf="topics.length > 0"><div><span class="topics-eyebrow">ΕΚΠΑΙΔΕΥΤΙΚΟ ΥΛΙΚΟ</span><h2>Οι θεματολογίες μας</h2><p>Επίλεξε μία θεματολογία για να δεις το περιεχόμενό της.</p></div><span class="topics-total">{{ filteredTopics.length }} θεματολογίες</span></div>
         <div class="theory-list" *ngIf="topics.length > 0">
 
-          <div class="theory-card clickable-theory-card"
-               *ngFor="let topic of filteredTopics; let i = index"
-               [class.expired-theory-card]="isAdmin && isExpiredThematologia(topic)"
-               (click)="openEditPage(topic)">
+          <a class="theory-card clickable-theory-card"
+             *ngFor="let topic of filteredTopics; let i = index"
+             [class.expired-theory-card]="isAdmin && isExpiredThematologia(topic)"
+             [attr.href]="'/edit/' + topic.id"
+             target="_blank"
+             rel="noopener noreferrer"
+             title="Άνοιγμα θεματολογίας σε νέα καρτέλα">
 
             <div class="theory-number">
               {{ i + 1 }}
@@ -116,15 +141,8 @@
                 Μη διαθέσιμη για χρήστες
               </div>
 
-              <!--<small>
-          {{ isAdmin ? 'Πατήστε για επεξεργασία' : 'Πατήστε για προβολή θεωριών' }}
-        </small>-->
-
               <div class="preview-theory-details"
                    *ngIf="!isAdmin && openedPreviewThematologiaId === topic.id">
-
-                lo
-                If
 
                 <div class="empty-theory" *ngIf="previewTheories.length === 0">
                   Δεν υπάρχουν ακόμη διαθέσιμες θεωρίες για αυτή τη θεματολογία.
@@ -142,8 +160,8 @@
 
               </div>
             </div>
-
-          </div>
+            <span class="topic-arrow" aria-hidden="true">↗</span>
+          </a>
 
         </div>
       </div>
@@ -338,6 +356,160 @@
             </div>
           </div>
 
+        </div>
+      </div>
+
+      <!-- ΗΜΕΡΟΛΟΓΙΟ -->
+      <section *ngIf="activeSection === 'calendar'" class="calendar-section">
+        <div class="calendar-heading">
+          <div>
+            <h1>Ημερολόγιο</h1>
+            <p>Δραστηριότητες {{ calendarYear }}</p>
+          </div>
+          <button *ngIf="isAdmin"
+                  type="button"
+                  class="calendar-add-btn"
+                  (click)="openCalendarEventModal()">
+            + Προσθήκη δραστηριότητας
+          </button>
+        </div>
+
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <button type="button"
+                    class="calendar-arrow"
+                    [disabled]="calendarMonth === 0"
+                    (click)="changeCalendarMonth(-1)"
+                    aria-label="Προηγούμενος μήνας">
+              &#10094;
+            </button>
+            <h2>{{ calendarMonthNames[calendarMonth] }} {{ calendarYear }}</h2>
+            <button type="button"
+
+                    class="calendar-arrow"
+                    [disabled]="calendarMonth === 11"
+                    (click)="changeCalendarMonth(1)"
+                    aria-label="Επόμενος μήνας">
+              &#10095;
+            </button>
+          </div>
+
+          <p *ngIf="calendarLoading"
+             class="calendar-status">Φόρτωση δραστηριοτήτων...</p>
+          <p *ngIf="calendarError"
+             class="calendar-error">{{ calendarError }}</p>
+
+          <div class="calendar-grid">
+            <div *ngFor="let weekday of calendarWeekDays"
+                 class="calendar-weekday">{{ weekday }}</div>
+            <ng-container *ngFor="let day of calendarDays">
+
+              <div *ngIf="!day"
+                   class="calendar-day calendar-day-empty">
+
+              </div>
+
+              <div *ngIf="day"
+                   class="calendar-day"
+                   [class.today]="isCalendarToday(day)"
+                   [class.selected]="isCalendarSelected(day)"
+                   (click)="selectCalendarDate(day)">
+
+                <span class="calendar-day-number">{{ day.getDate() }}</span>
+                <div class="calendar-events">
+                  <div *ngFor="let event of getEventsForDate(day)" class="calendar-event"
+                       [title]="event.description || event.title">
+                    <div class="calendar-event-content">
+
+                      <span *ngIf="event.startTime || event.endTime"
+                            class="calendar-event-time">
+                        {{ event.startTime ? event.startTime.substring(0, 5) : '' }}
+                        {{ event.startTime && event.endTime ? ' - ' : '' }}
+                        {{ event.endTime ? event.endTime.substring(0, 5) : '' }}
+                      </span>
+
+                      <span class="calendar-event-title">{{ event.title }}</span>
+                    </div>
+                    <button *ngIf="isAdmin"
+                            type="button"
+                            class="calendar-event-delete"
+                            [disabled]="deletingCalendarEventId !== null"
+                            (click)="deleteCalendarEvent(event, $event)"
+                            aria-label="Διαγραφή δραστηριότητας">
+                      ×
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </section>
+
+      <div *ngIf="activeSection === 'calendar' && isAdmin && showCalendarEventModal"
+           class="calendar-modal-backdrop"
+           (click)="closeCalendarEventModal()">
+        <div class="calendar-modal"
+             role="dialog"
+             aria-modal="true"
+             (click)="$event.stopPropagation()">
+          <div class="calendar-modal-header">
+            <h2>Προσθήκη δραστηριότητας</h2>
+            <button type="button"
+                    class="calendar-modal-close"
+                    (click)="closeCalendarEventModal()"
+                    aria-label="Κλείσιμο">×</button>
+          </div>
+          <form (ngSubmit)="addCalendarEvent()">
+            <label for="calendarTitle">Τίτλος *</label>
+            <input id="calendarTitle"
+                   name="calendarTitle"
+                   type="text" maxlength="200"
+                   required
+                   [(ngModel)]="calendarEventTitle"
+                   placeholder="π.χ. Quiz Ασφάλειας">
+
+            <label for="calendarDate">Ημερομηνία *</label>
+            <input id="calendarDate" name="calendarDate" type="date" required
+                   [min]="calendarYear + '-01-01'" [max]="calendarYear + '-12-31'"
+                   [(ngModel)]="calendarEventDate">
+
+            <div class="calendar-time-row">
+              <div>
+                <label for="calendarStartTime">Ώρα έναρξης (προαιρετική)</label>
+                <input id="calendarStartTime" name="calendarStartTime" type="time"
+                       [(ngModel)]="calendarEventStartTime">
+              </div>
+              <div>
+                <label
+                       for="calendarEndTime">Ώρα λήξης (προαιρετική)
+                </label>
+                <input id="calendarEndTime"
+                       name="calendarEndTime" type="time"
+                       [(ngModel)]="calendarEventEndTime">
+              </div>
+            </div>
+
+            <label for="calendarDescription">Περιγραφή (προαιρετική)</label>
+            <textarea id="calendarDescription"
+                      name="calendarDescription"
+                      rows="3"
+                      [(ngModel)]="calendarEventDescription"></textarea>
+
+            <div class="calendar-modal-actions">
+              <button type="button"
+                      class="calendar-cancel-btn"
+                      [disabled]="calendarSaving"
+                      (click)="closeCalendarEventModal()">
+                Ακύρωση
+              </button>
+              <button type="submit"
+                      class="calendar-add-btn"
+                      [disabled]="calendarSaving">
+                {{ calendarSaving ? 'Αποθήκευση...' : 'Αποθήκευση' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 

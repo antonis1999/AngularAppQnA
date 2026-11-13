@@ -1466,7 +1466,7 @@ namespace AngularAppQnA.Server.Controllers
             guide.Cell(6, 1).Value = "4. Question Type: 1 = Multiple Choice, 2 = True / False, 3 = Ordering, 4 = Matching, 5 = Categorization.";
             guide.Cell(7, 1).Value = "5. Multiple Choice: χρησιμοποιεί ΑΠΑΝΤΗΣΕΙΣ και ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ.";
             guide.Cell(8, 1).Value = "6. True / False: δημιουργούνται αυτόματα οι απαντήσεις Σωστό / Λάθος. ΣΩΣΤΗ ΑΠΑΝΤΗΣΗ 1 = Σωστό, 2 = Λάθος.";
-            guide.Cell(9, 1).Value = "7. Ordering: ΑΠΑΝΤΗΣΕΙΣ και ORDER POSITION πρέπει να έχουν ίδιο πλήθος τιμών. Π.χ. Α;Β;Γ και 2;1;3.";
+            guide.Cell(9, 1).Value = "7. Ordering: ΑΠΑΝΤΗΣΕΙΣ και ORDER POSITION πρέπει να έχουν ίδιο πλήθος τιμών. Π.χ. Α;Β;Γ και 2;1;3.(Σώστη θεωρείται η πρώτη απάντηση που δηλώνεις";
             guide.Cell(10, 1).Value = "8. Matching: MATCH LEFT και MATCH RIGHT πρέπει να έχουν ίδιο πλήθος τιμών.";
             guide.Cell(11, 1).Value = "9. Categorization: ΑΠΑΝΤΗΣΕΙΣ και CATEGORY NAME πρέπει να έχουν ίδιο πλήθος τιμών και τουλάχιστον 2 διαφορετικές κατηγορίες.";
             guide.Cell(12, 1).Value = "10. Η θεματολογία δεν γράφεται στο Excel. Επιλέγεται από την εφαρμογή.";

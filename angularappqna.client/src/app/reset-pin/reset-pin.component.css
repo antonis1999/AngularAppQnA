@@ -296,3 +296,17 @@ form {
 
 
 /**/
+
+
+:host { --corporate-navy:#112e51; --corporate-blue:#1768b5; --corporate-border:#e1e9f2; color:#1a3554; }
+:host { font-family:Inter,'Segoe UI',Arial,sans-serif; }
+:host input:not([type="checkbox"]):not([type="radio"]), :host select, :host textarea { border-radius:9px; font-size:13px; }
+:host button { font-family:inherit; transition:background .18s ease,box-shadow .18s ease; }
+:host button:focus-visible,:host a:focus-visible { outline:3px solid #58b6d4; outline-offset:2px; }
+
+
+.reset-page { background:#f3f7fc !important; min-height:100vh; }
+.reset-card { background:#fff !important; border:1px solid #e1e9f2 !important; border-radius:15px !important; box-shadow:0 12px 34px rgba(18,48,81,.08) !important; }
+.reset-header h1 { color:#173657 !important; font-size:22px !important; }
+.reset-header p { color:#69809a; font-size:13px; }
+.primary-btn,.back-btn { border-radius:9px !important; font-size:13px; }

@@ -55,11 +55,13 @@ internal class Program
 
         builder.Services.Configure<EmailSettings>(
             builder.Configuration.GetSection("EmailSettings"));
+        
 
         // Services
         builder.Services.AddScoped<AuditService>();
         builder.Services.AddScoped<BlobStorageService>();
         builder.Services.AddScoped<IEmailService, EmailService>();
+        builder.Services.AddScoped<ICalendarService, CalendarService>();
         builder.Services.Configure<FormOptions>(options =>
         {
             options.MultipartBodyLengthLimit = 500 * 1024 * 1024;
