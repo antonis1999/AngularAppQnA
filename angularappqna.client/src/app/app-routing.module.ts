@@ -7,6 +7,8 @@ import { QuizPageComponent } from './quiz-page/quiz-page.component';
 import { QuizDetailsComponent } from './quiz-details/quiz-details.component';
 import { ResetPinComponent } from './reset-pin/reset-pin.component';
 import { PresentationComponent } from './presentation/presentation.component';
+import { NewsComponent } from './news/news.component';
+import { NewsDetailsComponent } from './news-details/news-details.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -16,7 +18,8 @@ const routes: Routes = [
   { path: 'quiz-page/:id', component: QuizPageComponent },
   { path: 'quiz-details/:thematologiaId/:nickname', component: QuizDetailsComponent },
   { path: 'reset-pin', component: ResetPinComponent },
-  { path: 'presentation',component: PresentationComponent  },
+  { path: 'presentation', component: PresentationComponent },
+  { path: 'news/:source/:id', component: NewsDetailsComponent },
   { path: '**', redirectTo: '' }
  
 ];

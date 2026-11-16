@@ -43,10 +43,9 @@
       </button>
 
       <button type="button"
-              class="sidebar-placeholder"
-              disabled
-              title="Σύντομα διαθέσιμο">
-        Νέα 
+              [class.active]="activeSection === 'news'"
+              (click)="setSection('news')">
+        Νέα & Ανακοινώσεις
       </button>
 
       <button type="button"
@@ -359,6 +358,11 @@
         </div>
       </div>
 
+      <!-- ΝΕΑ & ΑΝΑΚΟΙΝΩΣΕΙΣ -->
+      <div *ngIf="activeSection === 'news'">
+        <app-news></app-news>
+      </div>
+
       <!-- ΗΜΕΡΟΛΟΓΙΟ -->
       <section *ngIf="activeSection === 'calendar'" class="calendar-section">
         <div class="calendar-heading">
@@ -385,7 +389,6 @@
             </button>
             <h2>{{ calendarMonthNames[calendarMonth] }} {{ calendarYear }}</h2>
             <button type="button"
-
                     class="calendar-arrow"
                     [disabled]="calendarMonth === 11"
                     (click)="changeCalendarMonth(1)"
@@ -458,7 +461,9 @@
             <button type="button"
                     class="calendar-modal-close"
                     (click)="closeCalendarEventModal()"
-                    aria-label="Κλείσιμο">×</button>
+                    aria-label="Κλείσιμο">
+              ×
+            </button>
           </div>
           <form (ngSubmit)="addCalendarEvent()">
             <label for="calendarTitle">Τίτλος *</label>
@@ -481,8 +486,8 @@
                        [(ngModel)]="calendarEventStartTime">
               </div>
               <div>
-                <label
-                       for="calendarEndTime">Ώρα λήξης (προαιρετική)
+                <label for="calendarEndTime">
+                  Ώρα λήξης (προαιρετική)
                 </label>
                 <input id="calendarEndTime"
                        name="calendarEndTime" type="time"

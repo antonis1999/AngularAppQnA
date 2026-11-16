@@ -1,0 +1,136 @@
+
+<div class="news-details-page">
+
+  <div class="news-details-container">
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="news-state">
+      <div class="loading-spinner"></div>
+      <p>Φόρτωση είδησης...</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="!loading && error"
+         class="news-state error-state">
+      <h3>Δεν ήταν δυνατή η εμφάνιση της είδησης</h3>
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- News -->
+    <article *ngIf="!loading && !error && news"
+             class="news-article">
+
+      <header class="article-header">
+
+        <div class="article-meta">
+
+          <span class="source-badge">
+            {{ source.toLowerCase() === 'masportal' ? 'MasPortal' : 'Μασούτης'}}
+          </span>
+
+          <span *ngIf="news.insertdate || news.insertDate || news.CreateDate"
+                class="article-date">
+            {{ (news.insertdate || news.insertDate || news.CreateDate) | date:'dd/MM/yyyy' }}
+          </span>
+
+        </div>
+
+        <h1>{{ news.NewsHeader }}</h1>
+
+      </header>
+
+      <!-- Main image -->
+      <div *ngIf="news.PhotoData || news.Image"
+           class="article-cover">
+
+        <img [src]="news.PhotoData || news.Image"
+             [alt]="news.NewsHeader">
+
+      </div>
+
+      <!-- Full article -->
+      <div class="article-content"
+           [innerHTML]="news.NewsDetail">
+      </div>
+
+      <!-- Additional images -->
+      <div class="article-gallery"
+           *ngIf="news.PhotoData1 ||
+                  news.PhotoData2 ||
+                  news.Image1 ||
+                  news.Image2 ||
+                  news.NewsDetails?.length">
+
+        <h2>Φωτογραφίες</h2>
+
+        <div class="gallery-grid">
+
+          <img *ngIf="news.PhotoData1 || news.Image1"
+               [src]="news.PhotoData1 || news.Image1"
+               alt="Φωτογραφία είδησης">
+
+          <img *ngIf="news.PhotoData2 || news.Image2"
+               [src]="news.PhotoData2 || news.Image2"
+               alt="Φωτογραφία είδησης">
+
+          <ng-container *ngFor="let image of news.NewsDetails">
+            <img *ngIf="image.DetImage"
+                 [src]="image.DetImage"
+                 alt="Επιπλέον φωτογραφία">
+          </ng-container>
+
+        </div>
+
+      </div>
+
+      <!-- Video -->
+
+
+      <div *ngIf="news.VideoLink"
+           class="article-video">
+
+        <h2>Βίντεο</h2>
+
+        <ng-container *ngIf="isYouTubeVideo(news.VideoLink); else azureVideo">
+
+          <iframe *ngIf="getYouTubeEmbedUrl(news.VideoLink) as videoUrl"
+                  [src]="videoUrl"
+                  title="Βίντεο είδησης"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                  class="article-video-player">
+          </iframe>
+
+        </ng-container>
+
+        <ng-template #azureVideo>
+
+          <video controls
+                 playsinline
+                 preload="metadata"
+                 class="article-video-player"
+                 [src]="news.VideoLink">
+          </video>
+
+        </ng-template>
+
+      </div>
+
+
+
+      <footer class="article-footer">
+
+        <button type="button"
+                class="back-button"
+                (click)="goBack()">
+          ← Επιστροφή στις ειδήσεις
+        </button>
+
+      </footer>
+
+    </article>
+
+  </div>
+
+</div>

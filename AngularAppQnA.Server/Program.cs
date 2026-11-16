@@ -37,7 +37,32 @@ internal class Program
 
         // Swagger
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = Microsoft.OpenApi.Models.ParameterLocation.Header
+            });
+
+            options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+        });
 
         // HttpContext
         builder.Services.AddHttpContextAccessor();
@@ -65,6 +90,10 @@ internal class Program
         builder.Services.Configure<FormOptions>(options =>
         {
             options.MultipartBodyLengthLimit = 500 * 1024 * 1024;
+        });
+        builder.Services.AddHttpClient<INewsService, NewsService>(client =>
+        {
+            client.BaseAddress = new Uri("https://www.masoutis.gr/api/masoutis/");
         });
 
         // JWT Authentication

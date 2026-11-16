@@ -1,0 +1,242 @@
+
+<section class="news-page">
+  <header class="news-heading">
+    <div>
+      <h1>Νέα &amp; Ανακοινώσεις</h1>
+      <p>
+        Ενημερωθείτε για τις τελευταίες εξελίξεις
+        και δράσεις της εταιρείας.
+      </p>
+    </div>
+  </header>
+
+  <div *ngIf="loading"
+       class="news-state">
+    Φόρτωση εταιρικών νέων...
+  </div>
+
+  <div *ngIf="error && !loading"
+       class="news-state news-error">
+    <span>{{ error }}</span>
+    <button type="button"
+            (click)="loadNews()">
+      Προσπάθεια ξανά
+    </button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+
+    <section class="news-slider-section"
+             *ngIf="sliderNews.length > 0"
+             aria-label="Πρόσφατες εταιρικές ειδήσεις">
+
+      <div class="news-list-heading">
+        <div>
+          <span class="news-eyebrow">
+            ΤΕΛΕΥΤΑΙΕΣ ΕΞΕΛΙΞΕΙΣ
+          </span>
+          <h2>Στο επίκεντρο</h2>
+        </div>
+
+        <span class="news-slider-counter">
+          {{ activeSlideIndex + 1 }} / {{ sliderNews.length }}
+        </span>
+      </div>
+
+      <div class="news-slider"
+           (mouseenter)="pauseSlider()"
+           (mouseleave)="resumeSlider()">
+
+        <ng-container *ngFor="let item of sliderNews; let i = index">
+
+          <article *ngIf="i === activeSlideIndex"
+                   class="news-featured news-slide"
+                   tabindex="0"
+                   role="button"
+                   (click)="openNews(item)"
+                   (keydown.enter)="openNews(item)">
+
+            <div class="news-featured-image"
+                 [class.news-image-empty]="!imageUrl(item)">
+
+              <img *ngIf="imageUrl(item) as image"
+                   [src]="image"
+                   [alt]="item.NewsHeader"
+                   loading="eager">
+
+              <span *ngIf="!imageUrl(item)"
+                    class="news-placeholder">
+                ΝΕΑ
+              </span>
+            </div>
+
+            <div class="news-featured-content">
+
+              <span class="news-kicker">
+                ΠΡΟΣΦΑΤΗ ΔΗΜΟΣΙΕΥΣΗ
+              </span>
+
+              <time>
+                {{ formatDate(item.insertdate) }}
+              </time>
+
+              <h2>
+                {{ item.NewsHeader }}
+              </h2>
+
+              <p>
+                {{ summary(item, 240) }}
+              </p>
+
+              <span class="news-read">
+                Διαβάστε περισσότερα
+                <span aria-hidden="true">→</span>
+              </span>
+
+            </div>
+          </article>
+
+        </ng-container>
+
+        <button *ngIf="sliderNews.length > 1"
+                class="news-slider-arrow news-slider-prev"
+                type="button"
+                aria-label="Προηγούμενη είδηση"
+                (click)="previousSlide()">
+          ‹
+        </button>
+
+        <button *ngIf="sliderNews.length > 1"
+                class="news-slider-arrow news-slider-next"
+                type="button"
+                aria-label="Επόμενη είδηση"
+                (click)="nextSlide()">
+          ›
+        </button>
+      </div>
+
+      <div class="news-slider-dots"
+           *ngIf="sliderNews.length > 1">
+
+        <button *ngFor="let item of sliderNews; let i = index"
+                type="button"
+                class="news-slider-dot"
+                [class.active]="i === activeSlideIndex"
+                [attr.aria-label]="'Μετάβαση στην είδηση ' + (i + 1)"
+                [attr.aria-current]="i === activeSlideIndex ? 'true' : null"
+                (click)="goToSlide(i)">
+        </button>
+
+      </div>
+    </section>
+
+    <section class="news-results-section">
+
+      <div class="news-list-heading">
+        <div>
+          <span class="news-eyebrow">
+            ΑΡΧΕΙΟ ΔΗΜΟΣΙΕΥΣΕΩΝ
+          </span>
+
+          <h2>Όλα τα νέα &amp; οι ανακοινώσεις</h2>
+        </div>
+      </div>
+
+      <div class="news-toolbar">
+
+        <div class="news-search-wrap">
+          <span aria-hidden="true">⌕</span>
+
+          <input type="search"
+                 [(ngModel)]="searchText"
+                 (ngModelChange)="updateFilters()"
+                 placeholder="Αναζήτηση σε νέα και ανακοινώσεις"
+                 aria-label="Αναζήτηση ειδήσεων">
+        </div>
+
+        <span class="news-count">
+          {{ filteredNews.length }} δημοσιεύσεις
+        </span>
+
+      </div>
+
+      <div *ngIf="filteredNews.length === 0"
+           class="news-state">
+        Δεν βρέθηκαν δημοσιεύσεις
+        με αυτά τα κριτήρια.
+      </div>
+
+      <div class="news-grid"
+           *ngIf="regularNews.length > 0">
+
+        <article class="news-card"
+                 *ngFor="let item of regularNews"
+                 tabindex="0"
+                 role="button"
+                 (click)="openNews(item)"
+                 (keydown.enter)="openNews(item)">
+
+          <div class="news-card-image"
+               [class.news-image-empty]="!imageUrl(item)">
+
+            <img *ngIf="imageUrl(item) as image"
+                 [src]="image"
+                 [alt]="item.NewsHeader"
+                 loading="lazy">
+
+            <span *ngIf="!imageUrl(item)"
+                  class="news-placeholder">
+              ΝΕΑ
+            </span>
+
+          </div>
+
+          <div class="news-card-body">
+
+            <time>
+              {{ formatDate(item.insertdate) }}
+            </time>
+
+            <h3>
+              {{ item.NewsHeader }}
+            </h3>
+
+            <p>
+              {{ summary(item) }}
+            </p>
+
+            <span class="news-read">
+              Περισσότερα
+              <span aria-hidden="true">→</span>
+            </span>
+
+          </div>
+        </article>
+      </div>
+
+      <nav class="news-pagination"
+           *ngIf="totalPages > 1"
+           aria-label="Σελιδοποίηση νέων">
+
+        <button type="button"
+                (click)="changePage(currentPage - 1)"
+                [disabled]="currentPage === 1">
+          ← Προηγούμενη
+        </button>
+
+        <span>
+          Σελίδα {{ currentPage }} από {{ totalPages }}
+        </span>
+
+        <button type="button"
+                (click)="changePage(currentPage + 1)"
+                [disabled]="currentPage === totalPages">
+          Επόμενη →
+        </button>
+
+      </nav>
+
+    </section>
+
+  </ng-container>
+</section>

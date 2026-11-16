@@ -10,12 +10,14 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { LoaderComponent } from './shared/loader/loader.component';
 import { PresentationComponent } from './presentation/presentation.component';
 import { FormsModule } from '@angular/forms';
+import { NewsDetailsComponent } from './news-details/news-details.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     QuizPageComponent,
+    NewsDetailsComponent,
     
 
   ],

@@ -10,11 +10,18 @@ import { PresentationComponent } from '../presentation/presentation.component';
 import { AuthService } from '../services/auth.service';
 import { CalendarService } from '../services/calendar.service';
 import { CalendarEvent } from '../interfaces/models';
+import { NewsComponent } from '../news/news.component';
 
 @Component({
   selector: 'app-mainpage',
   standalone: true,
-  imports: [CommonModule, FormsModule, QuillModule, PresentationComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    QuillModule,
+    PresentationComponent,
+    NewsComponent
+  ],
   templateUrl: './mainpage.component.html',
   styleUrl: './mainpage.component.css'
 })
@@ -121,6 +128,10 @@ export class MainpageComponent {
     this.loadThematologies();
 
     this.route.queryParams.subscribe(params => {
+      if (params['section'] === 'news') {
+        this.activeSection = 'news';
+      }
+
       if (params['section'] === 'ranking') {
         this.activeSection = 'ranking';
         this.selectedRankingThematologiaId = Number(params['thematologiaId']);
@@ -430,6 +441,12 @@ export class MainpageComponent {
 
   setSection(section: string) {
     this.activeSection = section;
+
+    if (section === 'news') {
+      this.router.navigate(['/mainpage'], {
+        queryParams: { section: 'news' }
+      });
+    }
 
     if (section === 'ranking') {
       this.loadRanking();
